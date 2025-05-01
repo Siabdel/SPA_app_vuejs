@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M. Atlasoft</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF8C00; /* Orange */
+            --secondary-color: #0275d8; /* Bleu */
+            --light-color: #ffffff; /* Blanc */
+        }
+        
+        body {
+            background-image: url('https://via.placeholder.com/1920x1080');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+        }
+        
+        .navbar-brand {
+            color: var(--light-color);
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+        
+        .navbar-toggler {
+            border-color: var(--light-color);
+        }
+        
+        .sidebar {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-right: 3px solid var(--primary-color);
+            height: 100%;
+            padding: 20px 0;
+        }
+        
+        .sidebar-header {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-menu a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(2, 117, 216, 0.1);
+            border-left: 3px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .sidebar-menu a i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .content-section {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content-header {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+        
+        .search-container {
+            margin-bottom: 25px;
+        }
+        
+        .search-container .input-group {
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        
+        .search-container .form-control {
+            border-radius: 50px 0 0 50px;
+            border: 2px solid var(--secondary-color);
+            border-right: none;
+        }
+        
+        .search-container .btn {
+            border-radius: 0 50px 50px 0;
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+            border: 2px solid var(--secondary-color);
+        }
+        
+        .featured-card {
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .featured-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .featured-card .card-img-top {
+            height: 160px;
+            object-fit: cover;
+        }
+        
+        .featured-card .card-title {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+        
+        .featured-card .card-body {
+            padding: 20px;
+        }
+        
+        .featured-card .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                border-right: none;
+                border-bottom: 3px solid var(--primary-color);
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">M. Atlasoft</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#"><i class="fas fa-home"></i> Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fas fa-info-circle"></i> À propos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fas fa-envelope"></i> Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fas fa-user-shield"></i> Connexion</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container mt-4">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-3 col-md-4" id="app-sidebar">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h4>Catégories</h4>
+                        </div>
+                        <ul class="sidebar-menu" id="sidebar-menu">
+                            <li v-for="(item, index) in menuItems" :key="index">
+                                <a href="#" @click.prevent="setActiveCategory(item)" :class="{ active: activeCategory === item }">
+                                    <i :class="getIconForCategory(item)"></i> {{ item }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="col-lg-9 col-md-8">
+                    <div class="content-section">
+                        <h1 class="content-header">Bienvenue chez M. Atlasoft</h1>
+                        
+                        <!-- Search Bar -->
+                        <div class="search-container">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Rechercher un article ou un site..." v-model="searchQuery">
+                                <button class="btn btn-primary" type="button" @click="searchContent">
+                                    <i class="fas fa-search"></i> Rechercher
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Featured Content -->
+                        <div v-if="activeCategory">
+                            <h2>{{ activeCategory }}</h2>
+                            <div class="row mt-4">
+                                <div v-for="(item, index) in filteredContent" :key="index" class="col-md-4">
+                                    <div class="card featured-card">
+                                        <img :src="'https://via.placeholder.com/400x240'" class="card-img-top" alt="Placeholder Image">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ item.title }}</h5>
+                                            <p class="card-text">{{ item.description }}</p>
+                                            <a href="#" class="btn btn-primary btn-sm">En savoir plus</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-else>
+                            <h2>Nos Services</h2>
+                            <div class="row mt-4">
+                                <div class="col-md-4">
+                                    <div class="card featured-card">
+                                        <img src="https://via.placeholder.com/400x240" class="card-img-top" alt="Informatique">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Solutions Informatiques</h5>
+                                            <p class="card-text">Découvrez nos services et solutions informatiques adaptés à vos besoins.</p>
+                                            <a href="#" class="btn btn-primary btn-sm" @click.prevent="setActiveCategory('Informatique')">Explorer</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card featured-card">
+                                        <img src="https://via.placeholder.com/400x240" class="card-img-top" alt="Vidéo">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Production Vidéo</h5>
+                                            <p class="card-text">Services de production et édition vidéo professionnels.</p>
+                                            <a href="#" class="btn btn-primary btn-sm" @click.prevent="setActiveCategory('Video')">Explorer</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card featured-card">
+                                        <img src="https://via.placeholder.com/400x240" class="card-img-top" alt="IA">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Intelligence Artificielle</h5>
+                                            <p class="card-text">Nos solutions d'IA pour optimiser vos processus métier.</p>
+                                            <a href="#" class="btn btn-primary btn-sm" @click.prevent="setActiveCategory('I.A')">Explorer</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>M. Atlasoft</h5>
+                        <p>Solutions informatiques, vidéo et intelligence artificielle</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p>&copy; 2025 M. Atlasoft. Tous droits réservés.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    menuItems: ['Informatique', 'Video', 'Histoire', 'Mes site preferes', 'Mes site Heberger', 'console admin', 'I.A'],
+                    activeCategory: '',
+                    searchQuery: '',
+                    contentItems: {
+                        'Informatique': [
+                            { title: 'Solutions Cloud', description: 'Services cloud pour entreprises' },
+                            { title: 'Développement Web', description: 'Création de sites web professionnels' },
+                            { title: 'Sécurité IT', description: 'Protection de vos données' }
+                        ],
+                        'Video': [
+                            { title: 'Montage vidéo', description: 'Services de montage professionnel' },
+                            { title: 'Animation 3D', description: 'Création d\'animations 3D' },
+                            { title: 'Streaming', description: 'Solutions de diffusion en direct' }
+                        ],
+                        'Histoire': [
+                            { title: 'Notre parcours', description: 'L\'histoire de M. Atlasoft' },
+                            { title: 'Évolution tech', description: 'Notre adaptation aux nouvelles technologies' },
+                            { title: 'Projets marquants', description: 'Nos réalisations phares' }
+                        ],
+                        'Mes site preferes': [
+                            { title: 'Tech News', description: 'Les dernières actualités tech' },
+                            { title: 'Ressources Dev', description: 'Outils et tutoriels pour développeurs' },
+                            { title: 'Communauté', description: 'Forums et groupes de discussion' }
+                        ],
+                        'Mes site Heberger': [
+                            { title: 'Portfolio Client 1', description: 'Site vitrine pour entreprise' },
+                            { title: 'E-commerce', description: 'Boutique en ligne de produits tech' },
+                            { title: 'Blog Tech', description: 'Blog d\'actualités technologiques' }
+                        ],
+                        'console admin': [
+                            { title: 'Tableau de bord', description: 'Gestion de votre compte' },
+                            { title: 'Statistiques', description: 'Analyses de performance' },
+                            { title: 'Paramètres', description: 'Configuration de votre espace' }
+                        ],
+                        'I.A': [
+                            { title: 'Machine Learning', description: 'Solutions d\'apprentissage automatique' },
+                            { title: 'Chatbots', description: 'Assistants virtuels intelligents' },
+                            { title: 'Analyse prédictive', description: 'Prévisions basées sur les données' }
+                        ]
+                    }
+                }
+            },
+            computed: {
+                filteredContent() {
+                    if (!this.activeCategory) return [];
+                    
+                    const content = this.contentItems[this.activeCategory] || [];
+                    
+                    if (!this.searchQuery) {
+                        return content;
+                    }
+                    
+                    const query = this.searchQuery.toLowerCase();
+                    return content.filter(item => 
+                        item.title.toLowerCase().includes(query) || 
+                        item.description.toLowerCase().includes(query)
+                    );
+                }
+            },
+            methods: {
+                setActiveCategory(category) {
+                    this.activeCategory = category;
+                    this.searchQuery = '';
+                },
+                getIconForCategory(category) {
+                    const icons = {
+                        'Informatique': 'fas fa-laptop-code',
+                        'Video': 'fas fa-video',
+                        'Histoire': 'fas fa-history',
+                        'Mes site preferes': 'fas fa-star',
+                        'Mes site Heberger': 'fas fa-server',
+                        'console admin': 'fas fa-cogs',
+                        'I.A': 'fas fa-robot'
+                    };
+                    
+                    return icons[category] || 'fas fa-folder';
+                },
+                searchContent() {
+                    // La recherche est déjà gérée par le computed property filteredContent
+                },
+                fetchMenuItems() {
+                    // Simulation d'une requête API avec axios
+                    // Dans un environnement réel, vous remplaceriez ceci par une véritable URL d'API
+                    //console.log("Chargement des éléments du menu...");
+                    
+                    // Simulons un appel API avec un délai
+                    setTimeout(() => {
+                        this.menuItems = ['Informatique', 'Video', 'Histoire', 'Mes site preferes', 'Mes site Heberger', 'console admin', 'I.A'];
+                        // En production, vous utiliseriez:
+                        // axios.get('votre-api-url/menu')
+                        //     .then(response => {
+                        //         this.menuItems = response.data;
+                        //     })
+                        //     .catch(error => {
+                        //         console.error("Erreur lors du chargement des éléments du menu:", error);
+                        //     });
+                        
+                        //console.log("Éléments du menu chargés avec succès");
+                    }, 500);
+                }
+            },
+            mounted() {
+                this.fetchMenuItems();
+            }
+        }).mount('#app-sidebar');
+    </script>
+</body>
+</html>

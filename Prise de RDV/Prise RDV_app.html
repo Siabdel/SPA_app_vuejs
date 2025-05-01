@@ -1,0 +1,621 @@
+
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation en ligne - AutoService</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E63946',
+                        secondary: '#1D3557',
+                        light: '#F1FAEE',
+                        accent: '#A8DADC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dark body {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+        
+        .step-indicator {
+            counter-increment: step-counter;
+        }
+        
+        .step-indicator::before {
+            content: counter(step-counter);
+            @apply w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white font-bold;
+        }
+        
+        .step-indicator.active::before {
+            @apply bg-secondary;
+        }
+        
+        .step-indicator.completed::before {
+            @apply bg-green-500;
+        }
+        
+        .calendar-day {
+            @apply p-2 border border-gray-200 rounded cursor-pointer hover:bg-accent transition-colors;
+        }
+        
+        .calendar-day.selected {
+            @apply bg-primary text-white;
+        }
+        
+        .calendar-day.unavailable {
+            @apply bg-gray-100 text-gray-400 cursor-not-allowed;
+        }
+        
+        .service-card {
+            @apply p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md;
+        }
+        
+        .service-card.selected {
+            @apply border-primary ring-2 ring-primary;
+        }
+        
+        .form-input {
+            @apply w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+        }
+        
+        .btn-primary {
+            @apply bg-primary hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 active:scale-95;
+        }
+        
+        .btn-secondary {
+            @apply bg-secondary hover:bg-blue-900 text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 active:scale-95;
+        }
+        
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+        
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .dark body {
+                background-color: #1a202c;
+                color: #f7fafc;
+            }
+            
+            .calendar-day {
+                @apply border-gray-700;
+            }
+            
+            .calendar-day.unavailable {
+                @apply bg-gray-800 text-gray-500;
+            }
+            
+            .form-input {
+                @apply bg-gray-800 border-gray-700 text-white;
+            }
+            
+            .service-card {
+                @apply border-gray-700 bg-gray-800;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light text-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold mb-2 text-secondary">AutoService Pro</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Réservez votre rendez-vous en ligne en quelques clics</p>
+        </header>
+        
+        <!-- Main App Container -->
+        <div id="app" class="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden transition-all duration-300">
+            <!-- Progress Steps -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="step-indicator active">
+                    <span class="ml-3 font-medium">Sélection du rendez-vous</span>
+                </div>
+                <div class="flex-1 h-1 mx-2 bg-gray-200 dark:bg-gray-700"></div>
+                <div class="step-indicator">
+                    <span class="ml-3 font-medium">Coordonnées</span>
+                </div>
+                <div class="flex-1 h-1 mx-2 bg-gray-200 dark:bg-gray-700"></div>
+                <div class="step-indicator">
+                    <span class="ml-3 font-medium">Confirmation</span>
+                </div>
+                <div class="flex-1 h-1 mx-2 bg-gray-200 dark:bg-gray-700"></div>
+                <div class="step-indicator">
+                    <span class="ml-3 font-medium">Paiement</span>
+                </div>
+            </div>
+            
+            <!-- Step 1: Appointment Selection -->
+            <div id="step-1" class="p-6 transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6 text-secondary">Choisissez votre prestation</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Service Type -->
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="font-bold mb-4 text-lg flex items-center">
+                            <i class="fas fa-tools mr-2 text-primary"></i> Type de prestation
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="service-card selected">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3">
+                                        <i class="fas fa-car"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Contrôle technique</h4>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">À partir de 60€</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="service-card">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white mr-3">
+                                        <i class="fas fa-oil-can"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Vidange complète</h4>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">À partir de 90€</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="service-card">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white mr-3">
+                                        <i class="fas fa-bolt"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Diagnostic électronique</h4>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">À partir de 45€</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vehicle Details -->
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="font-bold mb-4 text-lg flex items-center">
+                            <i class="fas fa-car-alt mr-2 text-primary"></i> Détails du véhicule
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Immatriculation</label>
+                                <input type="text" class="form-input" placeholder="AA-123-BB">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Type de carburant</label>
+                                <select class="form-input">
+                                    <option value="">Sélectionnez</option>
+                                    <option>Essence</option>
+                                    <option>Diesel</option>
+                                    <option>Hybride</option>
+                                    <option>Électrique</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Marque et modèle</label>
+                                <input type="text" class="form-input" placeholder="Ex: Peugeot 308">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar -->
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="font-bold mb-4 text-lg flex items-center">
+                            <i class="far fa-calendar-alt mr-2 text-primary"></i> Disponibilités
+                        </h3>
+                        <div class="mb-4 flex justify-between items-center">
+                            <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span class="font-bold">Juillet 2023</span>
+                            <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-sm mb-2">
+                            <div class="font-medium">L</div>
+                            <div class="font-medium">M</div>
+                            <div class="font-medium">M</div>
+                            <div class="font-medium">J</div>
+                            <div class="font-medium">V</div>
+                            <div class="font-medium">S</div>
+                            <div class="font-medium">D</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1">
+                            <div class="calendar-day unavailable">26</div>
+                            <div class="calendar-day unavailable">27</div>
+                            <div class="calendar-day unavailable">28</div>
+                            <div class="calendar-day unavailable">29</div>
+                            <div class="calendar-day unavailable">30</div>
+                            <div class="calendar-day">1</div>
+                            <div class="calendar-day">2</div>
+                            <div class="calendar-day">3</div>
+                            <div class="calendar-day">4</div>
+                            <div class="calendar-day">5</div>
+                            <div class="calendar-day">6</div>
+                            <div class="calendar-day">7</div>
+                            <div class="calendar-day">8</div>
+                            <div class="calendar-day">9</div>
+                            <div class="calendar-day">10</div>
+                            <div class="calendar-day selected">11</div>
+                            <div class="calendar-day">12</div>
+                            <div class="calendar-day">13</div>
+                            <div class="calendar-day">14</div>
+                            <div class="calendar-day">15</div>
+                            <div class="calendar-day">16</div>
+                            <div class="calendar-day">17</div>
+                            <div class="calendar-day">18</div>
+                            <div class="calendar-day">19</div>
+                            <div class="calendar-day">20</div>
+                            <div class="calendar-day">21</div>
+                            <div class="calendar-day">22</div>
+                            <div class="calendar-day">23</div>
+                            <div class="calendar-day">24</div>
+                            <div class="calendar-day">25</div>
+                            <div class="calendar-day">26</div>
+                            <div class="calendar-day">27</div>
+                            <div class="calendar-day">28</div>
+                            <div class="calendar-day">29</div>
+                            <div class="calendar-day">30</div>
+                            <div class="calendar-day">31</div>
+                            <div class="calendar-day unavailable">1</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Time Slots -->
+                <div class="mb-8">
+                    <h3 class="font-bold mb-4 text-lg">Choisissez un créneau horaire</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">08:00</button>
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">09:00</button>
+                        <button class="py-2 px-4 border rounded-lg bg-primary text-white border-primary">10:00</button>
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">11:00</button>
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">13:00</button>
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">14:00</button>
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">15:00</button>
+                        <button class="py-2 px-4 border rounded-lg hover:bg-accent hover:border-primary transition-colors">16:00</button>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button class="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour
+                    </button>
+                    <button class="btn-primary">
+                        Suivant <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Contact Information (Hidden by default) -->
+            <div id="step-2" class="hidden p-6 transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6 text-secondary">Vos coordonnées</h2>
+                
+                <form class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Civilité <span class="text-primary">*</span></label>
+                        <select class="form-input">
+                            <option value="">Sélectionnez</option>
+                            <option>Monsieur</option>
+                            <option>Madame</option>
+                            <option>Autre</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2"></div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Nom <span class="text-primary">*</span></label>
+                        <input type="text" class="form-input" placeholder="Votre nom">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Prénom <span class="text-primary">*</span></label>
+                        <input type="text" class="form-input" placeholder="Votre prénom">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Adresse complète <span class="text-primary">*</span></label>
+                        <input type="text" class="form-input" placeholder="N° et rue">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Code postal <span class="text-primary">*</span></label>
+                        <input type="text" class="form-input" placeholder="Code postal">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ville <span class="text-primary">*</span></label>
+                        <input type="text" class="form-input" placeholder="Ville">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email <span class="text-primary">*</span></label>
+                        <input type="email" class="form-input" placeholder="email@exemple.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Téléphone mobile <span class="text-primary">*</span></label>
+                        <input type="tel" class="form-input" placeholder="06 12 34 56 78">
+                    </div>
+                </form>
+                
+                <div class="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button class="btn-secondary" onclick="showStep(1)">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour
+                    </button>
+                    <button class="btn-primary" onclick="showStep(3)">
+                        Suivant <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Confirmation (Hidden by default) -->
+            <div id="step-3" class="hidden p-6 transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6 text-secondary">Confirmation</h2>
+                
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-8">
+                    <h3 class="font-bold text-lg mb-4">Récapitulatif de votre rendez-vous</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium mb-2 text-primary">Prestation</h4>
+                            <p>Contrôle technique</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Durée estimée: 45 minutes</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium mb-2 text-primary">Date et heure</h4>
+                            <p>Mardi 11 juillet 2023 à 10:00</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium mb-2 text-primary">Véhicule</h4>
+                            <p>Peugeot 308 (Essence)</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Immatriculation: AB-123-CD</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium mb-2 text-primary">Coordonnées</h4>
+                            <p>M. Jean Dupont</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">jean.dupont@email.com</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">06 12 34 56 78</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">Total</span>
+                            <span class="text-2xl font-bold text-primary">60,00 €</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="flex items-start">
+                        <input type="checkbox" class="mt-1 mr-2">
+                        <span class="text-sm">J'accepte les <a href="#" class="text-primary hover:underline">conditions générales</a> et la <a href="#" class="text-primary hover:underline">politique de confidentialité</a></span>
+                    </label>
+                </div>
+                
+                <div class="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button class="btn-secondary" onclick="showStep(2)">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour
+                    </button>
+                    <button class="btn-primary" onclick="showStep(4)">
+                        Confirmer et payer <i class="fas fa-lock ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Payment (Hidden by default) -->
+            <div id="step-4" class="hidden p-6 transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6 text-secondary">Paiement sécurisé</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-6">
+                            <h3 class="font-bold text-lg mb-4">Moyen de paiement</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                    <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-500 dark:text-blue-300 mr-3">
+                                        <i class="fab fa-cc-visa"></i>
+                                    </div>
+                                    <span class="font-medium">Carte bancaire</span>
+                                </div>
+                                
+                                <div class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                    <div class="w-10 h-10 bg-yellow-50 dark:bg-yellow-900 rounded-full flex items-center justify-center text-yellow-500 dark:text-yellow-300 mr-3">
+                                        <i class="fab fa-cc-paypal"></i>
+                                    </div>
+                                    <span class="font-medium">PayPal</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                                <h4 class="font-medium mb-3">Informations de paiement</h4>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Numéro de carte</label>
+                                        <div class="relative">
+                                            <input type="text" class="form-input pl-10" placeholder="1234 5678 9012 3456">
+                                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                                <i class="far fa-credit-card text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Date d'expiration</label>
+                                            <input type="text" class="form-input" placeholder="MM/AA">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Cryptogramme</label>
+                                            <div class="relative">
+                                                <input type="text" class="form-input pl-10" placeholder="CVC">
+                                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                                    <i class="fas fa-lock text-gray-400"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 sticky top-6">
+                            <h3 class="font-bold text-lg mb-4">Récapitulatif</h3>
+                            
+                            <div class="space-y-3 mb-4">
+                                <div class="flex justify-between">
+                                    <span>Contrôle technique</span>
+                                    <span>60,00 €</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Frais de dossier</span>
+                                    <span>0,00 €</span>
+                                </div>
+                            </div>
+                            
+                            <div class="py-3 border-t border-b border-gray-200 dark:border-gray-600 my-3">
+                                <div class="flex justify-between font-bold">
+                                    <span>Total</span>
+                                    <span class="text-primary">60,00 €</span>
+                                </div>
+                            </div>
+                            
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                <p class="mb-2"><i class="fas fa-lock text-primary mr-2"></i> Paiement sécurisé SSL</p>
+                                <p><i class="fas fa-shield-alt text-primary mr-2"></i> Garantie satisfait ou remboursé</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button class="btn-secondary" onclick="showStep(3)">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour
+                    </button>
+                    <button class="btn-primary" onclick="completeBooking()">
+                        Payer maintenant <i class="fas fa-lock ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Success Message (Hidden by default) -->
+            <div id="success-message" class="hidden p-12 text-center">
+                <div class="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-green-500 dark:text-green-300 text-3xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold mb-4 text-secondary">Rendez-vous confirmé !</h2>
+                <p class="text-lg mb-6">Votre réservation pour le contrôle technique a bien été enregistrée.</p>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 max-w-md mx-auto mb-8">
+                    <p class="font-medium mb-2">Mardi 11 juillet 2023 à 10:00</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">AutoService Pro<br>12 Rue de la République, 75001 Paris</p>
+                </div>
+                <p class="mb-8">Un email de confirmation vous a été envoyé avec tous les détails.</p>
+                <button class="btn-primary" onclick="resetBooking()">
+                    <i class="fas fa-calendar-plus mr-2"></i> Nouvelle réservation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple step navigation
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('[id^="step-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Show selected step
+            document.getElementById(`step-${stepNumber}`).classList.remove('hidden');
+            
+            // Update progress indicators
+            document.querySelectorAll('.step-indicator').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < stepNumber) {
+                    el.classList.add('completed');
+                } else if (index + 1 === stepNumber) {
+                    el.classList.add('active');
+                }
+            });
+        }
+        
+        // Complete booking and show success message
+        function completeBooking() {
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('success-message').classList.remove('hidden');
+        }
+        
+        // Reset booking process
+        function resetBooking() {
+            document.getElementById('success-message').classList.add('hidden');
+            showStep(1);
+        }
+        
+        // Service selection
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.service-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+        
+        // Calendar day selection
+        document.querySelectorAll('.calendar-day:not(.unavailable)').forEach(day => {
+            day.addEventListener('click', function() {
+                document.querySelectorAll('.calendar-day').forEach(d => {
+                    d.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+        
+        // Time slot selection
+        document.querySelectorAll('#step-1 button:not(.btn-primary)').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('#step-1 button').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white', 'border-primary');
+                });
+                this.classList.add('bg-primary', 'text-white', 'border-primary');
+            });
+        });
+        
+        // Initialize first step
+        showStep(1);
+    </script>
+</body>
+</html>

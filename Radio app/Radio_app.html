@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maroc Radio - Écoutez les radios marocaines en direct</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .radio-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .player-container {
+            background: linear-gradient(135deg, #2196F3 0%, #FF9800 100%);
+        }
+        .favorite-btn.active {
+            color: #FF9800;
+        }
+        .search-input:focus {
+            border-color: #2196F3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        .tab-active {
+            border-bottom: 3px solid #2196F3;
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl mr-3">
+                    MR
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Maroc Radio</h1>
+            </div>
+            <div class="relative w-64">
+                <input type="text" placeholder="Rechercher une radio..." class="search-input w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none">
+                <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 mb-8">
+            <button class="tab-active px-6 py-3 font-medium text-sm focus:outline-none">Toutes les radios</button>
+            <button class="px-6 py-3 font-medium text-sm text-gray-500 hover:text-blue-500 focus:outline-none">Favoris</button>
+            <button class="px-6 py-3 font-medium text-sm text-gray-500 hover:text-blue-500 focus:outline-none">Catégories</button>
+        </div>
+
+        <!-- Radio Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Radio Card 1 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/FF9800/FFFFFF?text=Radio+1" alt="Radio 1" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Radio Mars</h3>
+                    <p class="text-gray-600 text-sm mb-3">La radio leader au Maroc avec les dernières hits nationaux et internationaux.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 2 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Radio+2" alt="Radio 2" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Chada FM</h3>
+                    <p class="text-gray-600 text-sm mb-3">Radio marocaine généraliste avec des programmes variés et des informations locales.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 3 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/FF9800/FFFFFF?text=Radio+3" alt="Radio 3" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Hit Radio</h3>
+                    <p class="text-gray-600 text-sm mb-3">100% musique avec les meilleurs hits du moment et des émissions spéciales.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 4 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Radio+4" alt="Radio 4" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Medi 1</h3>
+                    <p class="text-gray-600 text-sm mb-3">Radio internationale avec des programmes en arabe, français et amazigh.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 5 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/FF9800/FFFFFF?text=Radio+5" alt="Radio 5" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Atlantic Radio</h3>
+                    <p class="text-gray-600 text-sm mb-3">Radio marocaine axée sur la culture et la musique traditionnelle.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 6 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Radio+6" alt="Radio 6" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Aswat</h3>
+                    <p class="text-gray-600 text-sm mb-3">Radio musicale avec une sélection éclectique de musique arabe et internationale.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 7 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/FF9800/FFFFFF?text=Radio+7" alt="Radio 7" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Radio Plus</h3>
+                    <p class="text-gray-600 text-sm mb-3">Radio généraliste avec des émissions d'information et de divertissement.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Radio Card 8 -->
+            <div class="radio-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+                <div class="relative">
+                    <img src="https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Radio+8" alt="Radio 8" class="w-full h-40 object-cover">
+                    <button class="favorite-btn absolute top-2 right-2 bg-white p-2 rounded-full shadow-md text-gray-400 hover:text-orange-500 focus:outline-none">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">MFM Radio</h3>
+                    <p class="text-gray-600 text-sm mb-3">Radio musicale avec une programmation jeune et dynamique.</p>
+                    <button class="play-btn w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                        <i class="fas fa-play mr-2"></i> Écouter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Player -->
+    <div class="player-container fixed bottom-0 left-0 right-0 bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center w-1/3">
+                <img src="https://via.placeholder.com/50x50/FF9800/FFFFFF?text=MR" alt="Now Playing" class="w-12 h-12 rounded-md mr-3">
+                <div>
+                    <h4 class="text-white font-medium">Radio Mars</h4>
+                    <p class="text-white text-opacity-80 text-sm">En direct</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-center w-1/3">
+                <button class="bg-white bg-opacity-20 rounded-full p-2 mx-1 focus:outline-none">
+                    <i class="fas fa-step-backward text-white"></i>
+                </button>
+                <button class="bg-white rounded-full p-3 mx-2 focus:outline-none">
+                    <i class="fas fa-pause text-blue-500 text-lg"></i>
+                </button>
+                <button class="bg-white bg-opacity-20 rounded-full p-2 mx-1 focus:outline-none">
+                    <i class="fas fa-step-forward text-white"></i>
+                </button>
+            </div>
+            
+            <div class="flex items-center w-1/3 justify-end">
+                <div class="hidden md:flex items-center mr-4">
+                    <span class="text-white text-sm mr-2">00:42</span>
+                    <div class="w-32 bg-white bg-opacity-30 rounded-full h-1">
+                        <div class="bg-white h-1 rounded-full" style="width: 30%"></div>
+                    </div>
+                    <span class="text-white text-sm ml-2">03:24</span>
+                </div>
+                <button class="bg-white bg-opacity-20 rounded-full p-2 focus:outline-none">
+                    <i class="fas fa-volume-up text-white"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Favorite functionality
+        document.querySelectorAll('.favorite-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    this.classList.add('active');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Play functionality
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.radio-card');
+                const title = card.querySelector('h3').textContent;
+                const imgSrc = card.querySelector('img').src;
+                
+                // Update player
+                const player = document.querySelector('.player-container');
+                player.querySelector('h4').textContent = title;
+                player.querySelector('img').src = imgSrc;
+                
+                // Show player if hidden
+                player.classList.remove('hidden');
+                
+                // Change play button to pause
+                const playIcon = player.querySelector('.fa-pause');
+                if (playIcon) {
+                    playIcon.classList.remove('fa-pause');
+                    playIcon.classList.add('fa-play');
+                } else {
+                    player.querySelector('.fa-play').classList.remove('fa-play');
+                    player.querySelector('.fa-play').classList.add('fa-pause');
+                }
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.flex.border-b button').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.flex.border-b button').forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.add('text-gray-500');
+                });
+                this.classList.add('tab-active');
+                this.classList.remove('text-gray-500');
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.radio-card').forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

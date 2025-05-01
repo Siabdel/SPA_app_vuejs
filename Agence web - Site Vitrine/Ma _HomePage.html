@@ -1,0 +1,854 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlasoft - Solutions Technologiques</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome pour les icônes -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Styles personnalisés -->
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --accent-color: #e74c3c;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+    }
+    
+    .navbar {
+      background-color: var(--secondary-color);
+      padding: 1rem 0;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      color: white;
+      font-size: 1.8rem;
+    }
+    
+    .navbar-brand span {
+      color: var(--primary-color);
+    }
+    
+    .nav-link {
+      color: rgba(255,255,255,0.8) !important;
+      font-weight: 500;
+      transition: color 0.3s;
+      margin: 0 0.5rem;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary-color) !important;
+    }
+    
+    .dropdown-menu {
+      background-color: var(--secondary-color);
+      border: none;
+    }
+    
+    .dropdown-item {
+      color: rgba(255,255,255,0.8);
+    }
+    
+    .dropdown-item:hover {
+      background-color: rgba(52, 152, 219, 0.2);
+      color: white;
+    }
+    
+    .hero {
+      background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), url('/api/placeholder/1200/600') center/cover;
+      color: white;
+      padding: 8rem 0;
+      text-align: center;
+    }
+    
+    .hero h1 {
+      font-weight: 700;
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      font-weight: 700;
+    }
+    
+    .section-title:after {
+      content: '';
+      width: 80px;
+      height: 3px;
+      background-color: var(--primary-color);
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .service-box {
+      text-align: center;
+      padding: 2rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin-bottom: 2rem;
+      border-radius: 5px;
+    }
+    
+    .service-box:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .service-icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+    }
+    
+    .portfolio-item {
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+    
+    .portfolio-img {
+      transition: transform 0.4s;
+    }
+    
+    .portfolio-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(44, 62, 80, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.4s;
+      color: white;
+      padding: 1rem;
+    }
+    
+    .portfolio-item:hover .portfolio-overlay {
+      opacity: 1;
+    }
+    
+    .portfolio-item:hover .portfolio-img {
+      transform: scale(1.1);
+    }
+    
+    .blog-card {
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .blog-card:hover {
+      transform: translateY(-10px);
+    }
+    
+    .blog-img {
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .blog-content {
+      padding: 1.5rem;
+    }
+    
+    .blog-date {
+      color: var(--primary-color);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .blog-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    footer {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 4rem 0 2rem;
+    }
+    
+    .footer-title {
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    .footer-title:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 50px;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+    
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary-color);
+    }
+    
+    .social-icons {
+      list-style: none;
+      padding: 0;
+      display: flex;
+    }
+    
+    .social-icons li {
+      margin-right: 15px;
+    }
+    
+    .social-icons a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    
+    .social-icons a:hover {
+      background-color: var(--primary-color);
+    }
+    
+    .copyright {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+    
+    .loader-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(52, 152, 219, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Atlas<span>Soft</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#accueil">Accueil</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#services">Services</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                Catégories
+              </a>
+              <ul class="dropdown-menu">
+                <li v-for="category in categories" :key="category.id">
+                  <a class="dropdown-item" :href="'#' + category.slug">{{ category.name }}</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#portfolio">Portfolio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#blog">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <h1>Solutions Technologiques Innovantes</h1>
+            <p>Bienvenue chez AtlasSoft, votre partenaire pour toutes vos solutions numériques. 
+               De l'informatique à la vidéo, en passant par l'intelligence artificielle, 
+               nous vous accompagnons dans votre transformation digitale.</p>
+            <a href="#services" class="btn btn-primary">Découvrir Nos Services</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-5" id="services">
+      <div class="container">
+        <h2 class="section-title">Nos Services</h2>
+        
+        <div v-if="loading.services" class="loader">
+          <div class="loader-spinner"></div>
+        </div>
+        
+        <div v-else class="row">
+          <div class="col-md-4" v-for="category in categories" :key="category.id">
+            <div class="service-box" :id="category.slug">
+              <div class="service-icon">
+                <i :class="category.icon"></i>
+              </div>
+              <h4>{{ category.name }}</h4>
+              <p>{{ category.description }}</p>
+              <a :href="category.link" class="btn btn-sm btn-outline-primary">En Savoir Plus</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="py-5 bg-light" id="portfolio">
+      <div class="container">
+        <h2 class="section-title">Notre Portfolio</h2>
+        
+        <div v-if="loading.portfolio" class="loader">
+          <div class="loader-spinner"></div>
+        </div>
+        
+        <div v-else class="row">
+          <div class="col-md-4" v-for="(item, index) in portfolio" :key="index">
+            <div class="portfolio-item">
+              <div class="portfolio-img">
+                <img :src="item.imageUrl || '/api/placeholder/400/300'" class="img-fluid" :alt="item.title">
+              </div>
+              <div class="portfolio-overlay">
+                <h5>{{ item.title }}</h5>
+                <p>{{ item.description }}</p>
+                <a :href="item.link" class="btn btn-sm btn-primary">Voir le projet</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section class="py-5" id="blog">
+      <div class="container">
+        <h2 class="section-title">Articles Récents</h2>
+        
+        <div v-if="loading.blog" class="loader">
+          <div class="loader-spinner"></div>
+        </div>
+        
+        <div v-else class="row">
+          <div class="col-md-4" v-for="(article, index) in articles" :key="index">
+            <div class="blog-card">
+              <div class="blog-img" :style="{ backgroundImage: 'url(' + (article.imageUrl || '/api/placeholder/400/200') + ')' }"></div>
+              <div class="blog-content">
+                <div class="blog-date">{{ formatDate(article.date) }}</div>
+                <h5 class="blog-title">{{ article.title }}</h5>
+                <p>{{ article.excerpt }}</p>
+                <a :href="article.link" class="btn btn-sm btn-outline-primary">Lire Plus</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-5 bg-light" id="contact">
+      <div class="container">
+        <h2 class="section-title">Contactez-Nous</h2>
+        <div class="row">
+          <div class="col-lg-6 mb-4 mb-lg-0">
+            <form @submit.prevent="submitForm">
+              <div class="mb-3">
+                <input type="text" class="form-control" v-model="contact.name" placeholder="Votre Nom" required>
+              </div>
+              <div class="mb-3">
+                <input type="email" class="form-control" v-model="contact.email" placeholder="Votre Email" required>
+              </div>
+              <div class="mb-3">
+                <input type="text" class="form-control" v-model="contact.subject" placeholder="Sujet" required>
+              </div>
+              <div class="mb-3">
+                <textarea class="form-control" rows="5" v-model="contact.message" placeholder="Votre Message" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" :disabled="submitLoading">
+                <span v-if="submitLoading">Envoi en cours...</span>
+                <span v-else>Envoyer Message</span>
+              </button>
+            </form>
+          </div>
+          <div class="col-lg-6">
+            <div class="contact-info p-4 bg-white shadow-sm rounded h-100">
+              <h4 class="mb-4">Informations de Contact</h4>
+              <div class="d-flex mb-3">
+                <div class="me-3">
+                  <i class="fas fa-map-marker-alt text-primary"></i>
+                </div>
+                <div>
+                  <h5 class="fs-6">Adresse</h5>
+                  <p>123 Rue de l'Innovation, 75000 Paris</p>
+                </div>
+              </div>
+              <div class="d-flex mb-3">
+                <div class="me-3">
+                  <i class="fas fa-phone text-primary"></i>
+                </div>
+                <div>
+                  <h5 class="fs-6">Téléphone</h5>
+                  <p>+33 1 23 45 67 89</p>
+                </div>
+              </div>
+              <div class="d-flex mb-3">
+                <div class="me-3">
+                  <i class="fas fa-envelope text-primary"></i>
+                </div>
+                <div>
+                  <h5 class="fs-6">Email</h5>
+                  <p>contact@atlasoft.fr</p>
+                </div>
+              </div>
+              <div class="d-flex">
+                <div class="me-3">
+                  <i class="fas fa-clock text-primary"></i>
+                </div>
+                <div>
+                  <h5 class="fs-6">Heures d'Ouverture</h5>
+                  <p>Lun-Ven: 9h00 - 18h00<br>Week-end: Fermé</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4 mb-4 mb-lg-0">
+            <h3 class="footer-title">AtlasSoft</h3>
+            <p>Votre partenaire pour toutes vos solutions numériques innovantes. Notre expertise à votre service pour vous accompagner dans tous vos projets technologiques.</p>
+            <ul class="social-icons mt-4">
+              <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+              <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+              <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+              <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+            </ul>
+          </div>
+          <div class="col-lg-4 mb-4 mb-lg-0">
+            <h3 class="footer-title">Liens Rapides</h3>
+            <ul class="footer-links list-unstyled">
+              <li><a href="#accueil">Accueil</a></li>
+              <li><a href="#services">Services</a></li>
+              <li><a href="#portfolio">Portfolio</a></li>
+              <li><a href="#blog">Blog</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-4">
+            <h3 class="footer-title">Newsletter</h3>
+            <p>Abonnez-vous à notre newsletter pour recevoir nos dernières actualités.</p>
+            <form @submit.prevent="subscribeNewsletter" class="mt-3">
+              <div class="input-group mb-3">
+                <input type="email" class="form-control" v-model="newsletter.email" placeholder="Votre Email" required>
+                <button class="btn btn-primary" type="submit" :disabled="newsletter.loading">
+                  <span v-if="newsletter.loading">...</span>
+                  <span v-else>S'abonner</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="copyright">
+          <p>&copy; {{ new Date().getFullYear() }} AtlasSoft. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <!-- Vue.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+  <!-- Axios -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  
+  <script>
+    // Configuration de l'API
+    const API_BASE_URL = 'https://api.atlasoft.fr/api'; // URL à remplacer par votre API réelle
+    
+    // Créer l'application Vue
+    const app = Vue.createApp({
+      data() {
+        return {
+          // Données pour les catégories (menu)
+          categories: [],
+          // Données pour le portfolio
+          portfolio: [],
+          // Données pour les articles du blog
+          articles: [],
+          // État de chargement
+          loading: {
+            services: true,
+            portfolio: true,
+            blog: true
+          },
+          // Données du formulaire de contact
+          contact: {
+            name: '',
+            email: '',
+            subject: '',
+            message: ''
+          },
+          submitLoading: false,
+          // Abonnement à la newsletter
+          newsletter: {
+            email: '',
+            loading: false
+          }
+        }
+      },
+      methods: {
+        // Récupération des catégories depuis l'API
+        async fetchCategories() {
+          try {
+            const response = await axios.get(`${API_BASE_URL}/categories`);
+            // Simulation de réponse en cas d'erreur d'API
+            this.categories = response.data || [
+              {
+                id: 1,
+                name: 'Informatique',
+                slug: 'informatique',
+                description: 'Solutions informatiques professionnelles pour tous vos besoins.',
+                icon: 'fas fa-laptop-code',
+                link: '#informatique'
+              },
+              {
+                id: 2,
+                name: 'Vidéo',
+                slug: 'video',
+                description: 'Création, montage et production vidéo de haute qualité.',
+                icon: 'fas fa-video',
+                link: '#video'
+              },
+              {
+                id: 3,
+                name: 'Histoire',
+                slug: 'histoire',
+                description: 'Explorez l\'histoire de l\'informatique et des technologies.',
+                icon: 'fas fa-book-open',
+                link: '#histoire'
+              },
+              {
+                id: 4,
+                name: 'Sites Préférés',
+                slug: 'sites-preferes',
+                description: 'Notre sélection de sites web pour vous inspirer.',
+                icon: 'fas fa-star',
+                link: '#sites-preferes'
+              },
+              {
+                id: 5,
+                name: 'Sites Hébergés',
+                slug: 'sites-heberges',
+                description: 'Services d\'hébergement web fiables et performants.',
+                icon: 'fas fa-server',
+                link: '#sites-heberges'
+              },
+              {
+                id: 6,
+                name: 'Console Admin',
+                slug: 'console-admin',
+                description: 'Outils d\'administration pour vos projets web.',
+                icon: 'fas fa-cogs',
+                link: '#console-admin'
+              },
+              {
+                id: 7,
+                name: 'Intelligence Artificielle',
+                slug: 'ia',
+                description: 'Solutions innovantes basées sur l\'IA pour votre entreprise.',
+                icon: 'fas fa-brain',
+                link: '#ia'
+              }
+            ];
+            this.loading.services = false;
+          } catch (error) {
+            console.error('Erreur lors du chargement des catégories:', error);
+            // Charger les données de secours en cas d'erreur
+            this.loadFallbackCategories();
+            this.loading.services = false;
+          }
+        },
+        
+        // Données de secours pour les catégories
+        loadFallbackCategories() {
+          this.categories = [
+            {
+              id: 1,
+              name: 'Informatique',
+              slug: 'informatique',
+              description: 'Solutions informatiques professionnelles pour tous vos besoins.',
+              icon: 'fas fa-laptop-code',
+              link: '#informatique'
+            },
+            {
+              id: 2,
+              name: 'Vidéo',
+              slug: 'video',
+              description: 'Création, montage et production vidéo de haute qualité.',
+              icon: 'fas fa-video',
+              link: '#video'
+            },
+            {
+              id: 3,
+              name: 'Histoire',
+              slug: 'histoire',
+              description: 'Explorez l\'histoire de l\'informatique et des technologies.',
+              icon: 'fas fa-book-open',
+              link: '#histoire'
+            },
+            {
+              id: 4,
+              name: 'Sites Préférés',
+              slug: 'sites-preferes',
+              description: 'Notre sélection de sites web pour vous inspirer.',
+              icon: 'fas fa-star',
+              link: '#sites-preferes'
+            },
+            {
+              id: 5,
+              name: 'Sites Hébergés',
+              slug: 'sites-heberges',
+              description: 'Services d\'hébergement web fiables et performants.',
+              icon: 'fas fa-server',
+              link: '#sites-heberges'
+            },
+            {
+              id: 6,
+              name: 'Console Admin',
+              slug: 'console-admin',
+              description: 'Outils d\'administration pour vos projets web.',
+              icon: 'fas fa-cogs',
+              link: '#console-admin'
+            },
+            {
+              id: 7,
+              name: 'Intelligence Artificielle',
+              slug: 'ia',
+              description: 'Solutions innovantes basées sur l\'IA pour votre entreprise.',
+              icon: 'fas fa-brain',
+              link: '#ia'
+            }
+          ];
+        },
+        
+        // Récupération des projets portfolio depuis l'API
+        async fetchPortfolio() {
+          try {
+            const response = await axios.get(`${API_BASE_URL}/portfolio`);
+            this.portfolio = response.data || this.getFallbackPortfolio();
+            this.loading.portfolio = false;
+          } catch (error) {
+            console.error('Erreur lors du chargement du portfolio:', error);
+            this.portfolio = this.getFallbackPortfolio();
+            this.loading.portfolio = false;
+          }
+        },
+        
+        // Données de secours pour le portfolio
+        getFallbackPortfolio() {
+          return [
+            {
+              id: 1,
+              title: 'Application E-commerce',
+              description: 'Une application e-commerce responsive avec panier et paiement intégré.',
+              imageUrl: '/api/placeholder/400/300',
+              link: '#portfolio-1'
+            },
+            {
+              id: 2,
+              title: 'Dashboard Analytique',
+              description: 'Un tableau de bord analytique pour visualiser les données de votre entreprise.',
+              imageUrl: '/api/placeholder/400/300',
+              link: '#portfolio-2'
+            },
+            {
+              id: 3,
+              title: 'Système de Gestion',
+              description: 'Un système de gestion personnalisé pour optimiser vos processus.',
+              imageUrl: '/api/placeholder/400/300',
+              link: '#portfolio-3'
+            },
+            {
+              id: 4,
+              title: 'Application Mobile',
+              description: 'Une application mobile cross-platform développée avec React Native.',
+              imageUrl: '/api/placeholder/400/300',
+              link: '#portfolio-4'
+            },
+            {
+              id: 5,
+              title: 'Site Web Institutionnel',
+              description: 'Un site web moderne et professionnel pour une institution renommée.',
+              imageUrl: '/api/placeholder/400/300',
+              link: '#portfolio-5'
+            },
+            {
+              id: 6,
+              title: 'Plateforme d\'Apprentissage',
+              description: 'Une plateforme e-learning complète avec suivi des progrès.',
+              imageUrl: '/api/placeholder/400/300',
+              link: '#portfolio-6'
+            }
+          ];
+        },
+        
+        // Récupération des articles du blog depuis l'API
+        async fetchArticles() {
+          try {
+            const response = await axios.get(`${API_BASE_URL}/articles`);
+            this.articles = response.data || this.getFallbackArticles();
+            this.loading.blog = false;
+          } catch (error) {
+            console.error('Erreur lors du chargement des articles:', error);
+            this.articles = this.getFallbackArticles();
+            this.loading.blog = false;
+          }
+        },
+        
+        // Données de secours pour les articles
+        getFallbackArticles() {
+          return [
+            {
+              id: 1,
+              title: 'L\'ère de l\'Intelligence Artificielle',
+              excerpt: 'Comment l\'IA transforme les entreprises et quels sont les défis à venir.',
+              date: '2025-04-15',
+              imageUrl: '/api/placeholder/400/200',
+              link: '#article-1'
+            },
+            {
+              id: 2,
+              title: 'Optimiser la Performance Web',
+              excerpt: 'Techniques avancées pour améliorer la vitesse et l\'expérience utilisateur de votre site web.',
+              date: '2025-04-05',
+              imageUrl: '/api/placeholder/400/200',
+              link: '#article-2'
+            },
+            {
+              id: 3,
+              title: 'Sécurité Informatique en 2025',
+              excerpt: 'Les meilleures pratiques pour protéger votre entreprise contre les cybermenaces actuelles.',
+              date: '2025-03-28',
+              imageUrl: '/api/placeholder/400/200',
+              link: '#article-3'
+            }
+          ];
+        },
+        
+        // Formatage de la date
+        formatDate(dateString) {
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          return new Date(dateString).toLocaleDateString('fr-FR', options);
+        },
+        
+        // Envoi du formulaire de contact
+        async submitForm() {
+          this.submitLoading = true;
+          try {
+            // Simulation d'envoi API
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            alert('Message envoyé avec succès!');
+            this.contact = { name: '', email: '', subject: '', message: '' };
+          } catch (error) {
+            console.error('Erreur lors de l\'envoi du message:', error);
+            alert('Erreur lors de l\'envoi du message. Veuillez réessayer.');
+          } finally {
+            this.submitLoading = false;
+          }
+        }
+    },
+    mounted() {
+      this.fetchCategories();
+      this.fetchPortfolio();
+      this.fetchArticles();
+    }
+});
+
+app.mount('#app');
+</script>
+
+
+</body>
+</html>

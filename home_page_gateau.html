@@ -1,0 +1,760 @@
+
+Hugging Face's logo
+Hugging Face
+Models
+Datasets
+Spaces
+Posts
+Docs
+Enterprise
+Pricing
+
+
+
+Please check your email address for a confirmation link
+Spaces:
+
+furuknap
+/
+azucarmorenatest001
+
+
+like
+4
+App
+Files
+Community
+azucarmorenatest001
+/
+index.html
+
+furuknap's picture
+furuknap
+Add 2 files
+cfbfab2
+verified
+about 1 month ago
+raw
+
+Copy download link
+history
+blame
+contribute
+delete
+
+26 kB
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azúcar Morena | Pastelería Artesanal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #F8D7D7;
+            --secondary: #A06060;
+            --dark: #3A3131;
+            --light: #FFF5F5;
+            --accent: #D4A5A5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent);
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--primary);
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-decoration: none;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav ul li a:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary);
+            transition: width 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--secondary);
+        }
+        
+        nav ul li a:hover:after {
+            width: 100%;
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 0 20px;
+            margin-top: 80px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 2px solid var(--secondary);
+        }
+        
+        .btn:hover {
+            background-color: transparent;
+            color: var(--secondary);
+        }
+        
+        /* Products Section */
+        .section {
+            padding: 100px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-img {
+            height: 250px;
+            overflow: hidden;
+        }
+        
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .product-card:hover .product-img img {
+            transform: scale(1.1);
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-name {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .product-price {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        /* Story Section */
+        .story {
+            background-color: var(--primary);
+        }
+        
+        .story-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .story-img {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .story-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .story-text p {
+            margin-bottom: 20px;
+        }
+        
+        /* Contact Section */
+        .contact {
+            text-align: center;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary);
+            color: var(--secondary);
+            border-radius: 50%;
+            margin: 0 10px;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--secondary);
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .contact-info {
+            margin-bottom: 30px;
+        }
+        
+        .contact-info p {
+            margin-bottom: 5px;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .story-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .story-img {
+                order: -1;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                background-color: var(--primary);
+                width: 100%;
+                flex-direction: column;
+                padding: 20px 0;
+                transition: left 0.3s;
+            }
+            
+            nav ul.active {
+                left: 0;
+            }
+            
+            nav ul li {
+                margin: 10px 0;
+                text-align: center;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .section {
+                padding: 60px 0;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Content Editable styles */
+        [contenteditable="true"] {
+            border-bottom: 1px dashed #ccc;
+            padding: 2px 5px;
+            outline: none;
+        }
+        
+        [contenteditable="true"]:focus {
+            background-color: #f9f9f9;
+            border-bottom-color: var(--secondary);
+        }
+        
+        /* Admin Edit Button */
+        .admin-edit {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .admin-edit:hover {
+            background-color: var(--dark);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">Azúcar Morena</a>
+            <nav>
+                <ul id="nav-menu">
+                    <li><a href="#products">Productos</a></li>
+                    <li><a href="#story">Mi Historia</a></li>
+                    <li><a href="#contact">Contacto</a></li>
+                </ul>
+                <div class="hamburger">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 contenteditable="true">Azúcar Morena</h1>
+            <p contenteditable="true">Deliciosos postres artesanales hechos con amor en Manizales</p>
+            <a href="#products" class="btn">Ver productos</a>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nuestros Productos</h2>
+                <p contenteditable="true">Dulces delicias hechas con ingredientes de la mejor calidad</p>
+            </div>
+            
+            <div id="products-container" class="products-grid">
+                <!-- Product Card 1 -->
+                <div class="product-card" data-id="1">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1571115177098-24ec42ed204d?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" alt="Pastel de chocolate">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">Pastel de Chocolate</h3>
+                        <p class="product-price" contenteditable="true">$45.000</p>
+                        <p class="product-desc" contenteditable="true">Delicioso pastel de chocolate con relleno de ganache y decoración de frutos rojos.</p>
+                    </div>
+                </div>
+                
+                <!-- Product Card 2 -->
+                <div class="product-card" data-id="2">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1552689486-f6773047d19f?ixlib=rb-1.2.1&auto=format&fit=crop&w=651&q=80" alt="Cookies">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">Cookies Clásicas</h3>
+                        <p class="product-price" contenteditable="true">$8.000 c/u</p>
+                        <p class="product-desc" contenteditable="true">Crujientes galletas con trozos de chocolate, perfectas para acompañar tu café.</p>
+                    </div>
+                </div>
+                
+                <!-- Product Card 3 -->
+                <div class="product-card" data-id="3">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" alt="Torta de frutas">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">Torta de Frutas</h3>
+                        <p class="product-price" contenteditable="true">$55.000</p>
+                        <p class="product-desc" contenteditable="true">Esponjoso bizcocho relleno de crema y frutas frescas de temporada.</p>
+                    </div>
+                </div>
+                
+                <!-- Product Card 4 -->
+                <div class="product-card" data-id="4">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1586788682665-3b6c585fa2e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" alt="Alfajores">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">Alfajores</h3>
+                        <p class="product-price" contenteditable="true">$6.000 c/u</p>
+                        <p class="product-desc" contenteditable="true">Delicadas galletas rellenas de dulce de leche y espolvoreadas con coco rallado.</p>
+                    </div>
+                </div>
+                
+                <!-- Product Card 5 -->
+                <div class="product-card" data-id="5">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1541781774459-bb2af1f62d1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" alt="Cheesecake">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">Cheesecake</h3>
+                        <p class="product-price" contenteditable="true">$50.000</p>
+                        <p class="product-desc" contenteditable="true">Suave pastel de queso con base de galleta y salsa de frutos rojos.</p>
+                    </div>
+                </div>
+                
+                <!-- Product Card 6 -->
+                <div class="product-card" data-id="6">
+                    <div class="product-img">
+                        <img src="https://images.unsplash.com/photo-1612188184046-6b9e71f8af80?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" alt="Trufas">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">Trufas de Chocolate</h3>
+                        <p class="product-price" contenteditable="true">$3.500 c/u</p>
+                        <p class="product-desc" contenteditable="true">Exquisitas bolitas de chocolate oscuro y relleno cremoso.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section id="story" class="section story">
+        <div class="container">
+            <div class="section-title">
+                <h2>Mi Historia</h2>
+            </div>
+            
+            <div class="story-content">
+                <div class="story-img">
+                    <img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" alt="Historia de Azúcar Morena">
+                </div>
+                <div class="story-text">
+                    <p contenteditable="true">Todo comenzó en la cocina de mi abuela, donde aprendí el amor por la repostería. Azúcar Morena nació de ese profundo cariño por los dulces momentos y las tradiciones familiares.</p>
+                    <p contenteditable="true">Después de estudiar gastronomía y trabajar en varios restaurantes, decidí comenzar mi propio emprendimiento desde casa en Manizales, donde puedo poner todo mi corazón en cada creación.</p>
+                    <p contenteditable="true">Cada producto que ofrezco está hecho con ingredientes de alta calidad y mucho cariño, porque creo que la repostería es una forma de arte y amor que debemos compartir.</p>
+                    <p contenteditable="true">¡Gracias por apoyar mi sueño y por permitirme ser parte de tus momentos especiales!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contáctanos</h2>
+                <p contenteditable="true">Síguenos en redes sociales o encarga tu pedido</p>
+            </div>
+            
+            <div class="social-links">
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/573012345678" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://rappi.com" target="_blank"><i class="fas fa-shopping-basket"></i></a>
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            </div>
+            
+            <div class="contact-info">
+                <p><i class="fas fa-map-marker-alt"></i> <span contenteditable="true">Manizales, Colombia</span></p>
+                <p><i class="fas fa-phone"></i> <span contenteditable="true">+57 300 123 4567</span></p>
+                <p><i class="fas fa-envelope"></i> <span contenteditable="true">hola@azucarmorena.co</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="year"></span> Azúcar Morena. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Admin Edit Button -->
+    <div class="admin-edit" id="edit-btn">
+        <i class="fas fa-edit"></i>
+    </div>
+
+    <!-- Product Form (Hidden by default) -->
+    <div id="product-form" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.2); width: 90%; max-width: 500px; z-index: 1000;">
+        <h3>Agregar Nuevo Producto</h3>
+        <form id="add-product-form">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">Nombre:</label>
+                <input type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">Precio:</label>
+                <input type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">Descripción:</label>
+                <textarea style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 100px;" required></textarea>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">URL de la imagen:</label>
+                <input type="text" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <button type="button" id="cancel-add" style="background: #ccc; color: #333; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Cancelar</button>
+                <button type="submit" style="background: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Agregar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Overlay (Hidden by default) -->
+    <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+    <script>
+        // Mobile Menu
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('#nav-menu');
+        
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('#nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // Current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+        
+        // Edit Mode
+        let isEditMode = false;
+        const editBtn = document.getElementById('edit-btn');
+        const contentEditableElements = document.querySelectorAll('[contenteditable="true"]');
+        const productForm = document.getElementById('product-form');
+        const overlay = document.getElementById('overlay');
+        const addProductForm = document.getElementById('add-product-form');
+        const cancelAdd = document.getElementById('cancel-add');
+        const productsContainer = document.getElementById('products-container');
+        
+        editBtn.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                editBtn.innerHTML = '<i class="fas fa-save"></i>';
+                document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                    el.style.borderBottom = '1px dashed #ccc';
+                });
+            } else {
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                    el.style.borderBottom = 'none';
+                });
+            }
+        });
+        
+        // Add new product functionality
+        editBtn.addEventListener('dblclick', () => {
+            overlay.style.display = 'block';
+            productForm.style.display = 'block';
+        });
+        
+        cancelAdd.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            productForm.style.display = 'none';
+        });
+        
+        overlay.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            productForm.style.display = 'none';
+        });
+        
+        addProductForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const inputs = e.target.elements;
+            const newId = Date.now(); // Generate unique ID
+            
+            const productHTML = `
+                <div class="product-card" data-id="${newId}">
+                    <div class="product-img">
+                        <img src="${inputs[3].value}" alt="${inputs[0].value}">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" contenteditable="true">${inputs[0].value}</h3>
+                        <p class="product-price" contenteditable="true">${inputs[1].value}</p>
+                        <p class="product-desc" contenteditable="true">${inputs[2].value}</p>
+                    </div>
+                </div>
+            `;
+            
+            productsContainer.insertAdjacentHTML('beforeend', productHTML);
+            
+            // Reset form
+            addProductForm.reset();
+            overlay.style.display = 'none';
+            productForm.style.display = 'none';
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: absolute; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">This website has been generated by <a href="https://enzostvs-deepsite.hf.space" style="color: #fff;" target="_blank" >DeepSite</a> <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;"></p></body>
+</html>

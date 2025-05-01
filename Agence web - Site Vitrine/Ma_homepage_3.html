@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M. Atlasoft - Solutions Technologiques</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/google-font/1.0.0/woff2/Montserrat:wght@300;400;500;600;700.woff2" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/google-font/1.0.0/woff2/Raleway:wght@300;400;500;600;700.woff2" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #e01c1c; /* Rouge */
+            --secondary-color: #0a3d91; /* Bleu */
+            --light-color: #ffffff; /* Blanc */
+            --dark-color: #212529;
+            --accent-color: #6bc25e; /* Vert */
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Raleway', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+        
+        .hero-section {
+            background-image: url('https://images.unsplash.com/photo-1618409195884-9a7f08a4d34b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80'); /* Image from Unsplash */
+            background-size: cover;
+            background-position: center;
+            color: var(--light-color);
+            padding: 150px 0 100px;
+            position: relative;
+            margin-top: -96px;
+            z-index: 0;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 61, 145, 0.85) 0%, rgba(224, 28, 28, 0.85) 100%);
+            z-index: -1;
+        }
+        
+        .top-navbar {
+            background-color: transparent;
+            transition: background-color 0.3s ease;
+            padding: 20px 0;
+            z-index: 100;
+        }
+        
+        .top-navbar.scrolled {
+            background-color: var(--light-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+        
+        .top-navbar.scrolled .navbar-brand,
+        .top-navbar.scrolled .nav-link {
+            color: var(--dark-color);
+        }
+        
+        .navbar-brand {
+            color: var(--light-color);
+            font-weight: 700;
+            font-size: 2rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .navbar-brand span {
+            color: var(--accent-color);
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--light-color);
+            font-weight: 500;
+            margin-left: 15px;
+            position: relative;
+            padding: 8px 0;
+            transition: all 0.3s;
+        }
+        
+        .navbar-nav .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            bottom: 0;
+            left: 0;
+            transition: width 0.3s;
+        }
+        
+        .navbar-nav .nav-link:hover:after,
+        .navbar-nav .nav-link.active:after {
+            width: 100%;
+        }
+        
+        .sidebar {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: var(--light-color);
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-menu li:last-child {
+            border-bottom: none;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(10, 61, 145, 0.05);
+            border-left: 4px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .sidebar-menu a i {
+            margin-right: 15px;
+            width: 22px;
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .search-container {
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .search-container .form-control {
+            border-radius: 50px;
+            padding: 12px 20px;
+            padding-right: 50px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            font-size: 0.95rem;
+            height: auto;
+        }
+        
+        .search-container .btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .search-container .btn:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .section-title {
+            position: relative;
+            margin-bottom: 40px;
+            text-align: center;
+            padding-bottom: 15px;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .content-card {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .content-card .card-body {
+            padding: 25px;
+        }
+        
+        .content-card .card-title {
+            color: var(--secondary-color);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .content-card .card-title:nth-child(1) {
+            color: var(--secondary-color);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .content-card .card-text {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .content-card .card-text:nth-child(1) {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #c61515;
+            border-color: #c61515;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #082d6b;
+            border-color: #082d6b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--light-color);
+            color: var(--light-color);
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            padding: 40px 0;
+        }
+        
+        .portfolio-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .portfolio-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .portfolio-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 61, 145, 0.9) 0%, rgba(224, 28, 28, 0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            color: var(--light-color);
+            text-align: center;
+        }
+        
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+        
+        .portfolio-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .blog-item {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+            margin-bottom: 30px;
+        }
+        
+        .blog-item .blog-img {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .blog-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .blog-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .blog-content {
+            padding: 25px;
+        }
+        
+        .blog-meta {
+            display: flex;
+            margin-bottom: 15px;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .blog-meta span {
+            margin-right: 20px;
+        }
+        
+        .blog-meta i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+        
+        .blog-title {
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .blog-excerpt {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .contact-form {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+        
+        .contact-info {
+            margin-top: 30px;
+        }
+        
+        .contact-info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+        
+        .contact-info-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light-color);
+            font-size: 1.2rem;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .contact-info-content h5 {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .contact-info-content p {
+            color: #6c757d;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: var(--light-color);
+            padding: 60px 0 30px;
+        }
+        
+        .footer-title {
+            position: relative;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .footer-title:after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent-color);
+            bottom: 0;
+            left: 0;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-links a i {
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light-color);
+            transform: translateX(5px);
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+        
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light-color);
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+        
+        @media (max-width: 991px) {
+            .hero-section {
+                margin-top: -70px;
+                padding: 120px 0 80px;
+            }
+            
+            .sidebar {
+                margin-bottom: 30px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .navbar-collapse {
+                background-color: var(--light-color);
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                margin-top: 15px;
+            }
+            
+            .navbar-nav .nav-link {
+                color: var(--dark-color);
+            }
+            
+            .hero-section {
+                text-align: center;
+                padding: 100px 0 60px;
+            }
+            
+            .hero-buttons .btn {
+                margin: 5px;
+            }
+            
+            .section-title {
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top top-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="#">M. Atla<span>soft</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#portfolio">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#blog">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7 mb-5 mb-lg-0">
+                    <h1 class="display-4 fw-bold mb-4">Solutions technologiques innovantes pour votre entreprise</h1>
+                    <p class="lead mb-5">Découvrez comment M. Atlasoft peut transformer votre vision en réalité avec nos services informatiques, vidéo et d'intelligence artificielle de pointe.</p>
+                    <div class="hero-buttons">
+                        <a href="#contact" class="btn btn-primary me-3">Contactez-nous</a>
+                        <a href="#portfolio" class="btn btn-outline">Voir nos projets</a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <img src="/api/placeholder/600/400" alt="Innovation technologique" class="img-fluid rounded shadow">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-3" id="app-sidebar">
+                    <div class="sidebar mb-4">
+                        <div class="sidebar-header">
+                            <h4 class="m-0">Catégories</h4>
+                        </div>
+                        <ul class="sidebar-menu" id="sidebar-menu">
+                            <li v-for="(item, index) in menuItems" :key="index">
+                                <a href="#" @click.prevent="setActiveCategory(item)" :class="{ active: activeCategory === item }">
+                                    <i :class="getIconForCategory(item)"></i> {{ item }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Search Component -->
+                    <div class="search-container">
+                        <div class="position-relative">
+                            <input type="text" class="form-control" placeholder="Rechercher..." v-model="searchQuery">
+                            <button class="btn" type="button" @click="searchContent">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="col-lg-9">
+                    <div v-if="activeCategory && filteredContent.length > 0">
+                        <h2 class="section-title">{{ activeCategory }}</h2>
+                        <div class="row">
+                            <div v-for="(item, index) in filteredContent" :key="index" class="col-md-4">
+                                <div class="content-card">
+                                    <img :src="'/api/placeholder/400/300'" class="card-img-top" alt="image">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ item.title }}</h5>
+                                        <p class="card-text">{{ item.description }}</p>
+                                        <a href="#" class="btn btn-primary">En savoir plus</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-else-if="activeCategory && filteredContent.length === 0">
+                        <div class="alert alert-info">
+                            Aucun résultat trouvé pour "{{ searchQuery }}" dans la catégorie {{ activeCategory }}.
+                        </div>
+                    </div>
+                    
+                    <div v-else>
+                        <!-- Services Overview -->
+                        <div class="services-section mb-5">
+                            <h2 class="section-title">Nos Services</h2>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="content-card">
+                                        <img src="/api/placeholder/400/300" class="card-img-top" alt="Informatique">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Informatique</h5>
+                                            <p class="card-text">Développement web, applications mobiles, intégration de systèmes et solutions cloud.</p>
+                                            <a href="#" class="btn btn-primary" @click.prevent="setActiveCategory('Informatique')">Découvrir</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="content-card">
+                                        <img src="/api/placeholder/400/300" class="card-img-top" alt="Vidéo">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Production Vidéo</h5>
+                                            <p class="card-text">Création de contenu vidéo professionnel, montage et post-production.</p>
+                                            <a href="#" class="btn btn-primary" @click.prevent="setActiveCategory('Video')">Découvrir</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="content-card">
+                                        <img src="/api/placeholder/400/300" class="card-img-top" alt="IA">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Intelligence Artificielle</h5>
+                                            <p class="card-text">Solutions d'IA avancées pour automatiser et optimiser vos processus métier.</p>
+                                            <a href="#" class="btn btn-primary" @click.prevent="setActiveCategory('I.A')">Découvrir</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Portfolio Section -->
+                        <div class="portfolio-section mb-5" id="portfolio">
+                            <h2 class="section-title">Notre Portfolio</h2>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="portfolio-item">
+                                        <img src="https://via.placeholder.com/400x300" alt="Portfolio 1">
+                                        <div class="portfolio-overlay">
+                                            <h4>Application E-commerce</h4>
+                                            <p>Développement d'une boutique en ligne complète</p>
+                                            <a href="#" class="btn btn-outline btn-sm mt-3">Voir le projet</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="portfolio-item">
+                                        <img src="https://via.placeholder.com/400x300" alt="Portfolio 2">
+                                        <div class="portfolio-overlay">
+                                            <h4>Campagne vidéo</h4>
+                                            <p>Production de vidéos promotionnelles</p>
+                                            <a href="#" class="btn btn-outline btn-sm mt-3">Voir le projet</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="portfolio-item">
+                                        <img src="https://via.placeholder.com/400x300" alt="Portfolio 3">
+                                        <div class="portfolio-overlay">
+                                            <h4>Système de chatbot IA</h4>
+                                            <p>Intégration d'un assistant virtuel intelligent</p>
+                                            <a href="#" class="btn btn-outline btn-sm mt-3">Voir le projet</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <a href="#" class="btn btn-secondary">Voir tous les projets</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Blog Section -->
+                        <div class="blog-section mb-5" id="blog">
+                            <h2 class="section-title">Notre Blog</h2>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="blog-item">
+                                        <div class="blog-img">
+                                            <img src="https://via.placeholder.com/400x300" alt="Blog 1">
+                                        </div>
+                                        <div class="blog-content">
+                                            <div class="blog-meta">
+                                                <span><i class="far fa-calendar"></i> 20 Avril, 2025</span>
+                                                <span><i class="far fa-user"></i> Admin</span>
+                                            </div>
+                                            <h5 class="blog-title">Les tendances technologiques de 2025</h5>
+                                            <p class="blog-excerpt">Découvrez les technologies émergentes qui transformeront votre entreprise cette année.</p>
+                                            <a href="#" class="btn btn-primary btn-sm">Lire plus</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="blog-item">
+                                        <div class="blog-img">
+                                            <img src="https://via.placeholder.com/400x300" alt="Blog 2">
+                                        </div>
+                                        <div class="blog-content">
+                                            <div class="blog-meta">
+                                                <span><i class="far fa-calendar"></i> 15 Avril, 2025</span>
+                                                <span><i class="far fa-user"></i> Admin</span>
+                                            </div>
+                                            <h5 class="blog-title">Comment optimiser votre présence vidéo</h5>
+                                            <p class="blog-excerpt">Conseils pratiques pour créer des vidéos professionnelles qui captent l'attention.</p>
+                                            <a href="#" class="btn btn-primary btn-sm">Lire plus</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="blog-item">
+                                        <div class="blog-img">
+                                            <img src="https://via.placeholder.com/400x300" alt="Blog 3">
+                                        </div>
+                                        <div class="blog-content">
+                                            <div class="blog-meta">
+                                                <span><i class="far fa-calendar"></i> 10 Avril, 2025</span>
+                                                <span><i class="far fa-user"></i> Admin

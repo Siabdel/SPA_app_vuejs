@@ -1,0 +1,460 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'Étiquettes - Imprimante Thermique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-area {
+                visibility: visible !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+        .barcode-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .label-preview {
+            border: 1px dashed #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto p-4 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-blue-600">Générateur d'Étiquettes</h1>
+            <p class="text-gray-600">Créez et imprimez des étiquettes avec code-barres pour votre imprimante thermique</p>
+        </header>
+
+        <main class="bg-white rounded-lg shadow-md p-6">
+            <!-- Article Form -->
+            <section class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Saisie de l'article</h2>
+                <form @submit.prevent="addArticle" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nom de l'article</label>
+                        <input v-model="article.name" type="text" id="name" required 
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700">Prix (€)</label>
+                        <input v-model="article.price" type="number" step="0.01" min="0" id="price" required 
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    
+                    <div>
+                        <label for="barcode" class="block text-sm font-medium text-gray-700">Code-barres (EAN-13)</label>
+                        <div class="flex space-x-2">
+                            <input v-model="article.barcode" type="text" id="barcode" 
+                                   pattern="\d{13}" title="Doit contenir exactement 13 chiffres"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            <button type="button" @click="generateBarcode" 
+                                    class="mt-1 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                Générer
+                            </button>
+                        </div>
+                        <p v-if="barcodeError" class="mt-1 text-sm text-red-600">{{ barcodeError }}</p>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Créer l'étiquette
+                    </button>
+                </form>
+            </section>
+
+            <!-- Label Preview -->
+            <section class="mb-8" v-if="currentLabel">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Prévisualisation</h2>
+                <div class="label-preview">
+                    <div class="text-center">
+                        <h3 class="font-bold text-lg">{{ currentLabel.name }}</h3>
+                        <p class="text-xl font-bold">{{ currentLabel.price }} €</p>
+                        <div class="barcode-container">
+                            <svg id="barcode-svg"></svg>
+                        </div>
+                        <p class="text-sm">{{ currentLabel.barcode }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mt-4 no-print">
+                    <button @click="printLabel" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Imprimer via navigateur
+                    </button>
+                    <button @click="downloadPDF" 
+                            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Télécharger PDF
+                    </button>
+                    <button @click="connectPrinter" 
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Imprimer via Bluetooth
+                    </button>
+                </div>
+            </section>
+
+            <!-- Printer Status -->
+            <section v-if="printerStatus" class="mb-8 p-4 bg-gray-100 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-gray-800">Statut de l'imprimante</h2>
+                <p :class="{'text-green-600': printerStatus.connected, 'text-red-600': !printerStatus.connected}">
+                    {{ printerStatus.connected ? 'Connecté' : 'Déconnecté' }} - {{ printerStatus.deviceName || 'Aucune imprimante sélectionnée' }}
+                </p>
+                <p v-if="printerStatus.message" class="text-sm text-gray-600 mt-1">{{ printerStatus.message }}</p>
+            </section>
+
+            <!-- Print Area (hidden until printing) -->
+            <div id="print-area" class="print-area hidden"></div>
+        </main>
+
+        <footer class="mt-8 text-center text-sm text-gray-500">
+            <p>Application compatible avec l'imprimante thermique JADEN JD-268 BT</p>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, watch, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const article = reactive({
+                    name: '',
+                    price: '',
+                    barcode: ''
+                });
+                
+                const currentLabel = ref(null);
+                const barcodeError = ref('');
+                const printerStatus = reactive({
+                    connected: false,
+                    deviceName: '',
+                    message: ''
+                });
+                const printerCharacteristic = ref(null);
+
+                // Generate random EAN-13 barcode
+                const generateBarcode = () => {
+                    let barcode = '2'; // Start with 2 for France
+                    for (let i = 0; i < 11; i++) {
+                        barcode += Math.floor(Math.random() * 10);
+                    }
+                    
+                    // Calculate checksum
+                    let sum = 0;
+                    for (let i = 0; i < 12; i++) {
+                        sum += parseInt(barcode[i]) * (i % 2 === 0 ? 1 : 3);
+                    }
+                    const checksum = (10 - (sum % 10)) % 10;
+                    article.barcode = barcode + checksum;
+                    barcodeError.value = '';
+                };
+
+                // Validate EAN-13 barcode
+                const validateBarcode = (barcode) => {
+                    if (!barcode) return true; // Empty is valid (will be generated)
+                    
+                    if (!/^\d{13}$/.test(barcode)) {
+                        barcodeError.value = 'Le code-barres doit contenir exactement 13 chiffres';
+                        return false;
+                    }
+                    
+                    // Validate checksum
+                    let sum = 0;
+                    for (let i = 0; i < 12; i++) {
+                        sum += parseInt(barcode[i]) * (i % 2 === 0 ? 1 : 3);
+                    }
+                    const checksum = (10 - (sum % 10)) % 10;
+                    
+                    if (parseInt(barcode[12]) !== checksum) {
+                        barcodeError.value = 'Code-barres invalide (mauvais chiffre de contrôle)';
+                        return false;
+                    }
+                    
+                    barcodeError.value = '';
+                    return true;
+                };
+
+                // Add article and create label
+                const addArticle = () => {
+                    if (!validateBarcode(article.barcode)) return;
+                    
+                    if (!article.barcode) {
+                        generateBarcode();
+                    }
+                    
+                    currentLabel.value = {
+                        name: article.name,
+                        price: parseFloat(article.price).toFixed(2),
+                        barcode: article.barcode
+                    };
+                    
+                    // Generate barcode SVG
+                    nextTick(() => {
+                        JsBarcode("#barcode-svg", currentLabel.value.barcode, {
+                            format: "EAN13",
+                            lineColor: "#000",
+                            width: 2,
+                            height: 60,
+                            displayValue: true,
+                            fontSize: 16,
+                            margin: 10
+                        });
+                    });
+                };
+
+                // Print label using browser print
+                const printLabel = () => {
+                    if (!currentLabel.value) return;
+                    
+                    const printArea = document.getElementById('print-area');
+                    printArea.innerHTML = `
+                        <div style="width: 58mm; height: 40mm; padding: 5mm; font-family: Arial, sans-serif; text-align: center;">
+                            <h3 style="font-weight: bold; font-size: 14pt; margin-bottom: 2mm;">${currentLabel.value.name}</h3>
+                            <p style="font-weight: bold; font-size: 16pt; margin-bottom: 2mm;">${currentLabel.value.price} €</p>
+                            <svg id="print-barcode" style="margin: 0 auto;"></svg>
+                            <p style="font-size: 10pt; margin-top: 2mm;">${currentLabel.value.barcode}</p>
+                        </div>
+                    `;
+                    
+                    // Generate barcode for print
+                    setTimeout(() => {
+                        JsBarcode("#print-barcode", currentLabel.value.barcode, {
+                            format: "EAN13",
+                            lineColor: "#000",
+                            width: 1.5,
+                            height: 40,
+                            displayValue: false
+                        });
+                        
+                        // Show print dialog
+                        printArea.classList.remove('hidden');
+                        window.print();
+                        printArea.classList.add('hidden');
+                    }, 100);
+                };
+
+                // Download PDF of label
+                const downloadPDF = async () => {
+                    if (!currentLabel.value) return;
+                    
+                    try {
+                        const { PDFDocument, rgb } = PDFLib;
+                        
+                        // Create a new PDF document
+                        const pdfDoc = await PDFDocument.create();
+                        const page = pdfDoc.addPage([170, 113]); // ~58mm x 40mm
+                        
+                        // Add text
+                        page.drawText(currentLabel.value.name, {
+                            x: 10,
+                            y: 90,
+                            size: 14,
+                            color: rgb(0, 0, 0),
+                        });
+                        
+                        page.drawText(`${currentLabel.value.price} €`, {
+                            x: 10,
+                            y: 70,
+                            size: 16,
+                            color: rgb(0, 0, 0),
+                            font: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold),
+                        });
+                        
+                        // Generate barcode as image
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttribute('width', '150');
+                        svg.setAttribute('height', '50');
+                        
+                        JsBarcode(svg, currentLabel.value.barcode, {
+                            format: "EAN13",
+                            lineColor: "#000",
+                            width: 1.5,
+                            height: 40,
+                            displayValue: false
+                        });
+                        
+                        const svgString = new XMLSerializer().serializeToString(svg);
+                        const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
+                        const svgUrl = URL.createObjectURL(svgBlob);
+                        
+                        const img = new Image();
+                        img.src = svgUrl;
+                        
+                        await new Promise((resolve) => {
+                            img.onload = resolve;
+                        });
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 150;
+                        canvas.height = 50;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        const pngUrl = canvas.toDataURL('image/png');
+                        const pngImageBytes = await fetch(pngUrl).then(res => res.arrayBuffer());
+                        const pngImage = await pdfDoc.embedPng(pngImageBytes);
+                        
+                        page.drawImage(pngImage, {
+                            x: 10,
+                            y: 20,
+                            width: 150,
+                            height: 40,
+                        });
+                        
+                        // Add barcode text
+                        page.drawText(currentLabel.value.barcode, {
+                            x: 10,
+                            y: 10,
+                            size: 10,
+                            color: rgb(0, 0, 0),
+                        });
+                        
+                        // Save the PDF
+                        const pdfBytes = await pdfDoc.save();
+                        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                        saveAs(blob, `etiquette-${currentLabel.value.barcode}.pdf`);
+                        
+                    } catch (error) {
+                        console.error('Error generating PDF:', error);
+                        alert('Erreur lors de la génération du PDF');
+                    }
+                };
+
+                // Connect to Bluetooth printer
+                const connectPrinter = async () => {
+                    if (!currentLabel.value) {
+                        printerStatus.message = 'Veuillez créer une étiquette d\'abord';
+                        return;
+                    }
+                    
+                    try {
+                        printerStatus.message = 'Recherche d\'imprimantes Bluetooth...';
+                        
+                        // Request Bluetooth device
+                        const device = await navigator.bluetooth.requestDevice({
+                            acceptAllDevices: true,
+                            optionalServices: ['generic_access']
+                        });
+                        
+                        printerStatus.deviceName = device.name;
+                        printerStatus.message = 'Connexion en cours...';
+                        
+                        const server = await device.gatt.connect();
+                        printerStatus.connected = true;
+                        printerStatus.message = 'Connecté! Prêt à imprimer';
+                        
+                        // For ESC/POS printing, we need to find the right service and characteristic
+                        // This is printer-specific and may need adjustment for JADEN JD-268 BT
+                        const service = await server.getPrimaryService('generic_access');
+                        const characteristics = await service.getCharacteristics();
+                        
+                        // Find the characteristic for writing data
+                        // In a real app, you would need to know the specific UUID for your printer
+                        printerCharacteristic.value = characteristics.find(c => c.properties.write);
+                        
+                        if (printerCharacteristic.value) {
+                            await printToBluetoothPrinter();
+                        } else {
+                            printerStatus.message = 'Impossible de trouver la caractéristique d\'écriture';
+                        }
+                        
+                    } catch (error) {
+                        console.error('Bluetooth error:', error);
+                        printerStatus.connected = false;
+                        printerStatus.message = `Erreur: ${error.message}`;
+                    }
+                };
+
+                // Print to connected Bluetooth printer using ESC/POS commands
+                const printToBluetoothPrinter = async () => {
+                    if (!printerCharacteristic.value || !currentLabel.value) return;
+                    
+                    try {
+                        printerStatus.message = 'Envoi des données à l\'imprimante...';
+                        
+                        // ESC/POS commands
+                        const escpos = new Uint8Array([
+                            // Initialize printer
+                            0x1B, 0x40,
+                            
+                            // Set text size (double height and width)
+                            0x1D, 0x21, 0x11,
+                            
+                            // Print product name
+                            ...new TextEncoder().encode(currentLabel.value.name + '\n'),
+                            
+                            // Set price to bold and larger
+                            0x1B, 0x45, 0x01, // Bold on
+                            0x1D, 0x21, 0x22, // Double size
+                            ...new TextEncoder().encode(currentLabel.value.price + ' €\n'),
+                            
+                            // Reset text formatting
+                            0x1B, 0x45, 0x00, // Bold off
+                            0x1D, 0x21, 0x00, // Normal size
+                            
+                            // Print barcode number
+                            ...new TextEncoder().encode(currentLabel.value.barcode + '\n'),
+                            
+                            // Print barcode (Code 128)
+                            0x1D, 0x6B, 0x49, 0x0D, // Print barcode (GS k n)
+                            ...new TextEncoder().encode(currentLabel.value.barcode),
+                            
+                            // Feed paper and cut
+                            0x1B, 0x69 // Partial cut
+                        ]);
+                        
+                        await printerCharacteristic.value.writeValue(escpos);
+                        printerStatus.message = 'Impression terminée!';
+                        
+                    } catch (error) {
+                        console.error('Print error:', error);
+                        printerStatus.message = `Erreur d'impression: ${error.message}`;
+                    }
+                };
+
+                // Watch for barcode changes to validate
+                watch(() => article.barcode, (newVal) => {
+                    if (newVal) {
+                        validateBarcode(newVal);
+                    } else {
+                        barcodeError.value = '';
+                    }
+                });
+
+                return {
+                    article,
+                    currentLabel,
+                    barcodeError,
+                    printerStatus,
+                    generateBarcode,
+                    addArticle,
+                    printLabel,
+                    downloadPDF,
+                    connectPrinter
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
