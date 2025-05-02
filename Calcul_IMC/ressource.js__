@@ -1,0 +1,23 @@
+ 
+ class Personne{
+    Constructor(nom, prenom){
+        this.nom = nom
+        this.prenom = prenom
+    }
+    
+    log(){
+        console.log(`prenom : ${this.prenom} nom = ${this.nom}`)
+    }
+}
+
+class Homme extend Personne{
+    Constructor(nom, prenom){
+        super(nom, prenom) // appel du contructeur de la classe cconstructeur de la classe 
+        this.sexe = "H"
+    }
+    log(){
+        console.log(`Monsieur ${this.prenom} nom = ${this.nom}`)
+    }
+}
+
+export {Personne, Homme} Personne

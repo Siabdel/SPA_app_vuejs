@@ -1,0 +1,7 @@
+imc-calculator/
+├── Dockerfile
+├── docker-compose.yml
+├── nginx.conf
+├── index.html
+├── style.css
+└── app.js

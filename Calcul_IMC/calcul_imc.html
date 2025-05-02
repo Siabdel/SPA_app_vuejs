@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur IMC - Santé & Bien-être</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .result-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .input-highlight {
+            border-left: 4px solid #667eea;
+        }
+        .progress-bar-custom {
+            height: 10px;
+            border-radius: 5px;
+            transition: width 0.6s ease;
+        }
+        .category-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen gradient-bg text-gray-100">
+        <div class="container py-8 px-4 mx-auto">
+            <!-- Header -->
+            <header class="text-center mb-10">
+                <h1 class="text-4xl font-bold mb-3">
+                    <i class="fas fa-weight-scale mr-2"></i> Calculateur IMC
+                </h1>
+                <p class="text-xl opacity-90">
+                    Découvrez votre Indice de Masse Corporelle et ce qu'il signifie pour votre santé
+                </p>
+            </header>
+
+            <!-- Main Content -->
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Calculator Form -->
+                    <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-6 flex items-center">
+                            <i class="fas fa-calculator mr-3"></i> Entrez vos données
+                        </h2>
+                        
+                        <form @submit.prevent="calculateIMC" class="space-y-6">
+                            <!-- Height Input -->
+                            <div>
+                                <label for="height" class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-ruler-vertical mr-2"></i> Taille (cm)
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        v-model="height" 
+                                        id="height" 
+                                        type="number" 
+                                        class="w-full bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg py-3 px-4 text-black placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent input-highlight" 
+                                        placeholder="Ex: 175" 
+                                        min="100" 
+                                        max="250"
+                                        required
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span class="text-white">cm</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <input 
+                                        v-model="height" 
+                                        type="range" 
+                                        min="100" 
+                                        max="250" 
+                                        class="w-full h-2 bg-white bg-opacity-30 rounded-lg text-black appearance-none cursor-pointer"
+                                    >
+                                </div>
+                            </div>
+                            
+                            <!-- Weight Input -->
+                            <div>
+                                <label for="weight" class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-weight-hanging mr-2"></i> Poids (kg)
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        v-model="weight" 
+                                        id="weight" 
+                                        type="number" 
+                                        class="w-full bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg py-3 px-4 text-black placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent input-highlight" 
+                                        placeholder="Ex: 70" 
+                                        min="30" 
+                                        max="200"
+                                        required
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 text-black pointer-events-none">
+                                        <span class="text-white">kg</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <input 
+                                        v-model="weight" 
+                                        type="range" 
+                                        min="30" 
+                                        max="200" 
+                                        class="w-full h-2 bg-white text-black-50 bg-opacity-30 rounded-lg appearance-none cursor-pointer"
+                                    >
+                                </div>
+                            </div>
+                            
+                            <!-- Age Input -->
+                            <div>
+                                <label for="age" class="block text-sm font-medium mb-2">
+                                    <i class="fas fa-user mr-2"></i> Âge
+                                </label>
+                                <input 
+                                    v-model="age" 
+                                    id="age" 
+                                    type="number" 
+                                    class="w-full bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg py-3 px-4 text-black-50 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent input-highlight" 
+                                    placeholder="Ex: 30" 
+                                    min="10" 
+                                    max="120"
+                                >
+                            </div>
+                            
+                            <!-- Gender Selection -->
+                            <div>
+                                <label class="block text-sm font-medium mb-3">
+                                    <i class="fas fa-venus-mars mr-2"></i> Genre
+                                </label>
+                                <div class="flex space-x-4">
+                                    <label class="inline-flex items-center">
+                                        <input 
+                                            v-model="gender" 
+                                            type="radio" 
+                                            value="male" 
+                                            class="form-radio h-5 w-5 text-blue-500"
+                                            checked
+                                        >
+                                        <span class="ml-2">Homme</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input 
+                                            v-model="gender" 
+                                            type="radio" 
+                                            value="female" 
+                                            class="form-radio h-5 w-5 text-pink-500"
+                                        >
+                                        <span class="ml-2">Femme</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Calculate Button -->
+                            <button 
+                                type="submit" 
+                                class="w-full bg-white text-indigo-700 py-3 px-4 rounded-lg font-semibold hover:bg-indigo-100 transition duration-300 flex items-center justify-center"
+                            >
+                                <i class="fas fa-calculator mr-2"></i> Calculer mon IMC
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="space-y-6">
+                        <!-- Result Card -->
+                        <div 
+                            v-if="result" 
+                            class="result-card bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg"
+                        >
+                            <h2 class="text-2xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-chart-line mr-3"></i> Votre résultat
+                            </h2>
+                            
+                            <div class="text-center mb-6">
+                                <div class="text-5xl font-bold mb-2">{{ bmiValue }}</div>
+                                <div 
+                                    class="text-xl font-medium" 
+                                    :class="bmiCategoryClass"
+                                >
+                                    {{ bmiCategory }}
+                                </div>
+                            </div>
+                            
+                            <!-- BMI Progress Bar -->
+                            <div class="mb-6">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>15</span>
+                                    <span>18.5</span>
+                                    <span>25</span>
+                                    <span>30</span>
+                                    <span>40</span>
+                                </div>
+                                <div class="w-full bg-white bg-opacity-20 rounded-full h-3">
+                                    <div 
+                                        class="progress-bar-custom bg-gradient-to-r from-green-400 via-yellow-400 to-red-500" 
+                                        :style="{ width: bmiProgress + '%' }"
+                                    ></div>
+                                </div>
+                                <div class="mt-2 flex justify-between text-xs">
+                                    <span>Maigreur</span>
+                                    <span>Normal</span>
+                                    <span>Surpoids</span>
+                                    <span>Obésité</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Interpretation -->
+                            <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                                <h3 class="font-medium mb-2 flex items-center">
+                                    <i class="fas fa-info-circle mr-2"></i> Interprétation
+                                </h3>
+                                <p class="text-sm">{{ bmiInterpretation }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- BMI Categories Info -->
+                        <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg">
+                            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-table mr-3"></i> Catégories IMC
+                            </h2>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <span class="category-dot bg-green-500"></span>
+                                    <span class="text-sm">Moins de 18.5 - Maigreur</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="category-dot bg-blue-500"></span>
+                                    <span class="text-sm">18.5 à 24.9 - Poids normal</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="category-dot bg-yellow-500"></span>
+                                    <span class="text-sm">25 à 29.9 - Surpoids</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="category-dot bg-orange-500"></span>
+                                    <span class="text-sm">30 à 34.9 - Obésité modérée</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="category-dot bg-red-500"></span>
+                                    <span class="text-sm">35 et plus - Obésité sévère</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 text-xs opacity-80">
+                                <p>
+                                    <i class="fas fa-exclamation-triangle mr-1"></i> 
+                                    L'IMC est un indicateur général qui ne tient pas compte de la masse musculaire, de l'ossature ou de la répartition des graisses.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Tips -->
+                <div v-if="result" class="mt-10 bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-heartbeat mr-3"></i> Conseils santé personnalisés
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div v-for="(tip, index) in healthTips" :key="index" class="bg-white bg-opacity-10 rounded-lg p-4">
+                            <h3 class="font-medium mb-2 flex items-center">
+                                <i :class="tip.icon" class="mr-2"></i> {{ tip.title }}
+                            </h3>
+                            <p class="text-sm">{{ tip.content }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="mt-16 text-center text-sm opacity-80">
+                <p>© 2023 Calculateur IMC - Outil d'évaluation santé</p>
+                <p class="mt-1">
+                    <i class="fas fa-exclamation-circle mr-1"></i> 
+                    Cet outil ne remplace pas un avis médical professionnel.
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+        
+        createApp({
+            setup() {
+                const height = ref(175);
+                const weight = ref(70);
+                const age = ref(30);
+                const gender = ref('male');
+                const result = ref(false);
+                
+                const bmiValue = computed(() => {
+                    if (!height.value || !weight.value) return 0;
+                    const heightInMeters = height.value / 100;
+                    const bmi = weight.value / (heightInMeters * heightInMeters);
+                    return bmi.toFixed(1);
+                });
+                
+                const bmiCategory = computed(() => {
+                    const bmi = parseFloat(bmiValue.value);
+                    if (bmi < 18.5) return 'Maigreur';
+                    if (bmi < 25) return 'Poids normal';
+                    if (bmi < 30) return 'Surpoids';
+                    if (bmi < 35) return 'Obésité modérée';
+                    return 'Obésité sévère';
+                });
+                
+                const bmiCategoryClass = computed(() => {
+                    const bmi = parseFloat(bmiValue.value);
+                    if (bmi < 18.5) return 'text-blue-300';
+                    if (bmi < 25) return 'text-green-300';
+                    if (bmi < 30) return 'text-yellow-300';
+                    return 'text-red-300';
+                });
+                
+                const bmiInterpretation = computed(() => {
+                    const bmi = parseFloat(bmiValue.value);
+                    if (bmi < 18.5) return 'Votre IMC indique une maigreur. Une consultation avec un nutritionniste pourrait vous aider à atteindre un poids santé.';
+                    if (bmi < 25) return 'Félicitations ! Votre poids est considéré comme normal pour votre taille. Maintenez vos bonnes habitudes.';
+                    if (bmi < 30) return 'Votre IMC indique un surpoids. Une activité physique régulière et une alimentation équilibrée pourraient vous aider.';
+                    return 'Votre IMC indique une obésité. Nous vous recommandons de consulter un professionnel de santé pour un accompagnement personnalisé.';
+                });
+                
+                const bmiProgress = computed(() => {
+                    const bmi = parseFloat(bmiValue.value);
+                    // Scale the BMI to fit our progress bar (15-40 range)
+                    const progress = ((bmi - 15) / (40 - 15)) * 100;
+                    return Math.min(100, Math.max(0, progress));
+                });
+                
+                const healthTips = computed(() => {
+                    const bmi = parseFloat(bmiValue.value);
+                    const tips = [];
+                    
+                    if (bmi < 18.5) {
+                        tips.push(
+                            {
+                                title: 'Nutrition équilibrée',
+                                content: 'Privilégiez des aliments riches en nutriments et calories saines comme les avocats, les noix et les produits laitiers.',
+                                icon: 'fas fa-utensils'
+                            },
+                            {
+                                title: 'Activité physique',
+                                content: 'Combinez musculation légère et exercices cardiovasculaires pour stimuler votre appétit et développer votre masse musculaire.',
+                                icon: 'fas fa-dumbbell'
+                            }
+                        );
+                    } else if (bmi < 25) {
+                        tips.push(
+                            {
+                                title: 'Maintenir vos habitudes',
+                                content: 'Continuez votre routine d\'activité physique et votre alimentation équilibrée pour conserver votre poids santé.',
+                                icon: 'fas fa-check-circle'
+                            },
+                            {
+                                title: 'Variété alimentaire',
+                                content: 'Diversifiez votre alimentation pour couvrir tous vos besoins nutritionnels et prévenir les carences.',
+                                icon: 'fas fa-apple-alt'
+                            }
+                        );
+                    } else {
+                        tips.push(
+                            {
+                                title: 'Activité régulière',
+                                content: 'Pratiquez au moins 30 minutes d\'activité physique modérée par jour, comme la marche rapide ou le vélo.',
+                                icon: 'fas fa-walking'
+                            },
+                            {
+                                title: 'Alimentation saine',
+                                content: 'Réduisez les aliments transformés, augmentez les fruits et légumes, et contrôlez vos portions.',
+                                icon: 'fas fa-carrot'
+                            }
+                        );
+                    }
+                    
+                    // Common tips for everyone
+                    tips.push(
+                        {
+                            title: 'Hydratation',
+                            content: 'Buvez au moins 1,5L d\'eau par jour. Limitez les boissons sucrées et alcoolisées.',
+                            icon: 'fas fa-glass-water'
+                        },
+                        {
+                            title: 'Sommeil',
+                            content: 'Dormez 7 à 9 heures par nuit. Un bon sommeil est essentiel pour réguler le métabolisme.',
+                            icon: 'fas fa-moon'
+                        }
+                    );
+                    
+                    return tips;
+                });
+                
+                const calculateIMC = () => {
+                    result.value = true;
+                    // Scroll to results
+                    setTimeout(() => {
+                        const element = document.querySelector('.result-card');
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }, 100);
+                };
+                
+                return {
+                    height,
+                    weight,
+                    age,
+                    gender,
+                    result,
+                    bmiValue,
+                    bmiCategory,
+                    bmiCategoryClass,
+                    bmiInterpretation,
+                    bmiProgress,
+                    healthTips,
+                    calculateIMC
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

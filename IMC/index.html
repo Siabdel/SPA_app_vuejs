@@ -1,0 +1,78 @@
+ <!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Product App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" type="text/css" media="screen" href="style.css" /> -->
+    <link href="static/css/bootstrap-4.1.1/dist/css/bootstrap.css" rel="stylesheet">
+
+    
+
+</head>
+
+<body>
+    <div id="app" class="container">
+        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <a class="navbar-brand" href="#">
+                <img src="assets/logo.jpg" class="rounded" alt="Logo" style="width:40px;">
+            </a>
+            <span class="badge badge-secondary align-items-end">
+                    <h5>  Cart ( {{ cart }} ) </h5></span>
+        </nav>
+
+        <div class="row article">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <img :src="image" width="400px" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h1>{{ product }}</h1>
+                    </div>
+
+                    <div class="card-body">
+                        
+                        <div>
+                            <!-- couleur -->
+                            <p>Color :</p>
+                            <span v-for="elem in variants" :key="elem.variantId"
+                                @mouseover="updateProduct(elem.variantImage)" 
+                               :class="elem.variantColor" class="col-sm-2" >  _ </span>
+                        </div>
+                        <br>
+                        <div>
+                            <!-- compositions -->
+                            <p>Details :</p>
+                            <ul class="list-group">
+                                <li class="list-group-item" v-for="elem in details" 
+                                :key="elem.varianId" > {{ elem }} </li>
+                            </ul>
+                        </div>
+                        <div class="btn-group-lg mx-auto">
+                            <button class="btn-success btn-lg btn-block"
+                                @click.prevent="addToCart">Ajouter au panier</button>
+                            <button v-if="cart" class="btn-info btn-lg btn-block"
+                                @click.prevent="delToCart">Retirer du panier</button>
+                        </div>
+                         
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/jquery-ui.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

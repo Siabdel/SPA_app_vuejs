@@ -1,0 +1,39 @@
+
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress {
+    border-radius: 15px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* Couleurs personnalisées pour les catégories IMC */
+.bg-underweight {
+    background-color: #17a2b8; /* Bleu info */
+}
+
+.bg-normal {
+    background-color: #28a745; /* Vert succès */
+}
+
+.bg-overweight {
+    background-color: #ffc107; /* Jaune warning */
+}
+
+.bg-obese1 {
+    background-color: #fd7e14; /* Orange */
+}
+
+.bg-obese2 {
+    background-color: #dc3545; /* Rouge danger */
+}

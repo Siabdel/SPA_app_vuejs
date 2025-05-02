@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur d'IMC</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CSS personnalisé -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="h4 mb-0 text-center">Calculateur d'IMC</h1>
+                    </div>
+                    <div class="card-body">
+                        <form @submit.prevent="calculateIMC">
+                            <div class="mb-3">
+                                <label for="height" class="form-label">Taille (cm)</label>
+                                <input type="number" class="form-control" id="height" v-model="height" min="100" max="250" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="weight" class="form-label">Poids (kg)</label>
+                                <input type="number" class="form-control" id="weight" v-model="weight" min="30" max="300" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Calculer l'IMC</button>
+                            </div>
+                        </form>
+
+                        <div v-if="imc !== null" class="mt-4">
+                            <h2 class="h5 text-center">Résultat</h2>
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div class="progress-bar" 
+                                     :class="imcClass"
+                                     role="progressbar" 
+                                     :style="{ width: progressWidth + '%' }" 
+                                     :aria-valuenow="imc" 
+                                     aria-valuemin="15" 
+                                     aria-valuemax="40">
+                                    {{ imc.toFixed(1) }}
+                                </div>
+                            </div>
+                            <p class="text-center mb-1"><strong>Interprétation:</strong> {{ interpretation }}</p>
+                            <p class="text-center mb-0"><strong>Catégorie:</strong> {{ category }}</p>
+                        </div>
+
+                        <div class="mt-4">
+                            <h3 class="h6">Classification IMC</h3>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Moins de 18.5</span>
+                                    <span class="badge bg-info">Maigreur</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>18.5 - 24.9</span>
+                                    <span class="badge bg-success">Normal</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>25 - 29.9</span>
+                                    <span class="badge bg-warning">Surpoids</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>30 - 34.9</span>
+                                    <span class="badge bg-danger">Obésité modérée</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>35 et plus</span>
+                                    <span class="badge bg-danger">Obésité sévère</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- App JS -->
+    <script src="app.js"></script>
+</body>
+</html>
