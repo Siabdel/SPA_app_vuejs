@@ -1,0 +1,1525 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Réservation de rendez-vous médicaux</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/vue3@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.7/dist/vuelidate.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4A90E2">
+  
+  <style>
+    /* Custom CSS */
+    .doctor-card {
+      transition: all 0.3s ease;
+    }
+    
+    .doctor-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .form-step {
+      transition: all 0.3s ease;
+    }
+    
+    .form-step-enter-from,
+    .form-step-leave-to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    
+    .form-step-enter-active,
+    .form-step-leave-active {
+      position: absolute;
+      width: 100%;
+    }
+    
+    .fc .fc-button-primary {
+      background-color: #4A90E2;
+      border-color: #4A90E2;
+    }
+    
+    .fc .fc-button-primary:hover {
+      background-color: #3a7bc8;
+      border-color: #3a7bc8;
+    }
+    
+    .dark .fc-theme-standard .fc-scrollgrid,
+    .dark .fc-theme-standard td,
+    .dark .fc-theme-standard th {
+      border-color: #374151;
+    }
+    
+    .dark .fc-theme-standard .fc-popover {
+      background-color: #1F2937;
+    }
+    
+    .dark .fc .fc-button-primary {
+      background-color: #3B82F6;
+      border-color: #3B82F6;
+    }
+    
+    .dark .fc .fc-button-primary:hover {
+      background-color: #2563EB;
+      border-color: #2563EB;
+    }
+    
+    @media (max-width: 768px) {
+      .doctor-details {
+        flex-direction: column;
+      }
+      
+      .fc-toolbar-title {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+  <div id="app" class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-lg dark:bg-blue-800">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <router-link to="/" class="flex items-center space-x-2">
+          <i class="fas fa-calendar-check text-2xl"></i>
+          <h1 class="text-xl font-bold">MediBook</h1>
+        </router-link>
+        
+        <div class="flex items-center space-x-4">
+          <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-blue-700 dark:hover:bg-blue-900 transition">
+            <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'" class="text-lg"></i>
+          </button>
+          
+          <router-link v-if="!currentUser" to="/login" class="px-4 py-2 bg-white text-blue-600 rounded-full font-medium hover:bg-gray-100 transition">
+            Connexion
+          </router-link>
+          
+          <div v-else class="relative group">
+            <button @click="userMenuOpen = !userMenuOpen" class="flex items-center space-x-2">
+              <img :src="currentUser.avatar" class="w-8 h-8 rounded-full object-cover">
+              <span class="hidden md:inline">{{ currentUser.name }}</span>
+            </button>
+            
+            <div v-show="userMenuOpen" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+              <router-link to="/account" class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                Mon compte
+              </router-link>
+              <router-link to="/appointments" class="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                Mes rendez-vous
+              </router-link>
+              <button @click="logout" class="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                Déconnexion
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+      <router-view></router-view>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 dark:bg-gray-950">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">MediBook</h3>
+            <p class="text-gray-400">Prenez rendez-vous avec votre médecin en quelques clics.</p>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Liens rapides</h3>
+            <ul class="space-y-2">
+              <li><router-link to="/" class="text-gray-400 hover:text-white transition">Accueil</router-link></li>
+              <li><router-link to="/search" class="text-gray-400 hover:text-white transition">Trouver un médecin</router-link></li>
+              <li><router-link to="/about" class="text-gray-400 hover:text-white transition">À propos</router-link></li>
+              <li><router-link to="/contact" class="text-gray-400 hover:text-white transition">Contact</router-link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Mentions légales</h3>
+            <ul class="space-y-2">
+              <li><router-link to="/privacy" class="text-gray-400 hover:text-white transition">Confidentialité</router-link></li>
+              <li><router-link to="/terms" class="text-gray-400 hover:text-white transition">CGU</router-link></li>
+              <li><router-link to="/cookies" class="text-gray-400 hover:text-white transition">Cookies</router-link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Nous suivre</h3>
+            <div class="flex space-x-4">
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-facebook"></i></a>
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="text-gray-400 mt-4">contact@medibook.example.com</p>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+          <p>&copy; 2023 MediBook. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Install PWA Banner -->
+    <div v-if="showInstallBanner" class="fixed bottom-0 left-0 right-0 bg-blue-700 text-white p-4 shadow-lg z-50">
+      <div class="container mx-auto flex justify-between items-center">
+        <div>
+          <h3 class="font-bold">Installer MediBook</h3>
+          <p class="text-sm">Obtenez la meilleure expérience en installant notre application sur votre écran d'accueil !</p>
+        </div>
+        <div class="flex space-x-2">
+          <button @click="dismissInstallBanner" class="px-4 py-2 bg-transparent border border-white rounded hover:bg-blue-800 transition">
+            Plus tard
+          </button>
+          <button @click="installPWA" class="px-4 py-2 bg-white text-blue-700 rounded font-medium hover:bg-gray-100 transition">
+            Installer
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="text-center">
+        <lottie-player
+          src="https://assets1.lottiefiles.com/packages/lf20_usmfx6bp.json"
+          background="transparent"
+          speed="1"
+          style="width: 150px; height: 150px;"
+          loop
+          autoplay
+        ></lottie-player>
+        <p class="text-white mt-4">Chargement...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted, computed, watch } = Vue;
+    const { createRouter, createWebHistory } = VueRouter;
+    
+    // Mock data for demonstration
+    const mockDoctors = [
+      {
+        id: 1,
+        name: "Dr. Sophie Martin",
+        specialty: "Généraliste",
+        city: "Paris",
+        address: "15 Rue de Rivoli, 75004 Paris",
+        avatar: "https://randomuser.me/api/portraits/women/65.jpg",
+        rating: 4.8,
+        reviews: 124,
+        price: 25,
+        description: "Médecin généraliste avec plus de 10 ans d'expérience. Spécialisée en médecine préventive.",
+        languages: ["Français", "Anglais"],
+        availability: {
+          monday: ["09:00-12:00", "14:00-18:00"],
+          tuesday: ["09:00-12:00", "14:00-18:00"],
+          wednesday: ["09:00-12:00"],
+          thursday: ["09:00-12:00", "14:00-18:00"],
+          friday: ["09:00-12:00", "14:00-17:00"],
+          saturday: [],
+          sunday: []
+        }
+      },
+      {
+        id: 2,
+        name: "Dr. Jean Dupont",
+        specialty: "Dermatologue",
+        city: "Lyon",
+        address: "22 Rue de la République, 69002 Lyon",
+        avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+        rating: 4.9,
+        reviews: 89,
+        price: 50,
+        description: "Dermatologue spécialisé dans les maladies de peau et les soins esthétiques.",
+        languages: ["Français", "Espagnol"],
+        availability: {
+          monday: ["10:00-13:00", "15:00-19:00"],
+          tuesday: [],
+          wednesday: ["10:00-13:00", "15:00-19:00"],
+          thursday: ["10:00-13:00"],
+          friday: ["10:00-13:00", "15:00-19:00"],
+          saturday: ["09:00-12:00"],
+          sunday: []
+        }
+      },
+      {
+        id: 3,
+        name: "Dr. Marie Lambert",
+        specialty: "Pédiatre",
+        city: "Marseille",
+        address: "5 Rue Saint-Ferréol, 13001 Marseille",
+        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+        rating: 4.7,
+        reviews: 156,
+        price: 30,
+        description: "Pédiatre expérimentée, spécialisée dans le suivi des nouveau-nés et enfants.",
+        languages: ["Français", "Arabe"],
+        availability: {
+          monday: ["08:30-12:30", "14:00-18:00"],
+          tuesday: ["08:30-12:30"],
+          wednesday: ["08:30-12:30", "14:00-18:00"],
+          thursday: ["08:30-12:30"],
+          friday: ["08:30-12:30", "14:00-18:00"],
+          saturday: ["08:30-12:00"],
+          sunday: []
+        }
+      }
+    ];
+    
+    const mockAppointments = [
+      {
+        id: 1,
+        doctorId: 1,
+        patientId: 1,
+        date: "2023-11-15T10:30:00",
+        status: "confirmed",
+        reason: "Consultation générale",
+        notes: "Prise de sang à effectuer"
+      },
+      {
+        id: 2,
+        doctorId: 2,
+        patientId: 1,
+        date: "2023-11-20T15:00:00",
+        status: "confirmed",
+        reason: "Examen de la peau",
+        notes: "Apporter les résultats des précédents examens"
+      }
+    ];
+    
+    const mockCurrentUser = {
+      id: 1,
+      name: "Jean Dupont",
+      email: "jean.dupont@example.com",
+      phone: "+33612345678",
+      avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+      birthDate: "1985-05-15",
+      address: "10 Rue de la Paix, 75002 Paris"
+    };
+    
+    // Router setup
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [
+        { path: '/', component: { template: '<HomeView />' } },
+        { path: '/search', component: { template: '<SearchView />' } },
+        { path: '/doctor/:id', component: { template: '<DoctorView />', props: true } },
+        { path: '/book/:doctorId', component: { template: '<BookView />', props: true } },
+        { path: '/login', component: { template: '<LoginView />' } },
+        { path: '/register', component: { template: '<RegisterView />' } },
+        { path: '/account', component: { template: '<AccountView />' } },
+        { path: '/appointments', component: { template: '<AppointmentsView />' } },
+        { path: '/about', component: { template: '<AboutView />' } },
+        { path: '/contact', component: { template: '<ContactView />' } },
+        { path: '/privacy', component: { template: '<PrivacyView />' } },
+        { path: '/terms', component: { template: '<TermsView />' } },
+        { path: '/cookies', component: { template: '<CookiesView />' } }
+      ]
+    });
+    
+    // Main App
+    createApp({
+      components: {
+        // Views
+        HomeView: {
+          template: `
+            <div>
+              <section class="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-16 rounded-xl shadow-lg mb-12 dark:from-blue-700 dark:to-blue-800">
+                <div class="container mx-auto px-4">
+                  <div class="max-w-2xl mx-auto text-center">
+                    <h1 class="text-4xl font-bold mb-4">Prenez rendez-vous avec votre médecin en ligne</h1>
+                    <p class="text-xl mb-8">Simple, rapide et sécurisé. Trouvez le professionnel de santé qu'il vous faut.</p>
+                    <router-link to="/search" class="inline-block px-8 py-3 bg-white text-blue-600 rounded-full font-bold hover:bg-gray-100 transition shadow-lg">
+                      Trouver un médecin
+                    </router-link>
+                  </div>
+                </div>
+              </section>
+              
+              <section class="mb-16">
+                <h2 class="text-2xl font-semibold mb-8 text-center dark:text-white">Comment ça marche ?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div class="bg-white p-6 rounded-xl shadow-md text-center dark:bg-gray-800">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-blue-900">
+                      <i class="fas fa-search text-blue-600 text-2xl dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2 dark:text-white">1. Trouvez votre médecin</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Recherchez par spécialité, localisation ou nom.</p>
+                  </div>
+                  <div class="bg-white p-6 rounded-xl shadow-md text-center dark:bg-gray-800">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-blue-900">
+                      <i class="fas fa-calendar-alt text-blue-600 text-2xl dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2 dark:text-white">2. Choisissez un créneau</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Sélectionnez un horaire qui vous convient.</p>
+                  </div>
+                  <div class="bg-white p-6 rounded-xl shadow-md text-center dark:bg-gray-800">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-blue-900">
+                      <i class="fas fa-check-circle text-blue-600 text-2xl dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2 dark:text-white">3. Confirmez votre RDV</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Recevez une confirmation par email/SMS.</p>
+                  </div>
+                </div>
+              </section>
+              
+              <section class="mb-16">
+                <h2 class="text-2xl font-semibold mb-8 text-center dark:text-white">Nos spécialités</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <router-link 
+                    v-for="specialty in specialties" 
+                    :key="specialty.id"
+                    to="/search"
+                    class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition text-center dark:bg-gray-800 dark:hover:bg-gray-700"
+                  >
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 dark:bg-blue-900">
+                      <i :class="specialty.icon" class="text-blue-600 text-xl dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="font-medium dark:text-white">{{ specialty.name }}</h3>
+                  </router-link>
+                </div>
+              </section>
+              
+              <section class="bg-white rounded-xl shadow-md p-8 dark:bg-gray-800">
+                <h2 class="text-2xl font-semibold mb-6 text-center dark:text-white">Témoignages</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div v-for="testimonial in testimonials" :key="testimonial.id" class="bg-gray-50 p-6 rounded-lg dark:bg-gray-700">
+                    <div class="flex items-center mb-4">
+                      <img :src="testimonial.avatar" class="w-12 h-12 rounded-full object-cover mr-4">
+                      <div>
+                        <h4 class="font-semibold dark:text-white">{{ testimonial.name }}</h4>
+                        <div class="flex text-yellow-400">
+                          <i v-for="star in 5" :key="star" :class="star <= testimonial.rating ? 'fas fa-star' : 'far fa-star'" class="text-sm"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">{{ testimonial.comment }}</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          `,
+          setup() {
+            const specialties = ref([
+              { id: 1, name: "Généraliste", icon: "fas fa-user-md" },
+              { id: 2, name: "Dermatologue", icon: "fas fa-allergies" },
+              { id: 3, name: "Pédiatre", icon: "fas fa-baby" },
+              { id: 4, name: "Cardiologue", icon: "fas fa-heartbeat" },
+              { id: 5, name: "Gynécologue", icon: "fas fa-female" },
+              { id: 6, name: "Dentiste", icon: "fas fa-tooth" },
+              { id: 7, name: "Ophtalmologue", icon: "fas fa-eye" },
+              { id: 8, name: "ORL", icon: "fas fa-ear" }
+            ]);
+            
+            const testimonials = ref([
+              {
+                id: 1,
+                name: "Marie L.",
+                avatar: "https://randomuser.me/api/portraits/women/33.jpg",
+                rating: 5,
+                comment: "Très pratique pour prendre rendez-vous rapidement avec mon médecin traitant."
+              },
+              {
+                id: 2,
+                name: "Pierre D.",
+                avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+                rating: 4,
+                comment: "Interface simple et intuitive. J'ai trouvé un créneau le jour même."
+              },
+              {
+                id: 3,
+                name: "Sophie M.",
+                avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+                rating: 5,
+                comment: "Service impeccable, rappel SMS très utile pour ne pas oublier mon rendez-vous."
+              }
+            ]);
+            
+            return { specialties, testimonials };
+          }
+        },
+        
+        SearchView: {
+          template: `
+            <div>
+              <section class="bg-white rounded-xl shadow-md p-6 mb-8 dark:bg-gray-800">
+                <h1 class="text-2xl font-semibold mb-6 dark:text-white">Trouver un médecin</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div class="relative">
+                    <select v-model="search.specialty" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                      <option value="">Toutes spécialités</option>
+                      <option v-for="specialty in specialties" :key="specialty.id" :value="specialty.name">{{ specialty.name }}</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-4 text-gray-400"></i>
+                  </div>
+                  
+                  <div class="relative">
+                    <select v-model="search.city" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                      <option value="">Toutes villes</option>
+                      <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-4 text-gray-400"></i>
+                  </div>
+                  
+                  <div>
+                    <input v-model="search.name" type="text" placeholder="Nom du médecin" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  </div>
+                  
+                  <button @click="performSearch" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+                    <i class="fas fa-search mr-2"></i> Rechercher
+                  </button>
+                </div>
+                
+                <div class="flex items-center justify-between mb-4">
+                  <p class="text-gray-600 dark:text-gray-300">{{ filteredDoctors.length }} médecins trouvés</p>
+                  <div class="flex items-center">
+                    <span class="mr-2 text-gray-600 dark:text-gray-300">Trier par :</span>
+                    <select v-model="sortBy" class="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                      <option value="rating">Note</option>
+                      <option value="price">Prix</option>
+                      <option value="name">Nom</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+              
+              <div class="grid grid-cols-1 gap-6">
+                <div 
+                  v-for="doctor in sortedDoctors" 
+                  :key="doctor.id"
+                  class="doctor-card bg-white rounded-xl shadow-md overflow-hidden dark:bg-gray-800"
+                >
+                  <router-link :to="'/doctor/' + doctor.id" class="block">
+                    <div class="p-6">
+                      <div class="flex items-start">
+                        <img :src="doctor.avatar" class="w-16 h-16 rounded-full object-cover mr-4">
+                        <div class="flex-1">
+                          <div class="flex justify-between items-start">
+                            <div>
+                              <h2 class="text-xl font-bold dark:text-white">{{ doctor.name }}</h2>
+                              <p class="text-blue-600 dark:text-blue-400">{{ doctor.specialty }}</p>
+                            </div>
+                            <div class="flex items-center">
+                              <i class="fas fa-star text-yellow-400 mr-1"></i>
+                              <span class="font-semibold dark:text-white">{{ doctor.rating }}</span>
+                              <span class="text-gray-500 ml-1 dark:text-gray-400">({{ doctor.reviews }})</span>
+                            </div>
+                          </div>
+                          
+                          <div class="mt-2 flex items-center text-gray-600 dark:text-gray-300">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span>{{ doctor.address }}</span>
+                          </div>
+                          
+                          <div class="mt-3 flex items-center justify-between">
+                            <div class="flex items-center">
+                              <i class="fas fa-euro-sign mr-1 text-gray-600 dark:text-gray-300"></i>
+                              <span class="font-semibold dark:text-white">{{ doctor.price }}</span>
+                              <span class="text-gray-500 ml-1 dark:text-gray-400">/ consultation</span>
+                            </div>
+                            
+                            <router-link 
+                              :to="'/book/' + doctor.id" 
+                              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                            >
+                              Prendre RDV
+                            </router-link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </router-link>
+                </div>
+              </div>
+              
+              <div v-if="filteredDoctors.length === 0" class="bg-white rounded-xl shadow-md p-12 text-center dark:bg-gray-800">
+                <lottie-player
+                  src="https://assets1.lottiefiles.com/packages/lf20_kuhijlvx.json"
+                  background="transparent"
+                  speed="1"
+                  style="width: 200px; height: 200px; margin: 0 auto;"
+                  loop
+                  autoplay
+                ></lottie-player>
+                <h3 class="text-xl font-semibold mt-4 dark:text-white">Aucun médecin trouvé</h3>
+                <p class="text-gray-600 mt-2 dark:text-gray-300">Essayez de modifier vos critères de recherche</p>
+                <button @click="resetSearch" class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                  Réinitialiser la recherche
+                </button>
+              </div>
+            </div>
+          `,
+          setup() {
+            const search = ref({
+              specialty: "",
+              city: "",
+              name: ""
+            });
+            
+            const sortBy = ref("rating");
+            const doctors = ref(mockDoctors);
+            
+            const specialties = computed(() => {
+              const uniqueSpecialties = new Set();
+              mockDoctors.forEach(doctor => uniqueSpecialties.add(doctor.specialty));
+              return Array.from(uniqueSpecialties).map((s, i) => ({ id: i + 1, name: s }));
+            });
+            
+            const cities = computed(() => {
+              const uniqueCities = new Set();
+              mockDoctors.forEach(doctor => uniqueCities.add(doctor.city));
+              return Array.from(uniqueCities);
+            });
+            
+            const filteredDoctors = computed(() => {
+              return doctors.value.filter(doctor => {
+                const matchesSpecialty = !search.value.specialty || doctor.specialty === search.value.specialty;
+                const matchesCity = !search.value.city || doctor.city === search.value.city;
+                const matchesName = !search.value.name || 
+                  doctor.name.toLowerCase().includes(search.value.name.toLowerCase());
+                
+                return matchesSpecialty && matchesCity && matchesName;
+              });
+            });
+            
+            const sortedDoctors = computed(() => {
+              const doctorsCopy = [...filteredDoctors.value];
+              
+              if (sortBy.value === "rating") {
+                return doctorsCopy.sort((a, b) => b.rating - a.rating);
+              } else if (sortBy.value === "price") {
+                return doctorsCopy.sort((a, b) => a.price - b.price);
+              } else if (sortBy.value === "name") {
+                return doctorsCopy.sort((a, b) => a.name.localeCompare(b.name));
+              }
+              
+              return doctorsCopy;
+            });
+            
+            const performSearch = () => {
+              // In a real app, this would call an API
+              console.log("Searching with:", search.value);
+            };
+            
+            const resetSearch = () => {
+              search.value = {
+                specialty: "",
+                city: "",
+                name: ""
+              };
+            };
+            
+            return {
+              search,
+              sortBy,
+              specialties,
+              cities,
+              filteredDoctors,
+              sortedDoctors,
+              performSearch,
+              resetSearch
+            };
+          }
+        },
+        
+        DoctorView: {
+          template: `
+            <div v-if="doctor">
+              <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8 dark:bg-gray-800">
+                <div class="doctor-details flex flex-col md:flex-row">
+                  <!-- Doctor Info -->
+                  <div class="w-full md:w-1/3 p-6 bg-gray-50 dark:bg-gray-700">
+                    <div class="text-center">
+                      <img :src="doctor.avatar" class="w-32 h-32 rounded-full object-cover mx-auto mb-4">
+                      <h2 class="text-2xl font-bold dark:text-white">{{ doctor.name }}</h2>
+                      <p class="text-blue-600 text-lg dark:text-blue-400">{{ doctor.specialty }}</p>
+                      
+                      <div class="mt-4 flex items-center justify-center">
+                        <i class="fas fa-star text-yellow-400 mr-1"></i>
+                        <span class="font-semibold dark:text-white">{{ doctor.rating }}</span>
+                        <span class="text-gray-500 ml-1 dark:text-gray-400">({{ doctor.reviews }} avis)</span>
+                      </div>
+                      
+                      <div class="mt-6">
+                        <div class="flex items-center text-gray-600 mb-2 dark:text-gray-300">
+                          <i class="fas fa-euro-sign mr-2"></i>
+                          <span>Prix consultation: <span class="font-semibold dark:text-white">{{ doctor.price }}€</span></span>
+                        </div>
+                        
+                        <div class="flex items-center text-gray-600 mb-2 dark:text-gray-300">
+                          <i class="fas fa-map-marker-alt mr-2"></i>
+                          <span>{{ doctor.city }}</span>
+                        </div>
+                        
+                        <div class="flex items-center text-gray-600 dark:text-gray-300">
+                          <i class="fas fa-language mr-2"></i>
+                          <span>{{ doctor.languages.join(', ') }}</span>
+                        </div>
+                      </div>
+                      
+                      <router-link 
+                        :to="'/book/' + doctor.id" 
+                        class="mt-6 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                      >
+                        Prendre rendez-vous
+                      </router-link>
+                    </div>
+                  </div>
+                  
+                  <!-- Doctor Details -->
+                  <div class="w-full md:w-2/3 p-6">
+                    <div class="mb-6">
+                      <h3 class="text-xl font-semibold mb-4 dark:text-white">À propos</h3>
+                      <p class="text-gray-600 dark:text-gray-300">{{ doctor.description }}</p>
+                    </div>
+                    
+                    <div class="mb-6">
+                      <h3 class="text-xl font-semibold mb-4 dark:text-white">Adresse</h3>
+                      <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                        <p class="text-gray-600 dark:text-gray-300">{{ doctor.address }}</p>
+                        <div class="mt-4 h-48 bg-gray-200 rounded-lg flex items-center justify-center dark:bg-gray-600">
+                          <i class="fas fa-map-marked-alt text-3xl text-gray-400"></i>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 class="text-xl font-semibold mb-4 dark:text-white">Horaires</h3>
+                      <div class="overflow-x-auto">
+                        <table class="min-w-full bg-gray-50 rounded-lg dark:bg-gray-700">
+                          <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-600">
+                              <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Jour</th>
+                              <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Horaires</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr 
+                              v-for="(hours, day) in doctor.availability" 
+                              :key="day"
+                              class="border-b border-gray-200 dark:border-gray-600"
+                            >
+                              <td class="px-4 py-2 font-medium dark:text-white">{{ getDayName(day) }}</td>
+                              <td class="px-4 py-2 text-gray-600 dark:text-gray-300">
+                                <span v-if="hours.length > 0">{{ hours.join(' - ') }}</span>
+                                <span v-else class="text-gray-400">Fermé</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              
+              <section class="bg-white rounded-xl shadow-md p-6 mb-8 dark:bg-gray-800">
+                <h2 class="text-2xl font-semibold mb-6 dark:text-white">Disponibilités</h2>
+                <FullCalendar :options="calendarOptions" />
+              </section>
+              
+              <section class="bg-white rounded-xl shadow-md p-6 dark:bg-gray-800">
+                <h2 class="text-2xl font-semibold mb-6 dark:text-white">Avis des patients</h2>
+                
+                <div v-if="reviews.length > 0" class="space-y-6">
+                  <div v-for="review in reviews" :key="review.id" class="border-b border-gray-200 pb-6 last:border-0 last:pb-0 dark:border-gray-700">
+                    <div class="flex items-start mb-2">
+                      <img :src="review.avatar" class="w-10 h-10 rounded-full object-cover mr-3">
+                      <div>
+                        <h4 class="font-semibold dark:text-white">{{ review.name }}</h4>
+                        <div class="flex items-center">
+                          <div class="flex text-yellow-400 mr-2">
+                            <i v-for="star in 5" :key="star" :class="star <= review.rating ? 'fas fa-star' : 'far fa-star'" class="text-sm"></i>
+                          </div>
+                          <span class="text-gray-500 text-sm dark:text-gray-400">{{ formatDate(review.date) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300">{{ review.comment }}</p>
+                  </div>
+                </div>
+                
+                <div v-else class="text-center py-8">
+                  <p class="text-gray-600 dark:text-gray-300">Aucun avis pour le moment.</p>
+                </div>
+              </section>
+            </div>
+            
+            <div v-else class="text-center py-12">
+              <div class="inline-block p-4 bg-red-100 rounded-full mb-4 dark:bg-red-900">
+                <i class="fas fa-exclamation-triangle text-red-600 text-2xl dark:text-red-300"></i>
+              </div>
+              <h3 class="text-xl font-semibold dark:text-white">Médecin non trouvé</h3>
+              <p class="text-gray-600 mt-2 dark:text-gray-300">Le médecin que vous recherchez n'existe pas ou n'est plus disponible.</p>
+              <router-link to="/search" class="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Retour à la recherche
+              </router-link>
+            </div>
+          `,
+          props: ['id'],
+          setup(props) {
+            const doctor = ref(null);
+            const reviews = ref([]);
+            
+            // Load doctor data
+            onMounted(() => {
+              const foundDoctor = mockDoctors.find(d => d.id === parseInt(props.id));
+              doctor.value = foundDoctor || null;
+              
+              // Mock reviews
+              if (foundDoctor) {
+                reviews.value = [
+                  {
+                    id: 1,
+                    name: "Claire D.",
+                    avatar: "https://randomuser.me/api/portraits/women/23.jpg",
+                    rating: 5,
+                    date: "2023-10-15T14:30:00",
+                    comment: "Docteur très à l'écoute et professionnel. Je recommande vivement."
+                  },
+                  {
+                    id: 2,
+                    name: "Thomas L.",
+                    avatar: "https://randomuser.me/api/portraits/men/54.jpg",
+                    rating: 4,
+                    date: "2023-09-28T10:15:00",
+                    comment: "Bonne consultation, un peu d'attente mais c'est normal pour un médecin aussi demandé."
+                  }
+                ];
+              }
+            });
+            
+            // Calendar options
+            const calendarOptions = ref({
+              plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+              initialView: 'timeGridWeek',
+              headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+              },
+              events: computed(() => {
+                if (!doctor.value) return [];
+                
+                // Generate mock available slots
+                const events = [];
+                const today = new Date();
+                
+                for (let i = 0; i < 14; i++) { // 2 weeks
+                  const date = new Date(today);
+                  date.setDate(today.getDate() + i);
+                  const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase();
+                  
+                  if (doctor.value.availability[dayName] && doctor.value.availability[dayName].length > 0) {
+                    doctor.value.availability[dayName].forEach(slot => {
+                      const [start, end] = slot.split('-');
+                      const startTime = new Date(date);
+                      const [startHour, startMinute] = start.split(':');
+                      startTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
+                      
+                      const endTime = new Date(date);
+                      const [endHour, endMinute] = end.split(':');
+                      endTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+                      
+                      // Add 30-minute slots
+                      let currentSlot = new Date(startTime);
+                      while (currentSlot < endTime) {
+                        const slotEnd = new Date(currentSlot);
+                        slotEnd.setMinutes(slotEnd.getMinutes() + 30);
+                        
+                        if (slotEnd <= endTime) {
+                          events.push({
+                            title: 'Disponible',
+                            start: currentSlot.toISOString(),
+                            end: slotEnd.toISOString(),
+                            backgroundColor: '#4A90E2',
+                            borderColor: '#4A90E2',
+                            display: 'block',
+                            extendedProps: {
+                              available: true
+                            }
+                          });
+                        }
+                        
+                        currentSlot = new Date(slotEnd);
+                      }
+                    });
+                  }
+                }
+                
+                return events;
+              }),
+              eventClick: (info) => {
+                if (info.event.extendedProps.available) {
+                  router.push(`/book/${doctor.value.id}?date=${info.event.start.toISOString()}`);
+                }
+              },
+              slotMinTime: '08:00:00',
+              slotMaxTime: '20:00:00',
+              allDaySlot: false,
+              weekends: false,
+              height: 'auto',
+              locale: 'fr'
+            });
+            
+            const getDayName = (day) => {
+              const days = {
+                monday: 'Lundi',
+                tuesday: 'Mardi',
+                wednesday: 'Mercredi',
+                thursday: 'Jeudi',
+                friday: 'Vendredi',
+                saturday: 'Samedi',
+                sunday: 'Dimanche'
+              };
+              return days[day] || day;
+            };
+            
+            const formatDate = (dateString) => {
+              const options = { year: 'numeric', month: 'long', day: 'numeric' };
+              return new Date(dateString).toLocaleDateString('fr-FR', options);
+            };
+            
+            return {
+              doctor,
+              reviews,
+              calendarOptions,
+              getDayName,
+              formatDate
+            };
+          }
+        },
+        
+        BookView: {
+          template: `
+            <div>
+              <div v-if="doctor" class="bg-white rounded-xl shadow-md p-6 mb-8 dark:bg-gray-800">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+                  <div class="flex items-center mb-4 md:mb-0">
+                    <img :src="doctor.avatar" class="w-12 h-12 rounded-full object-cover mr-4">
+                    <div>
+                      <h2 class="text-xl font-bold dark:text-white">{{ doctor.name }}</h2>
+                      <p class="text-blue-600 dark:text-blue-400">{{ doctor.specialty }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="bg-blue-50 px-4 py-3 rounded-lg dark:bg-blue-900">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-alt text-blue-600 mr-2 dark:text-blue-300"></i>
+                      <span class="font-medium dark:text-white">{{ formatDateTime(selectedDate) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 dark:bg-gray-800">
+                <div class="flex border-b border-gray-200 dark:border-gray-700">
+                  <button 
+                    v-for="(step, index) in steps" 
+                    :key="index"
+                    @click="currentStep = index"
+                    class="px-6 py-4 text-center relative flex-1"
+                    :class="{
+                      'text-blue-600 font-medium dark:text-blue-400': currentStep === index,
+                      'text-gray-500 dark:text-gray-400': currentStep !== index
+                    }"
+                  >
+                    <span class="flex items-center justify-center">
+                      <span class="w-8 h-8 rounded-full flex items-center justify-center mr-2"
+                        :class="{
+                          'bg-blue-600 text-white': currentStep >= index,
+                          'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400': currentStep < index
+                        }"
+                      >
+                        {{ index + 1 }}
+                      </span>
+                      {{ step.label }}
+                    </span>
+                    <div 
+                      class="absolute bottom-0 left-0 right-0 h-1"
+                      :class="{
+                        'bg-blue-600': currentStep >= index,
+                        'bg-gray-200 dark:bg-gray-700': currentStep < index
+                      }"
+                    ></div>
+                  </button>
+                </div>
+                
+                <div class="p-6 relative min-h-96">
+                  <transition name="form-step" mode="out-in">
+                    <div v-if="currentStep === 0" key="step1">
+                      <h3 class="text-xl font-semibold mb-6 dark:text-white">Informations patient</h3>
+                      
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label class="block text-gray-700 mb-2 dark:text-gray-300">Nom complet</label>
+                          <input 
+                            v-model="form.patient.name" 
+                            type="text" 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            :class="{ 'border-red-500': $v.form.patient.name.$error }"
+                          >
+                          <div v-if="$v.form.patient.name.$error" class="text-red-500 text-sm mt-1">
+                            Le nom est requis
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label class="block text-gray-700 mb-2 dark:text-gray-300">Email</label>
+                          <input 
+                            v-model="form.patient.email" 
+                            type="email" 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            :class="{ 'border-red-500': $v.form.patient.email.$error }"
+                          >
+                          <div v-if="$v.form.patient.email.$error" class="text-red-500 text-sm mt-1">
+                            Veuillez entrer un email valide
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label class="block text-gray-700 mb-2 dark:text-gray-300">Téléphone</label>
+                          <input 
+                            v-model="form.patient.phone" 
+                            type="tel" 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            :class="{ 'border-red-500': $v.form.patient.phone.$error }"
+                          >
+                          <div v-if="$v.form.patient.phone.$error" class="text-red-500 text-sm mt-1">
+                            Veuillez entrer un numéro valide
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label class="block text-gray-700 mb-2 dark:text-gray-300">Date de naissance</label>
+                          <input 
+                            v-model="form.patient.birthDate" 
+                            type="date" 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            :class="{ 'border-red-500': $v.form.patient.birthDate.$error }"
+                          >
+                          <div v-if="$v.form.patient.birthDate.$error" class="text-red-500 text-sm mt-1">
+                            Veuillez entrer une date valide
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="mt-6">
+                        <label class="block text-gray-700 mb-2 dark:text-gray-300">Motif de la consultation</label>
+                        <textarea 
+                          v-model="form.reason" 
+                          rows="3" 
+                          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          placeholder="Décrivez brièvement la raison de votre consultation"
+                        ></textarea>
+                      </div>
+                      
+                      <div class="mt-8 flex justify-end">
+                        <button 
+                          @click="nextStep" 
+                          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                        >
+                          Suivant <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div v-else-if="currentStep === 1" key="step2">
+                      <h3 class="text-xl font-semibold mb-6 dark:text-white">Confirmation</h3>
+                      
+                      <div class="bg-gray-50 p-6 rounded-lg mb-6 dark:bg-gray-700">
+                        <h4 class="font-medium text-lg mb-4 dark:text-white">Récapitulatif du rendez-vous</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h5 class="text-gray-500 text-sm mb-2 dark:text-gray-400">Médecin</h5>
+                            <p class="font-medium dark:text-white">{{ doctor.name }}</p>
+                            <p class="text-gray-600 dark:text-gray-300">{{ doctor.specialty }}</p>
+                          </div>
+                          
+                          <div>
+                            <h5 class="text-gray-500 text-sm mb-2 dark:text-gray-400">Date et heure</h5>
+                            <p class="font-medium dark:text-white">{{ formatDateTime(selectedDate) }}</p>
+                          </div>
+                          
+                          <div>
+                            <h5 class="text-gray-500 text-sm mb-2 dark:text-gray-400">Patient</h5>
+                            <p class="font-medium dark:text-white">{{ form.patient.name }}</p>
+                            <p class="text-gray-600 dark:text-gray-300">{{ form.patient.phone }}</p>
+                          </div>
+                          
+                          <div>
+                            <h5 class="text-gray-500 text-sm mb-2 dark:text-gray-400">Motif</h5>
+                            <p class="text-gray-600 dark:text-gray-300">{{ form.reason || 'Non spécifié' }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="bg-blue-50 p-6 rounded-lg mb-6 dark:bg-blue-900">
+                        <h4 class="font-medium text-lg mb-4 dark:text-white">Paiement</h4>
+                        
+                        <div class="flex justify-between items-center mb-4">
+                          <span class="text-gray-600 dark:text-gray-300">Consultation</span>
+                          <span class="font-medium dark:text-white">{{ doctor.price }}€</span>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-4 mb-4 dark:border-gray-600">
+                          <div class="flex justify-between items-center">
+                            <span class="font-medium dark:text-white">Total</span>
+                            <span class="font-bold text-lg dark:text-white">{{ doctor.price }}€</span>
+                          </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                          <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded" v-model="form.termsAccepted">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">
+                              J'accepte les <a href="#" class="text-blue-600 hover:underline dark:text-blue-400">conditions générales</a>
+                            </span>
+                          </label>
+                          <div v-if="$v.form.termsAccepted.$error" class="text-red-500 text-sm mt-1">
+                            Vous devez accepter les conditions
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="flex justify-between">
+                        <button 
+                          @click="prevStep" 
+                          class="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                        >
+                          <i class="fas fa-arrow-left mr-2"></i> Retour
+                        </button>
+                        
+                        <button 
+                          @click="confirmAppointment" 
+                          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                          :disabled="loading"
+                        >
+                          <span v-if="!loading">Confirmer et payer</span>
+                          <span v-else>En cours...</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div v-else-if="currentStep === 2" key="step3" class="text-center py-12">
+                      <lottie-player
+                        src="https://assets1.lottiefiles.com/packages/lf20_olboe3by.json"
+                        background="transparent"
+                        speed="1"
+                        style="width: 150px; height: 150px; margin: 0 auto;"
+                        loop
+                        autoplay
+                      ></lottie-player>
+                      
+                      <h3 class="text-2xl font-semibold mt-6 dark:text-white">Rendez-vous confirmé !</h3>
+                      <p class="text-gray-600 mt-2 mb-6 dark:text-gray-300">
+                        Votre rendez-vous avec {{ doctor.name }} a bien été enregistré pour le {{ formatDateTime(selectedDate) }}.
+                      </p>
+                      
+                      <div class="bg-blue-50 p-6 rounded-lg max-w-md mx-auto mb-6 dark:bg-blue-900">
+                        <h4 class="font-medium text-lg mb-2 dark:text-white">Détails</h4>
+                        <p class="text-gray-600 dark:text-gray-300">Un email de confirmation avec toutes les informations vous a été envoyé à {{ form.patient.email }}.</p>
+                        <p class="text-gray-600 mt-2 dark:text-gray-300">Vous recevrez un rappel 24h avant votre rendez-vous.</p>
+                      </div>
+                      
+                      <div class="flex justify-center space-x-4">
+                        <router-link 
+                          to="/appointments" 
+                          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                        >
+                          Voir mes rendez-vous
+                        </router-link>
+                        
+                        <router-link 
+                          to="/" 
+                          class="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                        >
+                          Retour à l'accueil
+                        </router-link>
+                      </div>
+                    </div>
+                  </transition>
+                </div>
+              </div>
+            </div>
+          `,
+          props: ['doctorId'],
+          setup(props) {
+            const doctor = ref(null);
+            const selectedDate = ref(new Date());
+            const loading = ref(false);
+            
+            const steps = [
+              { label: 'Informations', completed: false },
+              { label: 'Confirmation', completed: false },
+              { label: 'Terminé', completed: false }
+            ];
+            
+            const currentStep = ref(0);
+            
+            const form = ref({
+              patient: {
+                name: '',
+                email: '',
+                phone: '',
+                birthDate: ''
+              },
+              reason: '',
+              termsAccepted: false
+            });
+            
+            // Vuelidate validations
+            const validations = {
+              form: {
+                patient: {
+                  name: { required },
+                  email: { required, email },
+                  phone: { required },
+                  birthDate: { required }
+                },
+                termsAccepted: {
+                  required,
+                  sameAs: sameAs(() => true)
+                }
+              }
+            };
+            
+            const $v = useVuelidate(validations, form);
+            
+            // Load doctor data and check URL params
+            onMounted(() => {
+              const foundDoctor = mockDoctors.find(d => d.id === parseInt(props.doctorId));
+              doctor.value = foundDoctor || null;
+              
+              // Check for date in URL
+              const urlParams = new URLSearchParams(window.location.search);
+              const dateParam = urlParams.get('date');
+              
+              if (dateParam) {
+                selectedDate.value = new Date(dateParam);
+              }
+              
+              // If user is logged in, pre-fill patient info
+              if (mockCurrentUser) {
+                form.value.patient = {
+                  name: mockCurrentUser.name,
+                  email: mockCurrentUser.email,
+                  phone: mockCurrentUser.phone,
+                  birthDate: mockCurrentUser.birthDate
+                };
+              }
+            });
+            
+            const nextStep = async () => {
+              if (currentStep.value === 0) {
+                $v.value.form.patient.$touch();
+                if ($v.value.form.patient.$invalid) return;
+              }
+              
+              currentStep.value++;
+            };
+            
+            const prevStep = () => {
+              currentStep.value--;
+            };
+            
+            const confirmAppointment = async () => {
+              $v.value.$touch();
+              if ($v.value.$invalid) return;
+              
+              loading.value = true;
+              
+              // In a real app, this would call an API
+              setTimeout(() => {
+                loading.value = false;
+                nextStep();
+                
+                // Add to mock appointments
+                const newAppointment = {
+                  id: mockAppointments.length + 1,
+                  doctorId: doctor.value.id,
+                  patientId: mockCurrentUser.id,
+                  date: selectedDate.value.toISOString(),
+                  status: "confirmed",
+                  reason: form.value.reason,
+                  notes: ""
+                };
+                
+                mockAppointments.push(newAppointment);
+              }, 1500);
+            };
+            
+            const formatDateTime = (date) => {
+              const options = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              };
+              return new Date(date).toLocaleDateString('fr-FR', options);
+            };
+            
+            return {
+              doctor,
+              selectedDate,
+              steps,
+              currentStep,
+              form,
+              $v,
+              loading,
+              nextStep,
+              prevStep,
+              confirmAppointment,
+              formatDateTime
+            };
+          }
+        },
+        
+        LoginView: {
+          template: `
+            <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 dark:bg-gray-800">
+              <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold dark:text-white">Connexion</h1>
+                <p class="text-gray-600 dark:text-gray-300">Accédez à votre espace patient</p>
+              </div>
+              
+              <form @submit.prevent="login">
+                <div class="mb-6">
+                  <label class="block text-gray-700 mb-2 dark:text-gray-300">Email</label>
+                  <input 
+                    v-model="form.email" 
+                    type="email" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    :class="{ 'border-red-500': $v.form.email.$error }"
+                  >
+                  <div v-if="$v.form.email.$error" class="text-red-500 text-sm mt-1">
+                    Veuillez entrer un email valide
+                  </div>
+                </div>
+                
+                <div class="mb-6">
+                  <label class="block text-gray-700 mb-2 dark:text-gray-300">Mot de passe</label>
+                  <input 
+                    v-model="form.password" 
+                    type="password" 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    :class="{ 'border-red-500': $v.form.password.$error }"
+                  >
+                  <div v-if="$v.form.password.$error" class="text-red-500 text-sm mt-1">
+                    Le mot de passe est requis
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-6">
+                  <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded" v-model="form.remember">
+                    <span class="ml-2 text-gray-700 dark:text-gray-300">Se souvenir de moi</span>
+                  </label>
+                  
+                  <router-link to="/forgot-password" class="text-blue-600 hover:underline dark:text-blue-400">
+                    Mot de passe oublié ?
+                  </router-link>
+                </div>
+                
+                <button 
+                  type="submit" 
+                  class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium mb-4"
+                  :disabled="loading"
+                >
+                  <span v-if="!loading">Se connecter</span>
+                  <span v-else>Connexion en cours...</span>
+                </button>
+                
+                <div v-if="error" class="bg-red-50 p-3 rounded-lg mb-4 dark:bg-red-900">
+                  <p class="text-red-600 dark:text-red-300">{{ error }}</p>
+                </div>
+                
+                <div class="text-center mt-6">
+                  <p class="text-gray-600 dark:text-gray-300">
+                    Pas encore de compte ? 
+                    <router-link to="/register" class="text-blue-600 hover:underline dark:text-blue-400">
+                      S'inscrire
+                    </router-link>
+                  </p>
+                </div>
+              </form>
+            </div>
+          `,
+          setup() {
+            const form = ref({
+              email: '',
+              password: '',
+              remember: false
+            });
+            
+            const loading = ref(false);
+            const error = ref(null);
+            
+            const validations = {
+              form: {
+                email: { required, email },
+                password: { required }
+              }
+            };
+            
+            const $v = useVuelidate(validations, form);
+            
+            const login = async () => {
+              $v.value.$touch();
+              if ($v.value.$invalid) return;
+              
+              loading.value = true;
+              error.value = null;
+              
+              // In a real app, this would call an API
+              setTimeout(() => {
+                loading.value = false;
+                
+                // Mock successful login
+                if (form.value.email === 'patient@example.com' && form.value.password === 'password') {
+                  // In a real app, you would store the token and redirect
+                  router.push('/');
+                } else {
+                  error.value = "Email ou mot de passe incorrect";
+                }
+              }, 1000);
+            };
+            
+            return {
+              form,
+              loading,
+              error,
+              $v,
+              login
+            };
+          }
+        },
+        
+        AppointmentsView: {
+          template: `
+            <div>
+              <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-semibold dark:text-white">Mes rendez-vous</h1>
+                <router-link to="/search" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                  <i class="fas fa-plus mr-2"></i> Nouveau RDV
+                </router-link>
+              </div>
+              
+              <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 dark:bg-gray-800">
+                <div class="border-b border-gray-200 dark:border-gray-700">
+                  <button 
+                    v-for="(tab, index) in tabs" 
+                    :key="index"
+                    @click="activeTab = index"
+                    class="px-6 py-4 text-center relative"
+                    :class="{
+                      'text-blue-600 font-medium dark:text-blue-400': activeTab === index,
+                      'text-gray-500 dark:text-gray-400': activeTab !== index
+                    }"
+                  >
+                    {{ tab.label }}
+                    <div 
+                      class="absolute bottom-0 left-0 right-0 h-1"
+                      :class="{
+                        'bg-blue-600': activeTab === index,
+                        'bg-transparent': activeTab !== index
+                      }"
+                    ></div>
+                  </button>
+                </div>
+                
+                <div class="p-6">
+                  <div v-if="filteredAppointments.length > 0">
+                    <div 
+                      v-for="appointment in filteredAppointments" 
+                      :key="appointment.id"
+                      class="border-b border-gray-200 py-6 last:border-0 dark:border-gray-700"
+                    >
+                      <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <div class="flex items-start mb-4 md:mb-0">
+                          <img :src="getDoctorAvatar(appointment.doctorId)" class="w-12 h-12 rounded-full object-cover mr-4">
+                          <div>
+                            <h3 class="font-bold dark:text-white">{{ getDoctorName(appointment.doctorId) }}</h3>
+                            <p class="text-gray-600 dark:text-gray-300">{{ getDoctorSpecialty(appointment.doctorId) }}</p>
+                            <div class="mt-1">
+                              <span class="inline-block px-2 py-1 text-xs rounded-full"
+                                :class="{
+                                  'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': appointment.status === 'confirmed',
+                                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': appointment.status === 'pending',
+                                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': appointment.status === 'cancelled'
+                                }"
+                              >
+                                {{ getStatusLabel(appointment.status) }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="text-right">
+                          <p class="font-medium dark:text-white">{{ formatDateTime(appointment.date) }}</p>
+                          <p class="text-gray-600 dark:text-gray-300">{{ appointment.reason }}</p>
+                        </div>
+                      </div>
+                      
+                      <div class="mt-4 flex justify-end space-x-2">
+                        <button 
+                          v-if="appointment.status === 'confirmed'"
+                          @click="cancelAppointment(appointment.id)"
+                          class="px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition text-sm dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
+                        >
+                          Annuler
+                        </button>
+                        
+                        <router-link 
+                          :to="'/doctor/' + appointment.doctorId"
+                          class="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition text-sm dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                        >
+                          Voir médecin
+                        </router-link>
+                        
+                        <button 
+                          @click="showDetails(appointment.id)"
+                          class="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition text-sm dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                        >
+                          Détails
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div v-else class="text-center py-12">
+                    <lottie-player
+                      src="https://assets1.lottiefiles.com/packages/lf20_vybwn7df.json"
+                      background="transparent"
+                      speed="1"
+                      style="width: 200px; height: 200px; margin: 0 auto;"
+                      loop
+                      autoplay
+                    ></lottie-player>
+                    <h3 class="text-xl font-semibold mt-6 dark:text-white">Aucun rendez-vous trouvé</h3>
+                    <p class="text-gray-600 mt-2 dark
+</html>

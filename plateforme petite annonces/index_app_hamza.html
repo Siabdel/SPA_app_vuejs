@@ -1,0 +1,1127 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAMZA - Petites annonces gratuites</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .category-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+        }
+        .ad-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .message-item:hover {
+            background-color: #f8f9fa;
+        }
+        .step-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .favorite-active {
+            color: #ef4444;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+        .image-preview {
+            transition: all 0.3s ease;
+        }
+        .image-preview:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2 cursor-pointer" @click="goToHome">
+                    <i class="fas fa-ad text-2xl text-blue-500"></i>
+                    <h1 class="text-xl font-bold text-gray-800">HAMZA</h1>
+                </div>
+                
+                <div class="hidden md:flex flex-1 mx-8">
+                    <div class="relative w-full">
+                        <input v-model="searchQuery" @keyup.enter="searchAds" type="text" placeholder="Rechercher une annonce..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <button @click="searchAds" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button v-if="!user" @click="showLoginModal = true" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        Connexion
+                    </button>
+                    <button v-if="!user" @click="showRegisterModal = true" class="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition">
+                        Inscription
+                    </button>
+                    
+                    <div v-if="user" class="flex items-center space-x-4">
+                        <button @click="toggleNotifications" class="relative p-2 text-gray-600 hover:text-blue-500">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span v-if="unreadNotifications > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ unreadNotifications }}
+                            </span>
+                        </button>
+                        <button @click="goToMessages" class="relative p-2 text-gray-600 hover:text-blue-500">
+                            <i class="fas fa-envelope text-xl"></i>
+                            <span v-if="unreadMessages > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ unreadMessages }}
+                            </span>
+                        </button>
+                        <button @click="showCreateAdModal = true" class="hidden md:block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                            <i class="fas fa-plus mr-2"></i> Déposer une annonce
+                        </button>
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2">
+                                <img :src="user.avatar || 'https://ui-avatars.com/api/?name='+user.name" class="w-8 h-8 rounded-full" alt="Profile">
+                                <span class="text-gray-700 hidden md:block">{{ user.name }}</span>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                                <a href="#" @click="goToProfile" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mon profil</a>
+                                <a href="#" @click="goToMyAds" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Mes annonces</a>
+                                <a href="#" @click="goToFavorites" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Favoris</a>
+                                <a href="#" @click="logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Déconnexion</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile search -->
+            <div class="md:hidden px-4 pb-3">
+                <div class="relative">
+                    <input v-model="searchQuery" @keyup.enter="searchAds" type="text" placeholder="Rechercher une annonce..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <button @click="searchAds" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-6">
+            <!-- Homepage -->
+            <div v-if="currentView === 'home'">
+                <!-- Categories -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Catégories</h3>
+                    <div class="flex space-x-6 overflow-x-auto pb-2">
+                        <button v-for="category in categories" :key="category.id" 
+                                @click="filterByCategory(category.id)"
+                                :class="{'category-active': selectedCategory === category.id}"
+                                class="px-4 py-2 whitespace-nowrap text-gray-600 hover:text-blue-500 transition">
+                            {{ category.name }}
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Featured Ads -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Annonces récentes</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">Trier par :</span>
+                            <select v-model="sortOption" @change="sortAds" class="px-3 py-1 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="date-desc">Plus récentes</option>
+                                <option value="date-asc">Plus anciennes</option>
+                                <option value="price-asc">Prix croissant</option>
+                                <option value="price-desc">Prix décroissant</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div v-if="loadingAds" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div v-for="i in 8" :key="i" class="bg-white rounded-xl shadow p-4 animate-pulse">
+                            <div class="bg-gray-200 h-40 rounded-lg mb-3"></div>
+                            <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="filteredAds.length === 0" class="bg-white rounded-xl shadow p-8 text-center">
+                        <i class="fas fa-ad text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-medium text-gray-700 mb-2">Aucune annonce trouvée</h3>
+                        <p class="text-gray-500 mb-4">Aucune annonce ne correspond à vos critères de recherche.</p>
+                        <button v-if="user" @click="showCreateAdModal = true" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                            Déposer une annonce
+                        </button>
+                    </div>
+
+                    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div v-for="ad in filteredAds" :key="ad.id" 
+                             class="bg-white rounded-xl shadow p-4 ad-card transition duration-300">
+                            <div class="relative">
+                                <img :src="ad.images[0] || 'https://via.placeholder.com/300x200'" :alt="ad.title" class="w-full h-40 object-cover rounded-lg mb-3">
+                                <button v-if="user" @click.stop="toggleFavorite(ad)" class="absolute top-2 right-2 p-2 bg-white bg-opacity-80 rounded-full">
+                                    <i :class="{'fas fa-heart favorite-active': isFavorite(ad.id), 'far fa-heart': !isFavorite(ad.id)}"></i>
+                                </button>
+                                <span v-if="ad.isPremium" class="absolute top-2 left-2 px-2 py-1 bg-yellow-500 text-white text-xs rounded-full">Premium</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-1">{{ ad.title }}</h4>
+                            <p class="text-sm text-gray-500 mb-2">{{ ad.location }}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-blue-500">{{ ad.price }} €</span>
+                                <span class="text-xs text-gray-500">{{ formatDate(ad.createdAt) }}</span>
+                            </div>
+                            <button @click="viewAd(ad)" class="w-full mt-3 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                Voir l'annonce
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div v-if="filteredAds.length > 0" class="mt-8 flex justify-center">
+                        <button @click="loadMoreAds" :disabled="loadingMore" class="px-6 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition">
+                            <span v-if="!loadingMore">Charger plus</span>
+                            <span v-else><i class="fas fa-spinner fa-spin mr-2"></i> Chargement...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ad Detail -->
+            <div v-if="currentView === 'ad-detail'" class="max-w-4xl mx-auto">
+                <button @click="goToHome" class="mb-4 flex items-center text-blue-500 hover:text-blue-600">
+                    <i class="fas fa-arrow-left mr-2"></i> Retour
+                </button>
+                
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800 mb-1">{{ currentAd.title }}</h2>
+                                <p class="text-gray-600">{{ currentAd.location }}</p>
+                            </div>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                {{ currentAd.category }}
+                            </span>
+                        </div>
+                        
+                        <!-- Image Gallery -->
+                        <div class="mb-6">
+                            <div class="relative">
+                                <img :src="currentImage" :alt="currentAd.title" class="w-full h-80 object-cover rounded-lg">
+                                <button v-if="currentAd.images.length > 1" @click="prevImage" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 p-2 rounded-full shadow">
+                                    <i class="fas fa-chevron-left text-gray-800"></i>
+                                </button>
+                                <button v-if="currentAd.images.length > 1" @click="nextImage" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 p-2 rounded-full shadow">
+                                    <i class="fas fa-chevron-right text-gray-800"></i>
+                                </button>
+                            </div>
+                            
+                            <div v-if="currentAd.images.length > 1" class="flex mt-3 space-x-2 overflow-x-auto py-2">
+                                <img v-for="(image, index) in currentAd.images" :key="index" 
+                                     :src="image" 
+                                     @click="selectImage(index)"
+                                     :class="{'border-blue-500': currentImageIndex === index}"
+                                     class="w-16 h-16 object-cover rounded border-2 cursor-pointer image-preview">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <div class="mb-6">
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Description</h3>
+                                    <p class="text-gray-600 whitespace-pre-line">{{ currentAd.description }}</p>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Caractéristiques</h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p class="text-gray-500">Catégorie</p>
+                                            <p class="text-gray-800">{{ currentAd.category }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500">État</p>
+                                            <p class="text-gray-800">{{ currentAd.condition }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500">Marque</p>
+                                            <p class="text-gray-800">{{ currentAd.brand || 'Non spécifié' }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500">Date de publication</p>
+                                            <p class="text-gray-800">{{ formatDate(currentAd.createdAt) }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="bg-gray-50 rounded-lg p-4 sticky top-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="text-2xl font-bold text-blue-500">{{ currentAd.price }} €</span>
+                                        <button v-if="user" @click="toggleFavorite(currentAd)" class="p-2 text-gray-500 hover:text-red-500">
+                                            <i :class="{'fas fa-heart favorite-active': isFavorite(currentAd.id), 'far fa-heart': !isFavorite(currentAd.id)}"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <div class="flex items-center mb-2">
+                                            <img :src="currentAd.user.avatar || 'https://ui-avatars.com/api/?name='+currentAd.user.name" class="w-10 h-10 rounded-full mr-3" alt="User">
+                                            <div>
+                                                <p class="font-medium">{{ currentAd.user.name }}</p>
+                                                <p class="text-sm text-gray-500">Membre depuis {{ formatDate(currentAd.user.joinDate) }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                            <span class="mr-2">{{ currentAd.user.rating }}</span>
+                                            <i class="fas fa-comment mr-1"></i>
+                                            <span>{{ currentAd.user.reviews }} avis</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <button v-if="user && currentAd.user.id !== user.id" @click="showMessageModal = true" class="w-full mb-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                        <i class="fas fa-envelope mr-2"></i> Contacter le vendeur
+                                    </button>
+                                    <button v-if="user && currentAd.user.id === user.id" @click="editAd(currentAd)" class="w-full mb-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                        <i class="fas fa-edit mr-2"></i> Modifier l'annonce
+                                    </button>
+                                    <button v-if="user && currentAd.user.id === user.id" @click="confirmDeleteAd(currentAd)" class="w-full px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition">
+                                        <i class="fas fa-trash mr-2"></i> Supprimer l'annonce
+                                    </button>
+                                    
+                                    <div v-if="user && currentAd.user.id !== user.id" class="mt-4 border-t pt-4">
+                                        <h4 class="font-medium text-gray-800 mb-2">Options d'achat</h4>
+                                        <select v-model="selectedDeliveryOption" class="w-full mb-3 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="pickup">Remise en main propre</option>
+                                            <option value="shipping">Livraison à domicile (+5€)</option>
+                                        </select>
+                                        <button @click="showPaymentModal = true" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                                            <i class="fas fa-shopping-cart mr-2"></i> Acheter maintenant
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Ads -->
+                <div v-if="currentAd.userAds && currentAd.userAds.length > 0" class="mt-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Autres annonces de {{ currentAd.user.name }}</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div v-for="ad in currentAd.userAds" :key="ad.id" 
+                             @click="viewAd(ad)"
+                             class="bg-white rounded-xl shadow p-4 ad-card transition duration-300 cursor-pointer">
+                            <img :src="ad.images[0] || 'https://via.placeholder.com/300x200'" :alt="ad.title" class="w-full h-32 object-cover rounded-lg mb-3">
+                            <h4 class="font-semibold text-gray-800 mb-1">{{ ad.title }}</h4>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-blue-500">{{ ad.price }} €</span>
+                                <span class="text-xs text-gray-500">{{ formatDate(ad.createdAt) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- My Ads -->
+            <div v-if="currentView === 'my-ads'" class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Mes annonces</h2>
+                    <button @click="showCreateAdModal = true" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        <i class="fas fa-plus mr-2"></i> Nouvelle annonce
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <ul class="flex border-b">
+                        <li @click="setAdFilter('all')" :class="{'border-b-2 border-blue-500 text-blue-500': adFilter === 'all'}" class="px-4 py-2 cursor-pointer">
+                            Toutes mes annonces
+                        </li>
+                        <li @click="setAdFilter('active')" :class="{'border-b-2 border-blue-500 text-blue-500': adFilter === 'active'}" class="px-4 py-2 cursor-pointer">
+                            Actives
+                        </li>
+                        <li @click="setAdFilter('inactive')" :class="{'border-b-2 border-blue-500 text-blue-500': adFilter === 'inactive'}" class="px-4 py-2 cursor-pointer">
+                            Inactives
+                        </li>
+                    </ul>
+                </div>
+                
+                <div v-if="loadingMyAds" class="space-y-4">
+                    <div v-for="i in 3" :key="i" class="bg-white rounded-xl shadow p-6 animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                        <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                </div>
+                
+                <div v-else-if="myAds.length === 0" class="bg-white rounded-xl shadow p-8 text-center">
+                    <i class="fas fa-ad text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-medium text-gray-700 mb-2">Aucune annonce</h3>
+                    <p class="text-gray-500 mb-4">Vous n'avez pas encore publié d'annonce sur HAMZA.</p>
+                    <button @click="showCreateAdModal = true" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        Déposer une annonce
+                    </button>
+                </div>
+                
+                <div v-else class="space-y-4">
+                    <div v-for="ad in myAds" :key="ad.id" class="bg-white rounded-xl shadow overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row md:items-center">
+                                <img :src="ad.images[0] || 'https://via.placeholder.com/300x200'" :alt="ad.title" class="w-full md:w-32 h-32 object-cover rounded-lg mb-4 md:mb-0 md:mr-4">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="font-bold text-gray-800">{{ ad.title }}</h3>
+                                            <p class="text-sm text-gray-500">{{ formatDate(ad.createdAt) }}</p>
+                                        </div>
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                            {{ ad.status === 'active' ? 'Active' : 'Inactive' }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="mt-2 flex items-center">
+                                        <span class="font-bold text-blue-500 mr-4">{{ ad.price }} €</span>
+                                        <span class="text-sm text-gray-500 mr-4"><i class="fas fa-eye mr-1"></i> {{ ad.views }} vues</span>
+                                        <span class="text-sm text-gray-500"><i class="fas fa-envelope mr-1"></i> {{ ad.messages }} messages</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 px-6 py-3 flex justify-between items-center">
+                            <div>
+                                <span class="text-sm text-gray-600">Dernière mise à jour : {{ formatDate(ad.updatedAt) }}</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button @click="editAd(ad)" class="px-3 py-1 text-sm border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition">
+                                    <i class="fas fa-edit mr-1"></i> Modifier
+                                </button>
+                                <button v-if="ad.status === 'active'" @click="toggleAdStatus(ad, 'inactive')" class="px-3 py-1 text-sm border border-gray-500 text-gray-500 rounded-lg hover:bg-gray-50 transition">
+                                    <i class="fas fa-eye-slash mr-1"></i> Désactiver
+                                </button>
+                                <button v-if="ad.status === 'inactive'" @click="toggleAdStatus(ad, 'active')" class="px-3 py-1 text-sm border border-green-500 text-green-500 rounded-lg hover:bg-green-50 transition">
+                                    <i class="fas fa-eye mr-1"></i> Activer
+                                </button>
+                                <button @click="confirmDeleteAd(ad)" class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                                    <i class="fas fa-trash mr-1"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Favorites -->
+            <div v-if="currentView === 'favorites'" class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Mes favoris</h2>
+                    <button @click="goToHome" class="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour
+                    </button>
+                </div>
+                
+                <div v-if="loadingFavorites" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div v-for="i in 4" :key="i" class="bg-white rounded-xl shadow p-4 animate-pulse">
+                        <div class="bg-gray-200 h-40 rounded-lg mb-3"></div>
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                </div>
+                
+                <div v-else-if="favorites.length === 0" class="bg-white rounded-xl shadow p-8 text-center">
+                    <i class="fas fa-heart text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-medium text-gray-700 mb-2">Aucun favori</h3>
+                    <p class="text-gray-500 mb-4">Vous n'avez pas encore ajouté d'annonces à vos favoris.</p>
+                    <button @click="goToHome" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        Voir les annonces
+                    </button>
+                </div>
+                
+                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div v-for="ad in favorites" :key="ad.id" 
+                         class="bg-white rounded-xl shadow p-4 ad-card transition duration-300">
+                        <div class="relative">
+                            <img :src="ad.images[0] || 'https://via.placeholder.com/300x200'" :alt="ad.title" class="w-full h-40 object-cover rounded-lg mb-3">
+                            <button @click.stop="toggleFavorite(ad)" class="absolute top-2 right-2 p-2 bg-white bg-opacity-80 rounded-full">
+                                <i class="fas fa-heart favorite-active"></i>
+                            </button>
+                        </div>
+                        <h4 class="font-semibold text-gray-800 mb-1">{{ ad.title }}</h4>
+                        <p class="text-sm text-gray-500 mb-2">{{ ad.location }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-blue-500">{{ ad.price }} €</span>
+                            <span class="text-xs text-gray-500">{{ formatDate(ad.createdAt) }}</span>
+                        </div>
+                        <button @click="viewAd(ad)" class="w-full mt-3 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                            Voir l'annonce
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile -->
+            <div v-if="currentView === 'profile'" class="max-w-4xl mx-auto">
+                <button @click="goToHome" class="mb-4 flex items-center text-blue-500 hover:text-blue-600">
+                    <i class="fas fa-arrow-left mr-2"></i> Retour
+                </button>
+                
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row items-start md:items-center">
+                            <div class="mb-4 md:mb-0 md:mr-6">
+                                <img :src="user.avatar || 'https://ui-avatars.com/api/?name='+user.name" class="w-24 h-24 rounded-full object-cover" alt="Profile">
+                            </div>
+                            <div class="flex-1">
+                                <h2 class="text-2xl font-bold text-gray-800 mb-1">{{ user.name }}</h2>
+                                <p class="text-gray-600 mb-2"><i class="fas fa-map-marker-alt mr-2"></i> {{ user.location || 'Non spécifié' }}</p>
+                                <div class="flex items-center mb-4">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <span class="mr-4">{{ user.rating || 'Aucune note' }}</span>
+                                    <i class="fas fa-user-clock mr-1"></i>
+                                    <span>Membre depuis {{ formatDate(user.joinDate) }}</span>
+                                </div>
+                                
+                                <div class="flex space-x-2">
+                                    <button @click="showEditProfileModal = true" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                        <i class="fas fa-edit mr-2"></i> Modifier le profil
+                                    </button>
+                                    <button @click="showChangePasswordModal = true" class="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition">
+                                        <i class="fas fa-lock mr-2"></i> Changer le mot de passe
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">À propos</h3>
+                        <p v-if="user.bio" class="text-gray-600 whitespace-pre-line">{{ user.bio }}</p>
+                        <p v-else class="text-gray-500 italic">Aucune description fournie.</p>
+                    </div>
+                    
+                    <div class="border-t p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Mes statistiques</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Annonces actives</p>
+                                <p class="text-2xl font-bold text-blue-500">{{ userStats.activeAds || 0 }}</p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Annonces vendues</p>
+                                <p class="text-2xl font-bold text-green-500">{{ userStats.soldAds || 0 }}</p>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500 mb-1">Note moyenne</p>
+                                <p class="text-2xl font-bold text-purple-500">{{ userStats.rating || 'Aucune' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Messages -->
+            <div v-if="currentView === 'messages'" class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Messages</h2>
+                    <button @click="goToHome" class="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 transition">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
+                        <!-- Conversations list -->
+                        <div class="md:col-span-1">
+                            <div class="p-4 border-b">
+                                <h3 class="font-semibold text-gray-800">Conversations</h3>
+                            </div>
+                            
+                            <div class="divide-y">
+                                <div v-for="conversation in conversations" :key="conversation.id" 
+                                     @click="selectConversation(conversation)"
+                                     :class="{'bg-blue-50': selectedConversation && selectedConversation.id === conversation.id}"
+                                     class="p-4 cursor-pointer hover:bg-gray-50 transition">
+                                    <div class="flex items-center">
+                                        <img :src="conversation.user.avatar || 'https://ui-avatars.com/api/?name='+conversation.user.name" class="w-10 h-10 rounded-full mr-3" alt="User">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between">
+                                                <h4 class="font-medium text-gray-800 truncate">{{ conversation.user.name }}</h4>
+                                                <span class="text-xs text-gray-500 whitespace-nowrap">{{ formatDate(conversation.lastMessage.date) }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-500 truncate">{{ conversation.lastMessage.text }}</p>
+                                        </div>
+                                        <span v-if="conversation.unread > 0" class="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                            {{ conversation.unread }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div v-if="conversations.length === 0" class="p-8 text-center text-gray-500">
+                                    <i class="fas fa-comment-slash text-3xl mb-3"></i>
+                                    <p>Aucune conversation</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Messages -->
+                        <div class="md:col-span-2">
+                            <div v-if="selectedConversation" class="h-full flex flex-col">
+                                <!-- Conversation header -->
+                                <div class="p-4 border-b flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <img :src="selectedConversation.user.avatar || 'https://ui-avatars.com/api/?name='+selectedConversation.user.name" class="w-10 h-10 rounded-full mr-3" alt="User">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">{{ selectedConversation.user.name }}</h4>
+                                            <p class="text-xs text-gray-500">Dernière connexion: {{ formatDate(selectedConversation.user.lastSeen) }}</p>
+                                        </div>
+                                    </div>
+                                    <button @click="showAdDetails(selectedConversation.ad)" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                        Voir l'annonce
+                                    </button>
+                                </div>
+                                
+                                <!-- Messages list -->
+                                <div ref="messagesContainer" class="flex-1 p-4 overflow-y-auto" style="max-height: 500px;">
+                                    <div v-for="message in selectedConversation.messages" :key="message.id" 
+                                         :class="{'justify-end': message.sender === 'me', 'justify-start': message.sender !== 'me'}"
+                                         class="flex mb-4">
+                                        <div v-if="message.sender !== 'me'" class="mr-3">
+                                            <img :src="selectedConversation.user.avatar || 'https://ui-avatars.com/api/?name='+selectedConversation.user.name" class="w-8 h-8 rounded-full" alt="User">
+                                        </div>
+                                        <div :class="{'bg-blue-500 text-white': message.sender === 'me', 'bg-gray-100 text-gray-800': message.sender !== 'me'}"
+                                             class="max-w-xs md:max-w-md rounded-lg p-3">
+                                            <p>{{ message.text }}</p>
+                                            <p class="text-xs mt-1" :class="{'text-blue-100': message.sender === 'me', 'text-gray-500': message.sender !== 'me'}">
+                                                {{ formatTime(message.date) }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Message input -->
+                                <div class="p-4 border-t">
+                                    <form @submit.prevent="sendMessage" class="flex space-x-2">
+                                        <input v-model="newMessage" type="text" placeholder="Écrire un message..." class="flex-1 px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div v-else class="h-64 flex items-center justify-center text-gray-500">
+                                <div class="text-center">
+                                    <i class="fas fa-comment-alt text-3xl mb-3"></i>
+                                    <p>Sélectionnez une conversation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notifications -->
+            <div v-if="currentView === 'notifications'" class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Notifications</h2>
+                    <button @click="markAllAsRead" class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        <i class="fas fa-check mr-2"></i> Tout marquer comme lu
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="divide-y">
+                        <div v-for="notification in notifications" :key="notification.id" 
+                             :class="{'bg-blue-50': !notification.read}"
+                             class="p-4 cursor-pointer hover:bg-gray-50 transition">
+                            <div class="flex items-start">
+                                <div :class="getNotificationIconClass(notification.type)" class="flex-shrink-0 p-2 rounded-full mr-3">
+                                    <i :class="getNotificationIcon(notification.type)" class="text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between">
+                                        <h4 class="font-medium text-gray-800">{{ notification.title }}</h4>
+                                        <span class="text-xs text-gray-500 whitespace-nowrap">{{ formatDate(notification.date) }}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500">{{ notification.message }}</p>
+                                    <button v-if="notification.action" @click.stop="handleNotificationAction(notification)" class="mt-2 text-sm text-blue-500 hover:underline">
+                                        {{ notification.action }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-if="notifications.length === 0" class="p-8 text-center text-gray-500">
+                            <i class="fas fa-bell-slash text-3xl mb-3"></i>
+                            <p>Aucune notification</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Create Ad Modal -->
+        <div v-if="showCreateAdModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Déposer une annonce</h3>
+                        <button @click="closeCreateAdModal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex space-x-4 overflow-x-auto pb-2">
+                            <button v-for="step in adSteps" :key="step.id" 
+                                    @click="currentAdStep = step.id"
+                                    :class="{'bg-blue-500 text-white': currentAdStep === step.id, 'bg-gray-100 text-gray-700': currentAdStep !== step.id}"
+                                    class="px-4 py-2 rounded-lg whitespace-nowrap">
+                                {{ step.name }}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 1: Category -->
+                    <div v-if="currentAdStep === 1">
+                        <h4 class="font-medium text-gray-800 mb-4">Catégorie de l'annonce</h4>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                            <div v-for="category in categories" :key="category.id" 
+                                 @click="selectAdCategory(category)"
+                                 :class="{'border-blue-500 bg-blue-50': newAd.category && newAd.category.id === category.id}"
+                                 class="border-2 rounded-lg p-4 cursor-pointer transition">
+                                <div class="flex flex-col items-center text-center">
+                                    <i :class="category.icon" class="text-2xl text-blue-500 mb-2"></i>
+                                    <h5 class="font-medium">{{ category.name }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button @click="closeCreateAdModal" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                Annuler
+                            </button>
+                            <button @click="currentAdStep = 2" :disabled="!newAd.category" 
+                                    :class="{'bg-blue-500 hover:bg-blue-600': newAd.category, 'bg-gray-300 cursor-not-allowed': !newAd.category}"
+                                    class="px-6 py-2 text-white rounded-lg transition">
+                                Suivant
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Details -->
+                    <div v-if="currentAdStep === 2">
+                        <h4 class="font-medium text-gray-800 mb-4">Détails de l'annonce</h4>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Titre de l'annonce *</label>
+                            <input v-model="newAd.title" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Description *</label>
+                            <textarea v-model="newAd.description" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Prix *</label>
+                                <div class="relative">
+                                    <input v-model="newAd.price" type="number" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                                    <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">€</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">État</label>
+                                <select v-model="newAd.condition" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="new">Neuf</option>
+                                    <option value="like_new">Comme neuf</option>
+                                    <option value="good">Bon état</option>
+                                    <option value="fair">État correct</option>
+                                    <option value="poor">Mauvais état</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Marque (optionnel)</label>
+                                <input v-model="newAd.brand" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Localisation *</label>
+                                <input v-model="newAd.location" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button @click="currentAdStep = 1" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                Retour
+                            </button>
+                            <button @click="currentAdStep = 3" :disabled="!newAd.title || !newAd.description || !newAd.price || !newAd.location" 
+                                    :class="{'bg-blue-500 hover:bg-blue-600': newAd.title && newAd.description && newAd.price && newAd.location, 'bg-gray-300 cursor-not-allowed': !newAd.title || !newAd.description || !newAd.price || !newAd.location}"
+                                    class="px-6 py-2 text-white rounded-lg transition">
+                                Suivant
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Images -->
+                    <div v-if="currentAdStep === 3">
+                        <h4 class="font-medium text-gray-800 mb-4">Photos de l'annonce</h4>
+                        <p class="text-sm text-gray-500 mb-4">Ajoutez au moins une photo (max 8). Les annonces avec photos sont 10 fois plus consultées.</p>
+                        
+                        <div class="mb-6">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div v-for="(image, index) in newAd.images" :key="index" class="relative">
+                                    <img :src="image.url" class="w-full h-32 object-cover rounded-lg">
+                                    <button @click="removeImage(index)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </div>
+                                
+                                <div v-if="newAd.images.length < 8" class="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 cursor-pointer" @click="triggerFileInput">
+                                    <input type="file" ref="fileInput" @change="handleImageUpload" multiple accept="image/*" class="hidden">
+                                    <div class="text-center p-4">
+                                        <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                                        <p class="text-sm text-gray-500">Ajouter des photos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button @click="currentAdStep = 2" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                Retour
+                            </button>
+                            <button @click="currentAdStep = 4" :disabled="newAd.images.length === 0" 
+                                    :class="{'bg-blue-500 hover:bg-blue-600': newAd.images.length > 0, 'bg-gray-300 cursor-not-allowed': newAd.images.length === 0}"
+                                    class="px-6 py-2 text-white rounded-lg transition">
+                                Suivant
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Options -->
+                    <div v-if="currentAdStep === 4">
+                        <h4 class="font-medium text-gray-800 mb-4">Options de l'annonce</h4>
+                        
+                        <div class="space-y-4 mb-6">
+                            <div class="flex items-center justify-between p-4 border rounded-lg">
+                                <div>
+                                    <h5 class="font-medium">Annonce Premium</h5>
+                                    <p class="text-sm text-gray-500">Mettez votre annonce en avant pour 5€</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input v-model="newAd.isPremium" type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border rounded-lg">
+                                <div>
+                                    <h5 class="font-medium">Livraison possible</h5>
+                                    <p class="text-sm text-gray-500">Proposez la livraison à vos acheteurs</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input v-model="newAd.shippingAvailable" type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                </label>
+                            </div>
+                            
+                            <div v-if="newAd.shippingAvailable" class="p-4 border rounded-lg bg-gray-50">
+                                <label class="block text-gray-700 mb-2">Frais de livraison (optionnel)</label>
+                                <input v-model="newAd.shippingCost" type="number" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border rounded-lg">
+                                <div>
+                                    <h5 class="font-medium">Négociation possible</h5>
+                                    <p class="text-sm text-gray-500">Autorisez les acheteurs à négocier le prix</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input v-model="newAd.negotiable" type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button @click="currentAdStep = 3" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                Retour
+                            </button>
+                            <button @click="submitAd" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                Publier l'annonce
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Modal -->
+        <div v-if="showMessageModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Contacter le vendeur</h3>
+                        <button @click="showMessageModal = false" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center mb-4">
+                            <img :src="currentAd.user.avatar || 'https://ui-avatars.com/api/?name='+currentAd.user.name" class="w-10 h-10 rounded-full mr-3" alt="User">
+                            <div>
+                                <h4 class="font-medium">{{ currentAd.user.name }}</h4>
+                                <p class="text-sm text-gray-500">À propos de : {{ currentAd.title }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Votre message *</label>
+                            <textarea v-model="messageContent" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Bonjour, je suis intéressé par votre annonce..."></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button @click="sendMessageToSeller" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                Envoyer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Modal -->
+        <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Paiement sécurisé</h3>
+                        <button @click="showPaymentModal = false" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-medium">{{ currentAd.title }}</h4>
+                                <span class="font-bold text-blue-500">{{ currentAd.price }} €</span>
+                            </div>
+                            
+                            <div v-if="selectedDeliveryOption === 'shipping'" class="flex justify-between items-center text-sm text-gray-500">
+                                <span>Livraison à domicile</span>
+                                <span>+5 €</span>
+                            </div>
+                            <div v-else class="text-sm text-gray-500">
+                                Remise en main propre
+                            </div>
+                        </div>
+                        
+                        <div class="border-t pt-4 mb-4">
+                            <div class="flex justify-between font-medium">
+                                <span class="text-gray-800">Total</span>
+                                <span class="text-blue-500">{{ selectedDeliveryOption === 'shipping' ? currentAd.price + 5 : currentAd.price }} €</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-800 mb-3">Moyen de paiement</h4>
+                            <div class="space-y-3">
+                                <div v-for="method in paymentMethods" :key="method.id" 
+                                     @click="selectPaymentMethod(method)"
+                                     :class="{'border-blue-500 bg-blue-50': selectedPaymentMethod === method.id}"
+                                     class="border-2 rounded-lg p-3 cursor-pointer transition">
+                                    <div class="flex items-center">
+                                        <div class="mr-3">
+                                            <i :class="method.icon" class="text-2xl text-gray-500"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h5 class="font-medium">{{ method.name }}</h5>
+                                        </div>
+                                        <div v-if="selectedPaymentMethod === method.id">
+                                            <i class="fas fa-check text-blue-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-if="selectedPaymentMethod === 'credit-card'" class="mb-6 border-t pt-4">
+                            <h4 class="font-medium text-gray-800 mb-3">Informations de carte</h4>
+                            
+                            <div class="mb-3">
+                                <label class="block text-gray-700 mb-1">Numéro de carte *</label>
+                                <input v-model="paymentInfo.cardNumber" type="text" placeholder="1234 5678 9012 3456" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="block text-gray-700 mb-1">Date d'expiration *</label>
+                                    <input v-model="paymentInfo.expiryDate" type="text" placeholder="MM/AA" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-1">CVV *</label>
+                                    <input v-model="paymentInfo.cvv" type="text" placeholder="123" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="block text-gray-700 mb-1">Nom sur la carte *</label>
+                                <input v-model="paymentInfo.cardName" type="text" placeholder="Nom complet" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button @click="showPaymentModal = false" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                            Annuler
+                        </button>
+                        <button @click="processPayment" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                            Payer maintenant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Connexion</h3>
+                        <button @click="showLoginModal = false" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form @submit.prevent="login">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Email *</label>
+                            <input v-model="loginForm.email" type="email" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Mot de passe *</label>
+                            <input v-model="loginForm.password" type="password" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <button type="submit" class="w-full px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4">
+                            Se connecter
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="text-gray-600">Pas encore de compte ? <a href="#" @click="showRegisterModal = true; showLoginModal = false" class="text-blue-500 hover:underline">S'inscrire</a></p>
+                            <a href="#" @click="showForgotPasswordModal = true" class="text-sm text-blue-500 hover:underline">Mot de passe oublié ?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div v-if="showRegisterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Créer un compte</h3>
+                        <button @click="showRegisterModal = false" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form @submit.prevent="register">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Prénom *</label>
+                                <input v-model="registerForm.firstName" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Nom *</label>
+                                <input v-model="registerForm.lastName" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Email *</label>
+                            <input v-model="registerForm.email" type="email" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Téléphone *</label>
+                            <input v-model="registerForm.phone" type="tel" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Localisation *</label>
+                            <input v-model="registerForm.location" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Mot de passe *</label>
+                            <input v-model="registerForm.password" type="password" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        
+                        <button type="submit" class="w-full px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4">
+                            S'inscrire
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="text-gray-600">Déjà un compte ? <a href="#" @click="showLoginModal = true; showRegisterModal = false" class="text-blue-500 hover:underline">Se connecter</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div v-if="showEditProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Modifier le profil</h3>
+                        <button @click="showEditProfileModal = false" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form @submit.prevent="updateProfile">
+                        <div class="mb-4 text-center">
+                            <div class="relative inline-block">
+                                <img :src="editProfileForm.avatar || user.avatar || 'https://ui-avatars.com/api/?name='+user.name" class="w-24 h-24 rounded-full object-cover mx-auto mb-3">
+                                <button type="button" @click="triggerAvatarInput" class="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <input type="file" ref="avatarInput" @change="handleAvatarUpload" accept="image/*" class="hidden">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Prénom *</label>
+                                <input v-model="editProfileForm.firstName" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Nom *</label>
+                                <input v-model="editProfileForm.lastName" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                           
+</html>
