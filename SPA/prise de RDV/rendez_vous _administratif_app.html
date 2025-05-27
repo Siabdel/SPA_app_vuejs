@@ -1,0 +1,1534 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion de Rendez-vous Administratifs</title>
+  <!-- CSS Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.8/main.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.8/main.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --dark-color: #34495e;
+    }
+    
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background-color: #f8f9fa;
+    }
+    
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar {
+      background-color: var(--primary-color);
+      color: white;
+      transition: all 0.3s;
+    }
+    
+    .sidebar-link {
+      color: var(--light-color);
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    
+    .sidebar-link:hover, .sidebar-link.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-left: 3px solid var(--secondary-color);
+    }
+    
+    .card-hover {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .badge-service {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+    
+    .badge-status-confirmed {
+      background-color: #2ecc71;
+    }
+    
+    .badge-status-cancelled {
+      background-color: var(--accent-color);
+    }
+    
+    .badge-status-pending {
+      background-color: #f39c12;
+    }
+    
+    .fc-event {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .fc-event:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+    
+    .file-upload-container {
+      border: 2px dashed #ccc;
+      transition: all 0.3s;
+    }
+    
+    .file-upload-container:hover {
+      border-color: var(--secondary-color);
+      background-color: rgba(52, 152, 219, 0.05);
+    }
+    
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    
+    .accessibility-high-contrast {
+      filter: contrast(120%);
+    }
+    
+    .text-primary {
+      color: var(--primary-color) !important;
+    }
+    
+    .bg-primary {
+      background-color: var(--primary-color) !important;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: #1a252f;
+      border-color: #1a252f;
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
+  </style>
+</head>
+<body class="app-container">
+  <div id="app">
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+      <div v-for="(toast, index) in toasts" :key="index" 
+           :class="`toast show mb-3 ${toast.type}`" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">{{ toast.title }}</strong>
+          <button type="button" class="btn-close" @click="removeToast(index)" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          {{ toast.message }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <i class="fas fa-calendar-check me-2"></i>
+          Rendez-vous Administratifs
+        </a>
+        <button class="navbar-toggler" type="button" @click="toggleMobileMenu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" :class="{ 'show': mobileMenuOpen }">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#" @click="changeView('dashboard')">
+                <i class="fas fa-home me-1"></i> Tableau de bord
+              </a>
+            </li>
+          </ul>
+          <div class="d-flex align-items-center">
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-circle me-1"></i>
+                {{ currentUser.name }}
+                <span class="badge bg-light text-dark ms-2">{{ currentUser.role }}</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="#" @click="openProfileModal"><i class="fas fa-user me-2"></i> Mon profil</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" @click="logout"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+              </ul>
+            </div>
+            <button class="btn btn-outline-light ms-3" @click="toggleAccessibility">
+              <i class="fas fa-universal-access"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid flex-grow-1">
+      <div class="row h-100">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar p-0" :class="{ 'd-none': !sidebarOpen }">
+          <div class="p-3">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Rechercher..." v-model="sidebarSearch">
+              <button class="btn btn-outline-light" type="button">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('dashboard')" :class="{ 'active': currentView === 'dashboard' }">
+                <i class="fas fa-tachometer-alt me-2"></i> Tableau de bord
+              </a>
+            </li>
+            
+            <!-- User Links -->
+            <template v-if="currentUser.role === 'user'">
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('appointments')" :class="{ 'active': currentView === 'appointments' }">
+                  <i class="fas fa-calendar me-2"></i> Mes rendez-vous
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('new-appointment')" :class="{ 'active': currentView === 'new-appointment' }">
+                  <i class="fas fa-plus-circle me-2"></i> Prendre rendez-vous
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('documents')" :class="{ 'active': currentView === 'documents' }">
+                  <i class="fas fa-file-upload me-2"></i> Mes documents
+                </a>
+              </li>
+            </template>
+            
+            <!-- Agent Links -->
+            <template v-if="currentUser.role === 'agent'">
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('agent-appointments')" :class="{ 'active': currentView === 'agent-appointments' }">
+                  <i class="fas fa-calendar-check me-2"></i> Rendez-vous
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('availability')" :class="{ 'active': currentView === 'availability' }">
+                  <i class="fas fa-clock me-2"></i> Gestion des créneaux
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('client-documents')" :class="{ 'active': currentView === 'client-documents' }">
+                  <i class="fas fa-folder-open me-2"></i> Documents clients
+                </a>
+              </li>
+            </template>
+            
+            <!-- Admin Links -->
+            <template v-if="currentUser.role === 'admin'">
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('admin-dashboard')" :class="{ 'active': currentView === 'admin-dashboard' }">
+                  <i class="fas fa-chart-line me-2"></i> Statistiques
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('user-management')" :class="{ 'active': currentView === 'user-management' }">
+                  <i class="fas fa-users-cog me-2"></i> Gestion des utilisateurs
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('service-management')" :class="{ 'active': currentView === 'service-management' }">
+                  <i class="fas fa-concierge-bell me-2"></i> Gestion des services
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link sidebar-link py-3 px-4" href="#" @click="changeView('global-calendar')" :class="{ 'active': currentView === 'global-calendar' }">
+                  <i class="fas fa-calendar-alt me-2"></i> Calendrier global
+                </a>
+              </li>
+            </template>
+          </ul>
+        </div>
+
+        <!-- Main View -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
+          <!-- Loading State -->
+          <div v-if="loading" class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+          </div>
+          
+          <!-- Error State -->
+          <div v-else-if="error" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+            <button class="btn btn-sm btn-outline-danger ms-3" @click="retryLoading">Réessayer</button>
+          </div>
+          
+          <!-- Dynamic Views -->
+          <div v-else>
+            <!-- User Dashboard -->
+            <div v-if="currentView === 'dashboard' && currentUser.role === 'user'">
+              <h2 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i> Tableau de bord</h2>
+              
+              <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                  <div class="card card-hover bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-calendar text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Rendez-vous à venir</h5>
+                          <p class="card-text text-muted mb-0">{{ upcomingAppointments.length }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="changeView('appointments')">
+                        Voir tous <i class="fas fa-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <div class="card card-hover bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-file-alt text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Documents déposés</h5>
+                          <p class="card-text text-muted mb-0">{{ userDocuments.length }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="changeView('documents')">
+                        Voir tous <i class="fas fa-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <div class="card card-hover bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-history text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Historique</h5>
+                          <p class="card-text text-muted mb-0">{{ pastAppointments.length }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="showPastAppointments = !showPastAppointments">
+                        {{ showPastAppointments ? 'Masquer' : 'Afficher' }} <i class="fas fa-history ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                  <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i> Prochains rendez-vous</h5>
+                </div>
+                <div class="card-body">
+                  <div v-if="upcomingAppointments.length === 0" class="text-center py-4">
+                    <i class="fas fa-calendar-times text-muted fs-1 mb-3"></i>
+                    <p class="text-muted">Aucun rendez-vous à venir</p>
+                    <button class="btn btn-primary" @click="changeView('new-appointment')">
+                      <i class="fas fa-plus me-1"></i> Prendre un rendez-vous
+                    </button>
+                  </div>
+                  
+                  <div v-else>
+                    <div class="list-group">
+                      <div v-for="appointment in upcomingAppointments.slice(0, 3)" :key="appointment.id" 
+                           class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                          <h6 class="mb-1">
+                            <span class="badge badge-service me-2">{{ appointment.service.name }}</span>
+                            {{ formatDate(appointment.start) }}
+                          </h6>
+                          <small class="text-muted">{{ formatTime(appointment.start) }} - {{ formatTime(appointment.end) }}</small>
+                        </div>
+                        <p class="mb-1">{{ appointment.location }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <small class="text-muted">Avec {{ appointment.agent.name }}</small>
+                          <div>
+                            <button class="btn btn-sm btn-outline-secondary me-1" @click.stop="viewAppointmentDetails(appointment)">
+                              <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" @click.stop="cancelAppointment(appointment)">
+                              <i class="fas fa-times"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-if="showPastAppointments && pastAppointments.length > 0" class="card shadow-sm">
+                <div class="card-header bg-white">
+                  <h5 class="mb-0"><i class="fas fa-history me-2"></i> Rendez-vous passés</h5>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Service</th>
+                          <th>Date</th>
+                          <th>Heure</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="appointment in pastAppointments.slice(0, 5)" :key="appointment.id">
+                          <td>{{ appointment.service.name }}</td>
+                          <td>{{ formatDate(appointment.start) }}</td>
+                          <td>{{ formatTime(appointment.start) }}</td>
+                          <td>
+                            <span :class="`badge badge-status-${appointment.status}`">
+                              {{ appointment.status === 'confirmed' ? 'Confirmé' : 
+                                 appointment.status === 'cancelled' ? 'Annulé' : 'Terminé' }}
+                            </span>
+                          </td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary" @click="viewAppointmentDetails(appointment)">
+                              <i class="fas fa-eye"></i> Détails
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- User Appointments Calendar -->
+            <div v-else-if="currentView === 'appointments' && currentUser.role === 'user'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar me-2"></i> Mes rendez-vous</h2>
+                <button class="btn btn-primary" @click="changeView('new-appointment')">
+                  <i class="fas fa-plus me-1"></i> Nouveau rendez-vous
+                </button>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div id="user-calendar"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- New Appointment Form -->
+            <div v-else-if="currentView === 'new-appointment' && currentUser.role === 'user'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-plus-circle me-2"></i> Prendre un rendez-vous</h2>
+                <button class="btn btn-outline-secondary" @click="changeView('appointments')">
+                  <i class="fas fa-arrow-left me-1"></i> Retour
+                </button>
+              </div>
+              
+              <div class="row">
+                <div class="col-lg-8">
+                  <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                      <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                          <a class="nav-link" :class="{ 'active': newAppointmentStep === 1 }" href="#" @click.prevent="setNewAppointmentStep(1)">
+                            <span class="badge bg-primary rounded-circle me-1">1</span> Service
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" :class="{ 'active': newAppointmentStep === 2 }" href="#" @click.prevent="setNewAppointmentStep(2)">
+                            <span class="badge bg-primary rounded-circle me-1">2</span> Date et heure
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" :class="{ 'active': newAppointmentStep === 3 }" href="#" @click.prevent="setNewAppointmentStep(3)">
+                            <span class="badge bg-primary rounded-circle me-1">3</span> Confirmation
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div class="card-body">
+                      <!-- Step 1: Service Selection -->
+                      <div v-if="newAppointmentStep === 1">
+                        <h5 class="mb-4">Choisissez un service</h5>
+                        <div class="row">
+                          <div v-for="service in services" :key="service.id" class="col-md-6 mb-3">
+                            <div class="card card-hover h-100" 
+                                 :class="{ 'border-primary': newAppointment.service && newAppointment.service.id === service.id }"
+                                 @click="selectService(service)">
+                              <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                  <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                                    <i :class="`fas ${service.icon} text-primary`"></i>
+                                  </div>
+                                  <div>
+                                    <h5 class="card-title mb-1">{{ service.name }}</h5>
+                                    <p class="card-text text-muted small">{{ service.description }}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="card-footer bg-transparent" v-if="service.duration">
+                                <small class="text-muted">Durée: {{ service.duration }} minutes</small>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end mt-4">
+                          <button class="btn btn-primary" :disabled="!newAppointment.service" @click="setNewAppointmentStep(2)">
+                            Suivant <i class="fas fa-arrow-right ms-1"></i>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <!-- Step 2: Date and Time Selection -->
+                      <div v-if="newAppointmentStep === 2">
+                        <h5 class="mb-4">Choisissez une date et un créneau</h5>
+                        
+                        <div class="row mb-4">
+                          <div class="col-md-6">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" v-model="newAppointmentDate" 
+                                   :min="formatDateForInput(new Date())" @change="fetchAvailableSlots">
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Agent</label>
+                            <select class="form-select" v-model="newAppointment.agent" @change="fetchAvailableSlots">
+                              <option value="">Tous les agents</option>
+                              <option v-for="agent in agents" :key="agent.id" :value="agent">
+                                {{ agent.name }} ({{ agent.specialty }})
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div v-if="loadingSlots" class="text-center py-4">
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                          </div>
+                          <p class="mt-2">Recherche des créneaux disponibles...</p>
+                        </div>
+                        
+                        <div v-else-if="availableSlots.length === 0" class="text-center py-4">
+                          <i class="fas fa-calendar-times text-muted fs-1 mb-3"></i>
+                          <p class="text-muted">Aucun créneau disponible pour cette date</p>
+                          <button class="btn btn-outline-primary" @click="newAppointmentDate = ''">
+                            <i class="fas fa-arrow-left me-1"></i> Changer de date
+                          </button>
+                        </div>
+                        
+                        <div v-else>
+                          <h6 class="mb-3">Créneaux disponibles le {{ formatDate(newAppointmentDate) }}</h6>
+                          <div class="row">
+                            <div v-for="slot in availableSlots" :key="slot.start" class="col-md-4 mb-3">
+                              <button class="btn w-100" 
+                                      :class="isSlotSelected(slot) ? 'btn-primary' : 'btn-outline-primary'"
+                                      @click="selectTimeSlot(slot)">
+                                {{ formatTime(slot.start) }} - {{ formatTime(slot.end) }}
+                                <small class="d-block">{{ slot.agent.name }}</small>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                          <button class="btn btn-outline-secondary" @click="setNewAppointmentStep(1)">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                          </button>
+                          <button class="btn btn-primary" :disabled="!newAppointment.start" @click="setNewAppointmentStep(3)">
+                            Suivant <i class="fas fa-arrow-right ms-1"></i>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <!-- Step 3: Confirmation -->
+                      <div v-if="newAppointmentStep === 3">
+                        <h5 class="mb-4">Confirmez votre rendez-vous</h5>
+                        
+                        <div class="card mb-4">
+                          <div class="card-body">
+                            <h6 class="card-title">Détails du rendez-vous</h6>
+                            <hr>
+                            <div class="row">
+                              <div class="col-md-6">
+                                <p><strong>Service:</strong> {{ newAppointment.service.name }}</p>
+                                <p><strong>Date:</strong> {{ formatDate(newAppointment.start) }}</p>
+                                <p><strong>Heure:</strong> {{ formatTime(newAppointment.start) }} - {{ formatTime(newAppointment.end) }}</p>
+                              </div>
+                              <div class="col-md-6">
+                                <p><strong>Lieu:</strong> {{ newAppointment.location }}</p>
+                                <p><strong>Avec:</strong> {{ newAppointment.agent.name }}</p>
+                                <p><strong>Durée:</strong> {{ newAppointment.service.duration }} minutes</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                          <div class="card-body">
+                            <h6 class="card-title">Documents requis</h6>
+                            <hr>
+                            <div v-if="newAppointment.service.requiredDocuments.length > 0">
+                              <p>Pour ce service, vous devez fournir les documents suivants :</p>
+                              <ul>
+                                <li v-for="doc in newAppointment.service.requiredDocuments" :key="doc">{{ doc }}</li>
+                              </ul>
+                              
+                              <div class="file-upload-container p-4 rounded text-center mb-3" @click="triggerFileUpload">
+                                <div v-if="uploadedFiles.length === 0">
+                                  <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-2"></i>
+                                  <p class="text-muted">Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
+                                  <small class="text-muted">Formats acceptés: PDF, JPG, PNG (max 5MB)</small>
+                                </div>
+                                <div v-else>
+                                  <i class="fas fa-check-circle text-success fs-1 mb-2"></i>
+                                  <p>{{ uploadedFiles.length }} fichier(s) prêt(s) à être envoyé(s)</p>
+                                  <ul class="list-unstyled">
+                                    <li v-for="file in uploadedFiles" :key="file.name">
+                                      <small>{{ file.name }} ({{ formatFileSize(file.size) }})</small>
+                                    </li>
+                                  </ul>
+                                </div>
+                                <input type="file" ref="fileInput" multiple @change="handleFileUpload" style="display: none;">
+                              </div>
+                            </div>
+                            <div v-else>
+                              <p>Aucun document requis pour ce service.</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                          <input class="form-check-input" type="checkbox" v-model="termsAccepted" id="termsCheck">
+                          <label class="form-check-label" for="termsCheck">
+                            Je confirme avoir pris connaissance des conditions générales et de la politique de confidentialité.
+                          </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                          <button class="btn btn-outline-secondary" @click="setNewAppointmentStep(2)">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                          </button>
+                          <button class="btn btn-success" :disabled="!termsAccepted || (newAppointment.service.requiredDocuments.length > 0 && uploadedFiles.length === 0)" @click="confirmAppointment">
+                            <i class="fas fa-check me-1"></i> Confirmer le rendez-vous
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-lg-4">
+                  <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-white">
+                      <h5 class="mb-0">Résumé</h5>
+                    </div>
+                    <div class="card-body">
+                      <div v-if="newAppointmentStep >= 1 && newAppointment.service">
+                        <h6 class="text-primary">{{ newAppointment.service.name }}</h6>
+                        <p class="small text-muted">{{ newAppointment.service.description }}</p>
+                        <hr>
+                      </div>
+                      
+                      <div v-if="newAppointmentStep >= 2 && newAppointment.start">
+                        <div class="d-flex justify-content-between">
+                          <span class="text-muted">Date:</span>
+                          <strong>{{ formatDate(newAppointment.start) }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                          <span class="text-muted">Heure:</span>
+                          <strong>{{ formatTime(newAppointment.start) }} - {{ formatTime(newAppointment.end) }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                          <span class="text-muted">Avec:</span>
+                          <strong>{{ newAppointment.agent.name }}</strong>
+                        </div>
+                        <hr>
+                      </div>
+                      
+                      <div v-if="newAppointmentStep >= 3">
+                        <div class="d-flex justify-content-between">
+                          <span class="text-muted">Documents:</span>
+                          <strong>{{ uploadedFiles.length }}/{{ newAppointment.service.requiredDocuments.length }}</strong>
+                        </div>
+                        <hr>
+                      </div>
+                      
+                      <div class="alert alert-info small">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Vous recevrez une confirmation par email avec les détails de votre rendez-vous.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- User Documents -->
+            <div v-else-if="currentView === 'documents' && currentUser.role === 'user'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-upload me-2"></i> Mes documents</h2>
+                <button class="btn btn-primary" @click="showUploadModal = true">
+                  <i class="fas fa-upload me-1"></i> Téléverser
+                </button>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Documents déposés</h5>
+                    <div class="input-group" style="width: 300px;">
+                      <input type="text" class="form-control" placeholder="Rechercher..." v-model="documentSearch">
+                      <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="card-body">
+                  <div v-if="filteredDocuments.length === 0" class="text-center py-5">
+                    <i class="fas fa-folder-open text-muted fs-1 mb-3"></i>
+                    <p class="text-muted">Aucun document déposé</p>
+                    <button class="btn btn-primary" @click="showUploadModal = true">
+                      <i class="fas fa-upload me-1"></i> Téléverser un document
+                    </button>
+                  </div>
+                  
+                  <div v-else>
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Taille</th>
+                            <th>Date de dépôt</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="doc in filteredDocuments" :key="doc.id">
+                            <td>
+                              <i :class="`fas ${getFileIcon(doc.type)} me-2`"></i>
+                              {{ doc.name }}
+                            </td>
+                            <td>{{ doc.type }}</td>
+                            <td>{{ formatFileSize(doc.size) }}</td>
+                            <td>{{ formatDate(doc.uploadDate) }}</td>
+                            <td>
+                              <span :class="`badge bg-${doc.status === 'approved' ? 'success' : 
+                                            doc.status === 'rejected' ? 'danger' : 'warning'}`">
+                                {{ doc.status === 'approved' ? 'Validé' : 
+                                   doc.status === 'rejected' ? 'Rejeté' : 'En attente' }}
+                              </span>
+                            </td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-primary me-1" @click="downloadDocument(doc)">
+                                <i class="fas fa-download"></i>
+                              </button>
+                              <button class="btn btn-sm btn-outline-danger" @click="deleteDocument(doc)">
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <nav aria-label="Document pagination" class="mt-4">
+                      <ul class="pagination justify-content-center">
+                        <li class="page-item" :class="{ 'disabled': currentDocumentPage === 1 }">
+                          <a class="page-link" href="#" @click.prevent="changeDocumentPage(currentDocumentPage - 1)">Précédent</a>
+                        </li>
+                        <li class="page-item" v-for="page in totalDocumentPages" :key="page" 
+                            :class="{ 'active': page === currentDocumentPage }">
+                          <a class="page-link" href="#" @click.prevent="changeDocumentPage(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" :class="{ 'disabled': currentDocumentPage === totalDocumentPages }">
+                          <a class="page-link" href="#" @click.prevent="changeDocumentPage(currentDocumentPage + 1)">Suivant</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Agent Appointments -->
+            <div v-else-if="currentView === 'agent-appointments' && currentUser.role === 'agent'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar-check me-2"></i> Mes rendez-vous</h2>
+                <div>
+                  <button class="btn btn-outline-secondary me-2" @click="refreshAgentAppointments">
+                    <i class="fas fa-sync-alt me-1"></i> Actualiser
+                  </button>
+                  <button class="btn btn-primary" @click="showAddManualAppointmentModal = true">
+                    <i class="fas fa-plus me-1"></i> Ajouter manuellement
+                  </button>
+                </div>
+              </div>
+              
+              <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-calendar-day text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Aujourd'hui</h5>
+                          <p class="card-text text-muted mb-0">{{ todaysAppointments.length }} RDV</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-clock text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">En attente</h5>
+                          <p class="card-text text-muted mb-0">{{ pendingAppointments.length }} RDV</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-check-circle text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Confirmés</h5>
+                          <p class="card-text text-muted mb-0">{{ confirmedAppointments.length }} RDV</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                  <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{ 'active': agentAppointmentsView === 'calendar' }" 
+                         href="#" @click.prevent="agentAppointmentsView = 'calendar'">
+                        <i class="fas fa-calendar-alt me-1"></i> Calendrier
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{ 'active': agentAppointmentsView === 'list' }" 
+                         href="#" @click.prevent="agentAppointmentsView = 'list'">
+                        <i class="fas fa-list me-1"></i> Liste
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div class="card-body">
+                  <!-- Calendar View -->
+                  <div v-if="agentAppointmentsView === 'calendar'">
+                    <div id="agent-calendar"></div>
+                  </div>
+                  
+                  <!-- List View -->
+                  <div v-else>
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Client</th>
+                            <th>Service</th>
+                            <th>Statut</th>
+                            <th>Documents</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="appointment in agentAppointments" :key="appointment.id">
+                            <td>{{ formatDate(appointment.start) }}</td>
+                            <td>{{ formatTime(appointment.start) }}</td>
+                            <td>{{ appointment.client.name }}</td>
+                            <td>{{ appointment.service.name }}</td>
+                            <td>
+                              <span :class="`badge badge-status-${appointment.status}`">
+                                {{ appointment.status === 'confirmed' ? 'Confirmé' : 
+                                   appointment.status === 'cancelled' ? 'Annulé' : 'En attente' }}
+                              </span>
+                            </td>
+                            <td>
+                              <span v-if="appointment.documents.length > 0" class="badge bg-info">
+                                {{ appointment.documents.length }} <i class="fas fa-file ms-1"></i>
+                              </span>
+                              <span v-else class="badge bg-secondary">Aucun</span>
+                            </td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" @click="viewAppointmentDetails(appointment)">
+                                  <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-success" @click="confirmClientAppointment(appointment)" 
+                                        :disabled="appointment.status === 'confirmed'">
+                                  <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" @click="cancelClientAppointment(appointment)"
+                                        :disabled="appointment.status === 'cancelled'">
+                                  <i class="fas fa-times"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <nav aria-label="Appointment pagination" class="mt-4">
+                      <ul class="pagination justify-content-center">
+                        <li class="page-item" :class="{ 'disabled': currentAgentAppointmentPage === 1 }">
+                          <a class="page-link" href="#" @click.prevent="changeAgentAppointmentPage(currentAgentAppointmentPage - 1)">Précédent</a>
+                        </li>
+                        <li class="page-item" v-for="page in totalAgentAppointmentPages" :key="page" 
+                            :class="{ 'active': page === currentAgentAppointmentPage }">
+                          <a class="page-link" href="#" @click.prevent="changeAgentAppointmentPage(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" :class="{ 'disabled': currentAgentAppointmentPage === totalAgentAppointmentPages }">
+                          <a class="page-link" href="#" @click.prevent="changeAgentAppointmentPage(currentAgentAppointmentPage + 1)">Suivant</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Agent Availability Management -->
+            <div v-else-if="currentView === 'availability' && currentUser.role === 'agent'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-clock me-2"></i> Gestion des créneaux</h2>
+                <button class="btn btn-primary" @click="showAddAvailabilityModal = true">
+                  <i class="fas fa-plus me-1"></i> Ajouter des créneaux
+                </button>
+              </div>
+              
+              <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                  <h5 class="mb-0">Mes disponibilités</h5>
+                </div>
+                <div class="card-body">
+                  <div id="availability-calendar"></div>
+                </div>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                  <h5 class="mb-0">Règles de disponibilité</h5>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Jour</th>
+                          <th>Heure d'ouverture</th>
+                          <th>Heure de fermeture</th>
+                          <th>Pause déjeuner</th>
+                          <th>Créneaux</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="rule in availabilityRules" :key="rule.day">
+                          <td>{{ getDayName(rule.day) }}</td>
+                          <td>{{ rule.startTime || '-' }}</td>
+                          <td>{{ rule.endTime || '-' }}</td>
+                          <td>
+                            <span v-if="rule.breakStart && rule.breakEnd">
+                              {{ rule.breakStart }} - {{ rule.breakEnd }}
+                            </span>
+                            <span v-else>-</span>
+                          </td>
+                          <td>{{ rule.slotDuration }} min</td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" @click="editAvailabilityRule(rule)">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" @click="deleteAvailabilityRule(rule)">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <button class="btn btn-primary mt-3" @click="showAddAvailabilityRuleModal = true">
+                    <i class="fas fa-plus me-1"></i> Ajouter une règle
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Agent Client Documents -->
+            <div v-else-if="currentView === 'client-documents' && currentUser.role === 'agent'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-folder-open me-2"></i> Documents clients</h2>
+                <div class="input-group" style="width: 300px;">
+                  <input type="text" class="form-control" placeholder="Rechercher..." v-model="clientDocumentSearch">
+                  <button class="btn btn-outline-secondary" type="button">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div v-if="clientDocuments.length === 0" class="text-center py-5">
+                    <i class="fas fa-folder-open text-muted fs-1 mb-3"></i>
+                    <p class="text-muted">Aucun document client disponible</p>
+                  </div>
+                  
+                  <div v-else>
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Client</th>
+                            <th>Document</th>
+                            <th>Type</th>
+                            <th>Date de dépôt</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="doc in filteredClientDocuments" :key="doc.id">
+                            <td>{{ doc.client.name }}</td>
+                            <td>
+                              <i :class="`fas ${getFileIcon(doc.type)} me-2`"></i>
+                              {{ doc.name }}
+                            </td>
+                            <td>{{ doc.type }}</td>
+                            <td>{{ formatDate(doc.uploadDate) }}</td>
+                            <td>
+                              <span :class="`badge bg-${doc.status === 'approved' ? 'success' : 
+                                            doc.status === 'rejected' ? 'danger' : 'warning'}`">
+                                {{ doc.status === 'approved' ? 'Validé' : 
+                                   doc.status === 'rejected' ? 'Rejeté' : 'En attente' }}
+                              </span>
+                            </td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" @click="downloadClientDocument(doc)">
+                                  <i class="fas fa-download"></i>
+                                </button>
+                                <button class="btn btn-outline-success" @click="approveDocument(doc)" 
+                                        :disabled="doc.status === 'approved'">
+                                  <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" @click="rejectDocument(doc)"
+                                        :disabled="doc.status === 'rejected'">
+                                  <i class="fas fa-times"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" @click="addDocumentNote(doc)">
+                                  <i class="fas fa-comment"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <nav aria-label="Document pagination" class="mt-4">
+                      <ul class="pagination justify-content-center">
+                        <li class="page-item" :class="{ 'disabled': currentClientDocumentPage === 1 }">
+                          <a class="page-link" href="#" @click.prevent="changeClientDocumentPage(currentClientDocumentPage - 1)">Précédent</a>
+                        </li>
+                        <li class="page-item" v-for="page in totalClientDocumentPages" :key="page" 
+                            :class="{ 'active': page === currentClientDocumentPage }">
+                          <a class="page-link" href="#" @click.prevent="changeClientDocumentPage(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" :class="{ 'disabled': currentClientDocumentPage === totalClientDocumentPages }">
+                          <a class="page-link" href="#" @click.prevent="changeClientDocumentPage(currentClientDocumentPage + 1)">Suivant</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Admin Dashboard -->
+            <div v-else-if="currentView === 'admin-dashboard' && currentUser.role === 'admin'">
+              <h2 class="mb-4"><i class="fas fa-chart-line me-2"></i> Tableau de bord administratif</h2>
+              
+              <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-users text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Utilisateurs</h5>
+                          <p class="card-text text-muted mb-0">{{ stats.totalUsers }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="changeView('user-management')">
+                        Gérer <i class="fas fa-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-user-tie text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Agents</h5>
+                          <p class="card-text text-muted mb-0">{{ stats.totalAgents }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="changeView('user-management')">
+                        Gérer <i class="fas fa-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-calendar-check text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Rendez-vous</h5>
+                          <p class="card-text text-muted mb-0">{{ stats.totalAppointments }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="changeView('global-calendar')">
+                        Voir <i class="fas fa-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                  <div class="card bg-white shadow-sm h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                          <i class="fas fa-concierge-bell text-primary fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="card-title mb-0">Services</h5>
+                          <p class="card-text text-muted mb-0">{{ stats.totalServices }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                      <a href="#" class="btn btn-sm btn-outline-primary" @click="changeView('service-management')">
+                        Gérer <i class="fas fa-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-4">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                      <h5 class="mb-0">Statistiques des rendez-vous</h5>
+                    </div>
+                    <div class="card-body">
+                      <canvas id="appointmentsChart" height="300"></canvas>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                      <h5 class="mb-0">Statut des rendez-vous</h5>
+                    </div>
+                    <div class="card-body">
+                      <canvas id="appointmentStatusChart" height="300"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                      <h5 class="mb-0">Derniers rendez-vous</h5>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Client</th>
+                              <th>Service</th>
+                              <th>Agent</th>
+                              <th>Statut</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="appointment in recentAppointments" :key="appointment.id">
+                              <td>{{ formatDateTime(appointment.start) }}</td>
+                              <td>{{ appointment.client.name }}</td>
+                              <td>{{ appointment.service.name }}</td>
+                              <td>{{ appointment.agent.name }}</td>
+                              <td>
+                                <span :class="`badge badge-status-${appointment.status}`">
+                                  {{ appointment.status === 'confirmed' ? 'Confirmé' : 
+                                     appointment.status === 'cancelled' ? 'Annulé' : 'En attente' }}
+                                </span>
+                              </td>
+                              <td>
+                                <button class="btn btn-sm btn-outline-primary" @click="viewAppointmentDetails(appointment)">
+                                  <i class="fas fa-eye"></i> Détails
+                                </button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Admin User Management -->
+            <div v-else-if="currentView === 'user-management' && currentUser.role === 'admin'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users-cog me-2"></i> Gestion des utilisateurs</h2>
+                <button class="btn btn-primary" @click="showAddUserModal = true">
+                  <i class="fas fa-plus me-1"></i> Ajouter un utilisateur
+                </button>
+              </div>
+              
+              <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Filtres</h5>
+                    <button class="btn btn-sm btn-outline-secondary" @click="resetUserFilters">
+                      <i class="fas fa-sync-alt me-1"></i> Réinitialiser
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Rôle</label>
+                      <select class="form-select" v-model="userFilters.role">
+                        <option value="">Tous les rôles</option>
+                        <option value="user">Utilisateur</option>
+                        <option value="agent">Agent</option>
+                        <option value="admin">Administrateur</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Statut</label>
+                      <select class="form-select" v-model="userFilters.status">
+                        <option value="">Tous les statuts</option>
+                        <option value="active">Actif</option>
+                        <option value="inactive">Inactif</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Recherche</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Nom, email..." v-model="userFilters.search">
+                        <button class="btn btn-outline-secondary" type="button">
+                          <i class="fas fa-search"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div v-if="filteredUsers.length === 0" class="text-center py-5">
+                    <i class="fas fa-user-slash text-muted fs-1 mb-3"></i>
+                    <p class="text-muted">Aucun utilisateur trouvé</p>
+                  </div>
+                  
+                  <div v-else>
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Dernière connexion</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="user in paginatedUsers" :key="user.id">
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <img :src="user.avatar || 'https://via.placeholder.com/40'" 
+                                     class="rounded-circle me-2" width="40" height="40">
+                                {{ user.name }}
+                              </div>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                              <span class="badge" 
+                                    :class="user.role === 'admin' ? 'bg-danger' : 
+                                           user.role === 'agent' ? 'bg-primary' : 'bg-secondary'">
+                                {{ user.role === 'admin' ? 'Administrateur' : 
+                                   user.role === 'agent' ? 'Agent' : 'Utilisateur' }}
+                              </span>
+                            </td>
+                            <td>
+                              <span class="badge" :class="user.status === 'active' ? 'bg-success' : 'bg-warning'">
+                                {{ user.status === 'active' ? 'Actif' : 'Inactif' }}
+                              </span>
+                            </td>
+                            <td>{{ user.lastLogin ? formatDateTime(user.lastLogin) : 'Jamais' }}</td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" @click="editUser(user)">
+                                  <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" @click="confirmDeleteUser(user)">
+                                  <i class="fas fa-trash"></i>
+                                </button>
+                                <button v-if="user.status === 'active'" 
+                                        class="btn btn-outline-warning" @click="toggleUserStatus(user)">
+                                  <i class="fas fa-ban"></i>
+                                </button>
+                                <button v-else class="btn btn-outline-success" @click="toggleUserStatus(user)">
+                                  <i class="fas fa-check"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <nav aria-label="User pagination" class="mt-4">
+                      <ul class="pagination justify-content-center">
+                        <li class="page-item" :class="{ 'disabled': currentUserPage === 1 }">
+                          <a class="page-link" href="#" @click.prevent="changeUserPage(currentUserPage - 1)">Précédent</a>
+                        </li>
+                        <li class="page-item" v-for="page in totalUserPages" :key="page" 
+                            :class="{ 'active': page === currentUserPage }">
+                          <a class="page-link" href="#" @click.prevent="changeUserPage(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" :class="{ 'disabled': currentUserPage === totalUserPages }">
+                          <a class="page-link" href="#" @click.prevent="changeUserPage(currentUserPage + 1)">Suivant</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Admin Service Management -->
+            <div v-else-if="currentView === 'service-management' && currentUser.role === 'admin'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-concierge-bell me-2"></i> Gestion des services</h2>
+                <button class="btn btn-primary" @click="showAddServiceModal = true">
+                  <i class="fas fa-plus me-1"></i> Ajouter un service
+                </button>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div v-if="services.length === 0" class="text-center py-5">
+                    <i class="fas fa-concierge-bell text-muted fs-1 mb-3"></i>
+                    <p class="text-muted">Aucun service configuré</p>
+                  </div>
+                  
+                  <div v-else>
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Durée</th>
+                            <th>Documents requis</th>
+                            <th>Agents</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="service in services" :key="service.id">
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded me-2">
+                                  <i :class="`fas ${service.icon} text-primary`"></i>
+                                </div>
+                                {{ service.name }}
+                              </div>
+                            </td>
+                            <td>{{ service.description }}</td>
+                            <td>{{ service.duration }} min</td>
+                            <td>
+                              <span v-if="service.requiredDocuments.length > 0" class="badge bg-info">
+                                {{ service.requiredDocuments.length }} <i class="fas fa-file ms-1"></i>
+                              </span>
+                              <span v-else class="badge bg-secondary">Aucun</span>
+                            </td>
+                            <td>
+                              <span class="badge bg-primary">
+                                {{ service.agents.length }} <i class="fas fa-user-tie ms-1"></i>
+                              </span>
+                            </td>
+                            <td>
+                              <span class="badge" :class="service.active ? 'bg-success' : 'bg-secondary'">
+                                {{ service.active ? 'Actif' : 'Inactif' }}
+                              </span>
+                            </td>
+                            <td>
+                              <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" @click="editService(service)">
+                                  <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" @click="confirmDeleteService(service)">
+                                  <i class="fas fa-trash"></i>
+                                </button>
+                                <button v-if="service.active" 
+                                        class="btn btn-outline-warning" @click="toggleServiceStatus(service)">
+                                  <i class="fas fa-ban"></i>
+                                </button>
+                                <button v-else class="btn btn-outline-success" @click="toggleServiceStatus(service)">
+                                  <i class="fas fa-check"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Admin Global Calendar -->
+            <div v-else-if="currentView === 'global-calendar' && currentUser.role === 'admin'">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar-alt me-2"></i> Calendrier global</h2>
+                <div>
+                  <button class="btn btn-outline-secondary me-2" @click="refreshGlobalCalendar">
+                    <i class="fas fa-sync-alt me-1"></i> Actualiser
+                  </button>
+                  <div class="btn-group">
+                    <button class="btn btn-outline-primary" @click="changeCalendarView('dayGridMonth')">
+                      <i class="fas fa-calendar-alt me-1"></i> Mois
+                    </button>
+                    <button class="btn btn-outline-primary" @click="changeCalendarView('timeGridWeek')">
+                      <i class="fas fa-calendar-week me-1"></i> Semaine
+                    </button>
+                    <button class="btn btn-outline-primary" @click="changeCalendarView('timeGridDay')">
+                      <i class="fas fa-calendar-day me-1"></i> Jour
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <label class="form-label">Service</label>
+                      <select class="form-select" v-model="calendarFilters.service">
+                        <option value="">Tous les services</option>
+                        <option v-for="service in services" :key="service.id" :value="service.id">
+                          {{ service.name
+</html>

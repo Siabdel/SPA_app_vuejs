@@ -1,0 +1,1331 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxImmo - Promoteur Immobilier</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <style>
+        .property-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .property-img {
+            height: 200px;
+            object-fit: cover;
+        }
+        .detail-img {
+            height: 400px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .thumbnail-img {
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .variant-badge {
+            cursor: pointer;
+        }
+        .gallery-modal-img {
+            max-height: 80vh;
+            max-width: 100%;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        @media (max-width: 768px) {
+            .detail-img {
+                height: 250px;
+            }
+            .property-img {
+                height: 150px;
+            }
+            .map-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Toast Notifications -->
+        <div class="toast-container">
+            <div v-for="(toast, index) in toasts" :key="index" class="toast show align-items-center" :class="`text-bg-${toast.type}`" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i :class="toast.icon" class="me-2"></i>
+                        {{ toast.message }}
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" @click="removeToast(index)"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="loading-overlay">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+            <div class="container">
+                <a class="navbar-brand" href="#" @click.prevent="currentView = 'home'">
+                    <i class="bi bi-building me-2"></i>LuxImmo
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="filterByCategory('')">Tous</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="filterByCategory('appartement')">Appartements</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="filterByCategory('maison')">Maisons</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="filterByCategory('villa')">Villas</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <div class="input-group me-3">
+                            <input type="text" class="form-control" placeholder="Rechercher..." v-model="searchQuery" @keyup.enter="searchProperties">
+                            <button class="btn btn-outline-light" @click="searchProperties">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <button class="btn btn-outline-light position-relative" @click="currentView = 'cart'">
+                            <i class="bi bi-cart3"></i>
+                            <span v-if="cart.length > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ cart.reduce((total, item) => total + item.quantity, 0) }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container my-4">
+            <!-- Home View - Property Listing -->
+            <div v-if="currentView === 'home'">
+                <div class="row">
+                    <!-- Filters Sidebar -->
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Filtrer</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Type de bien</label>
+                                    <select class="form-select" v-model="activeFilters.type" @change="applyFilters">
+                                        <option value="">Tous les types</option>
+                                        <option value="appartement">Appartement</option>
+                                        <option value="maison">Maison</option>
+                                        <option value="villa">Villa</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Localisation</label>
+                                    <select class="form-select" v-model="activeFilters.location" @change="applyFilters">
+                                        <option value="">Toutes</option>
+                                        <option v-for="location in availableLocations" :value="location">{{ location }}</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Surface (m²)</label>
+                                    <div class="row g-2">
+                                        <div class="col">
+                                            <input type="number" class="form-control" placeholder="Min" v-model="activeFilters.minSurface">
+                                        </div>
+                                        <div class="col">
+                                            <input type="number" class="form-control" placeholder="Max" v-model="activeFilters.maxSurface">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Prix (€)</label>
+                                    <div class="row g-2">
+                                        <div class="col">
+                                            <input type="number" class="form-control" placeholder="Min" v-model="activeFilters.minPrice">
+                                        </div>
+                                        <div class="col">
+                                            <input type="number" class="form-control" placeholder="Max" v-model="activeFilters.maxPrice">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre de pièces</label>
+                                    <select class="form-select" v-model="activeFilters.rooms" @change="applyFilters">
+                                        <option value="">Tous</option>
+                                        <option value="1">1 pièce</option>
+                                        <option value="2">2 pièces</option>
+                                        <option value="3">3 pièces</option>
+                                        <option value="4">4 pièces et plus</option>
+                                    </select>
+                                </div>
+                                
+                                <button class="btn btn-outline-primary w-100" @click="resetFilters">
+                                    <i class="bi bi-x-circle me-1"></i> Réinitialiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Property Grid -->
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 v-if="activeFilters.type">
+                                {{ activeFilters.type | capitalize }}s
+                                <span v-if="filteredProperties.length > 0" class="badge bg-primary">{{ filteredProperties.length }}</span>
+                            </h2>
+                            <h2 v-else>
+                                Nos biens immobiliers
+                                <span v-if="filteredProperties.length > 0" class="badge bg-primary">{{ filteredProperties.length }}</span>
+                            </h2>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">Trier par:</span>
+                                <select class="form-select form-select-sm" style="width: auto;" v-model="sortOption" @change="sortProperties">
+                                    <option value="price-asc">Prix croissant</option>
+                                    <option value="price-desc">Prix décroissant</option>
+                                    <option value="surface-asc">Surface croissante</option>
+                                    <option value="surface-desc">Surface décroissante</option>
+                                    <option value="newest">Plus récents</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div v-if="filteredProperties.length === 0" class="text-center py-5">
+                            <i class="bi bi-search" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">Aucun bien ne correspond à vos critères</h4>
+                            <button class="btn btn-outline-primary mt-3" @click="resetFilters">
+                                Réinitialiser les filtres
+                            </button>
+                        </div>
+                        
+                        <div v-else class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            <div class="col" v-for="property in paginatedProperties" :key="property.id">
+                                <div class="card property-card">
+                                    <img :src="property.images[0]" class="card-img-top property-img" :alt="property.title">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-primary">{{ property.type | capitalize }}</span>
+                                            <span class="text-muted">{{ property.surface }} m²</span>
+                                        </div>
+                                        <h5 class="card-title">{{ property.title }}</h5>
+                                        <p class="card-text text-muted">{{ property.location }}</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <span class="h5 text-primary">{{ property.price | price }} €</span>
+                                            <button class="btn btn-sm btn-outline-primary" @click="viewPropertyDetail(property)">
+                                                <i class="bi bi-eye"></i> Voir
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav v-if="filteredProperties.length > itemsPerPage" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" :class="{ 'disabled': currentPage === 1 }">
+                                    <button class="page-link" @click="changePage(currentPage - 1)">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
+                                </li>
+                                <li class="page-item" v-for="page in totalPages" :key="page" 
+                                    :class="{ 'active': page === currentPage }">
+                                    <button class="page-link" @click="changePage(page)">{{ page }}</button>
+                                </li>
+                                <li class="page-item" :class="{ 'disabled': currentPage === totalPages }">
+                                    <button class="page-link" @click="changePage(currentPage + 1)">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Property Detail View -->
+            <div v-else-if="currentView === 'property-detail'">
+                <button class="btn btn-outline-primary mb-3" @click="currentView = 'home'">
+                    <i class="bi bi-arrow-left"></i> Retour aux biens
+                </button>
+                
+                <div v-if="selectedProperty" class="row">
+                    <div class="col-lg-8">
+                        <!-- Main Image -->
+                        <img :src="selectedProperty.images[0]" class="img-fluid rounded detail-img mb-3" 
+                             :alt="selectedProperty.title" @click="openGallery(0)">
+                        
+                        <!-- Thumbnails -->
+                        <div class="row g-2 mb-4">
+                            <div class="col-4 col-md-3" v-for="(image, index) in selectedProperty.images.slice(1)" :key="index">
+                                <img :src="image" class="img-fluid rounded thumbnail-img" 
+                                     @click="openGallery(index + 1)">
+                            </div>
+                            <div class="col-4 col-md-3" v-if="selectedProperty.video">
+                                <div class="thumbnail-img bg-light d-flex align-items-center justify-content-center" 
+                                     @click="showVideoModal">
+                                    <i class="bi bi-play-circle-fill text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2>{{ selectedProperty.title }}</h2>
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-geo-alt"></i> {{ selectedProperty.location }}
+                        </p>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <span class="badge bg-primary">{{ selectedProperty.type | capitalize }}</span>
+                            <span class="badge bg-secondary">{{ selectedProperty.surface }} m²</span>
+                            <span class="badge bg-success">{{ selectedProperty.rooms }} pièces</span>
+                            <span class="badge bg-info">{{ selectedProperty.bedrooms }} chambres</span>
+                            <span v-if="selectedProperty.floor" class="badge bg-warning text-dark">{{ selectedProperty.floor }}ème étage</span>
+                            <span v-if="selectedProperty.orientation" class="badge bg-light text-dark">{{ selectedProperty.orientation }}</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4>Description</h4>
+                            <p>{{ selectedProperty.description }}</p>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Caractéristiques</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Type</span>
+                                        <span>{{ selectedProperty.type | capitalize }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Surface</span>
+                                        <span>{{ selectedProperty.surface }} m²</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Pièces</span>
+                                        <span>{{ selectedProperty.rooms }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Chambres</span>
+                                        <span>{{ selectedProperty.bedrooms }}</span>
+                                    </li>
+                                    <li v-if="selectedProperty.floor" class="list-group-item d-flex justify-content-between">
+                                        <span>Étage</span>
+                                        <span>{{ selectedProperty.floor }}</span>
+                                    </li>
+                                    <li v-if="selectedProperty.constructionYear" class="list-group-item d-flex justify-content-between">
+                                        <span>Année de construction</span>
+                                        <span>{{ selectedProperty.constructionYear }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Équipements</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li v-for="(equipment, index) in selectedProperty.equipments" :key="index" 
+                                        class="list-group-item">
+                                        <i class="bi bi-check-circle text-success me-2"></i>{{ equipment }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4>Localisation</h4>
+                            <div class="map-container" id="propertyMap"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card sticky-top" style="top: 20px;">
+                            <div class="card-body">
+                                <h3 class="card-title text-primary mb-3">{{ selectedProperty.price | price }} €</h3>
+                                
+                                <div v-if="selectedProperty.variants && selectedProperty.variants.length > 0" class="mb-4">
+                                    <h5>Options disponibles</h5>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span v-for="variant in selectedProperty.variants" :key="variant.type" 
+                                              class="badge variant-badge" 
+                                              :class="{ 'bg-primary': selectedVariantOptions[variant.type] === variant.value, 'bg-light text-dark': selectedVariantOptions[variant.type] !== variant.value }"
+                                              @click="selectVariantOption(variant.type, variant.value)">
+                                            {{ variant.type }}: {{ variant.value }} 
+                                            <span v-if="variant.price > 0">(+{{ variant.price | price }} €)</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h5>Demande de devis</h5>
+                                    <form @submit.prevent="submitQuoteRequest">
+                                        <div class="mb-3">
+                                            <label for="quoteName" class="form-label">Nom complet</label>
+                                            <input type="text" class="form-control" id="quoteName" v-model="quoteForm.name" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="quoteEmail" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="quoteEmail" v-model="quoteForm.email" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="quotePhone" class="form-label">Téléphone</label>
+                                            <input type="tel" class="form-control" id="quotePhone" v-model="quoteForm.phone">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="quoteMessage" class="form-label">Message</label>
+                                            <textarea class="form-control" id="quoteMessage" rows="3" v-model="quoteForm.message"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-send me-1"></i> Envoyer la demande
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="me-3">
+                                        <label class="form-label">Quantité:</label>
+                                        <div class="input-group" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary" @click="decreaseQuantity">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="number" class="form-control text-center" v-model="quantity" min="1">
+                                            <button class="btn btn-outline-secondary" @click="increaseQuantity">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn btn-primary flex-grow-1" @click="addToCart">
+                                        <i class="bi bi-cart-plus"></i> Ajouter au panier
+                                    </button>
+                                </div>
+                                
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">Contact</h5>
+                                        <p><i class="bi bi-telephone me-2"></i> +33 1 23 45 67 89</p>
+                                        <p><i class="bi bi-envelope me-2"></i> contact@luximmo.com</p>
+                                        <p><i class="bi bi-clock me-2"></i> Lun-Ven: 9h-18h</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gallery Modal -->
+                <div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">{{ selectedProperty.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img :src="selectedProperty.images[currentImageIndex]" class="gallery-modal-img" :alt="'Image ' + (currentImageIndex + 1)">
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                                <button type="button" class="btn btn-outline-primary" @click="prevImage">
+                                    <i class="bi bi-chevron-left"></i> Précédent
+                                </button>
+                                <span>{{ currentImageIndex + 1 }} / {{ selectedProperty.images.length }}</span>
+                                <button type="button" class="btn btn-outline-primary" @click="nextImage">
+                                    Suivant <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Video Modal -->
+                <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Visite virtuelle - {{ selectedProperty.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="video-container">
+                                    <iframe :src="selectedProperty.video" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cart View -->
+            <div v-else-if="currentView === 'cart'">
+                <button class="btn btn-outline-primary mb-3" @click="currentView = 'home'">
+                    <i class="bi bi-arrow-left"></i> Continuer mes recherches
+                </button>
+                
+                <h2 class="mb-4">Mon sélection</h2>
+                
+                <div v-if="cart.length === 0" class="text-center py-5">
+                    <i class="bi bi-cart-x" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">Votre sélection est vide</h4>
+                    <button class="btn btn-primary mt-3" @click="currentView = 'home'">
+                        <i class="bi bi-house-door me-1"></i> Voir nos biens
+                    </button>
+                </div>
+                
+                <div v-else class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th style="width: 45%">Bien</th>
+                                                <th style="width: 20%">Prix</th>
+                                                <th style="width: 20%">Quantité</th>
+                                                <th style="width: 15%">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(item, index) in cart" :key="index">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img :src="item.image" class="rounded me-3" style="width: 80px; height: 60px; object-fit: cover;" :alt="item.title">
+                                                        <div>
+                                                            <h6 class="mb-0">{{ item.title }}</h6>
+                                                            <small class="text-muted">{{ item.location }}</small>
+                                                            <div v-if="item.variant" class="mt-1">
+                                                                <small class="text-muted">{{ item.variant }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ item.price | price }} €</td>
+                                                <td>
+                                                    <div class="input-group" style="width: 100px;">
+                                                        <button class="btn btn-outline-secondary btn-sm" @click="updateCartItemQuantity(index, item.quantity - 1)">
+                                                            <i class="bi bi-dash"></i>
+                                                        </button>
+                                                        <input type="number" class="form-control form-control-sm text-center" 
+                                                               v-model.number="item.quantity" @change="updateCartItemQuantity(index, item.quantity)" min="1">
+                                                        <button class="btn btn-outline-secondary btn-sm" @click="updateCartItemQuantity(index, item.quantity + 1)">
+                                                            <i class="bi bi-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>{{ (item.price * item.quantity) | price }} €</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-danger" @click="removeFromCart(index)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Informations complémentaires</h5>
+                                <textarea class="form-control" rows="3" placeholder="Ajoutez des notes ou des demandes spécifiques..." v-model="cartNotes"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Récapitulatif</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                        Sous-total
+                                        <span>{{ subtotal | price }} €</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        Frais de dossier
+                                        <span>500 €</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                        <div>
+                                            <strong>Total</strong>
+                                        </div>
+                                        <span><strong>{{ (subtotal + 500) | price }} €</strong></span>
+                                    </li>
+                                </ul>
+                                
+                                <button class="btn btn-primary w-100" @click="currentView = 'checkout'">
+                                    <i class="bi bi-credit-card me-1"></i> Finaliser la réservation
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Besoin d'aide ?</h5>
+                                <p><i class="bi bi-telephone me-2"></i> +33 1 23 45 67 89</p>
+                                <p><i class="bi bi-envelope me-2"></i> contact@luximmo.com</p>
+                                <p class="mb-0"><i class="bi bi-clock me-2"></i> Lun-Ven: 9h-18h</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Checkout View -->
+            <div v-else-if="currentView === 'checkout'">
+                <button class="btn btn-outline-primary mb-3" @click="currentView = 'cart'">
+                    <i class="bi bi-arrow-left"></i> Retour au panier
+                </button>
+                
+                <h2 class="mb-4">Finaliser ma réservation</h2>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4">Informations personnelles</h5>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="firstName" class="form-label">Prénom</label>
+                                        <input type="text" class="form-control" id="firstName" v-model="checkoutForm.firstName" 
+                                               :class="{ 'is-invalid': checkoutErrors.firstName }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.firstName">
+                                            {{ checkoutErrors.firstName }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="lastName" class="form-label">Nom</label>
+                                        <input type="text" class="form-control" id="lastName" v-model="checkoutForm.lastName" 
+                                               :class="{ 'is-invalid': checkoutErrors.lastName }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.lastName">
+                                            {{ checkoutErrors.lastName }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" v-model="checkoutForm.email" 
+                                               :class="{ 'is-invalid': checkoutErrors.email }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.email">
+                                            {{ checkoutErrors.email }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="phone" class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" id="phone" v-model="checkoutForm.phone" 
+                                               :class="{ 'is-invalid': checkoutErrors.phone }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.phone">
+                                            {{ checkoutErrors.phone }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="address" class="form-label">Adresse</label>
+                                        <input type="text" class="form-control" id="address" v-model="checkoutForm.address" 
+                                               :class="{ 'is-invalid': checkoutErrors.address }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.address">
+                                            {{ checkoutErrors.address }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="city" class="form-label">Ville</label>
+                                        <input type="text" class="form-control" id="city" v-model="checkoutForm.city" 
+                                               :class="{ 'is-invalid': checkoutErrors.city }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.city">
+                                            {{ checkoutErrors.city }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="state" class="form-label">Région</label>
+                                        <select class="form-select" id="state" v-model="checkoutForm.state" 
+                                                :class="{ 'is-invalid': checkoutErrors.state }">
+                                            <option value="">Choisir...</option>
+                                            <option v-for="region in regions" :value="region">{{ region }}</option>
+                                        </select>
+                                        <div class="invalid-feedback" v-if="checkoutErrors.state">
+                                            {{ checkoutErrors.state }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="zip" class="form-label">Code postal</label>
+                                        <input type="text" class="form-control" id="zip" v-model="checkoutForm.zip" 
+                                               :class="{ 'is-invalid': checkoutErrors.zip }">
+                                        <div class="invalid-feedback" v-if="checkoutErrors.zip">
+                                            {{ checkoutErrors.zip }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4">Méthode de paiement</h5>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="payment" id="credit" 
+                                           value="credit" v-model="checkoutForm.paymentMethod">
+                                    <label class="form-check-label" for="credit">
+                                        <i class="bi bi-credit-card me-1"></i> Carte de crédit
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="payment" id="bank" 
+                                           value="bank" v-model="checkoutForm.paymentMethod">
+                                    <label class="form-check-label" for="bank">
+                                        <i class="bi bi-bank me-1"></i> Virement bancaire
+                                    </label>
+                                </div>
+                                
+                                <div v-if="checkoutForm.paymentMethod === 'credit'" class="mt-4">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label for="cardNumber" class="form-label">Numéro de carte</label>
+                                            <input type="text" class="form-control" id="cardNumber" 
+                                                   v-model="checkoutForm.cardNumber" placeholder="1234 5678 9012 3456">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="cardExpiry" class="form-label">Date d'expiration</label>
+                                            <input type="text" class="form-control" id="cardExpiry" 
+                                                   v-model="checkoutForm.cardExpiry" placeholder="MM/AA">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="cardCvc" class="form-label">Code de sécurité</label>
+                                            <input type="text" class="form-control" id="cardCvc" 
+                                                   v-model="checkoutForm.cardCvc" placeholder="CVC">
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="cardName" class="form-label">Nom sur la carte</label>
+                                            <input type="text" class="form-control" id="cardName" 
+                                                   v-model="checkoutForm.cardName">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Votre réservation</h5>
+                                
+                                <div v-for="item in cart" :key="item.id" class="mb-3 pb-3 border-bottom">
+                                    <h6>{{ item.title }}</h6>
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">{{ item.quantity }} × {{ item.price | price }} €</small>
+                                        <small>{{ (item.price * item.quantity) | price }} €</small>
+                                    </div>
+                                    <small v-if="item.variant" class="text-muted d-block">{{ item.variant }}</small>
+                                </div>
+                                
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <span>Sous-total</span>
+                                    <span>{{ subtotal | price }} €</span>
+                                </div>
+                                <div class="mb-3 d-flex justify-content-between">
+                                    <span>Frais de dossier</span>
+                                    <span>500 €</span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total</span>
+                                    <span>{{ (subtotal + 500) | price }} €</span>
+                                </div>
+                                
+                                <div class="form-check mt-4 mb-3">
+                                    <input class="form-check-input" type="checkbox" id="terms" v-model="checkoutForm.acceptTerms">
+                                    <label class="form-check-label" for="terms">
+                                        J'accepte les <a href="#">conditions générales</a> et la <a href="#">politique de confidentialité</a>
+                                    </label>
+                                </div>
+                                
+                                <button class="btn btn-primary w-100" @click="placeOrder" :disabled="processingOrder">
+                                    <span v-if="!processingOrder">
+                                        <i class="bi bi-check-circle me-1"></i> Confirmer la réservation
+                                    </span>
+                                    <span v-else>
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        Traitement...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Confirmation View -->
+            <div v-else-if="currentView === 'confirmation'">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h2 class="mb-3">Merci pour votre réservation !</h2>
+                    <p class="lead mb-4">Votre réservation #{{ orderConfirmation.orderId }} a bien été enregistrée.</p>
+                    <p class="mb-4">Un email de confirmation vous a été envoyé à <strong>{{ orderConfirmation.email }}</strong>.</p>
+                    
+                    <div class="card mx-auto mb-4" style="max-width: 500px;">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Récapitulatif</h5>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Date</span>
+                                <span>{{ orderConfirmation.date }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total</span>
+                                <span>{{ orderConfirmation.total | price }} €</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Méthode de paiement</span>
+                                <span>{{ orderConfirmation.paymentMethod }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Prochaine étape</span>
+                                <span>{{ orderConfirmation.nextStep }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" @click="currentView = 'home'">
+                        <i class="bi bi-house-door me-1"></i> Retour à l'accueil
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-5 mt-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5 class="mb-3">LuxImmo</h5>
+                        <p>Votre partenaire immobilier premium pour des biens d'exception.</p>
+                        <div class="social-icons">
+                            <a href="#" class="text-white me-3"><i class="bi bi-facebook"></i></a>
+                            <a href="#" class="text-white me-3"><i class="bi bi-instagram"></i></a>
+                            <a href="#" class="text-white me-3"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" class="text-white"><i class="bi bi-twitter"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mb-md-0">
+                        <h5 class="mb-3">Navigation</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white" @click.prevent="currentView = 'home'">Accueil</a></li>
+                            <li class="mb-2"><a href="#" class="text-white">Nos biens</a></li>
+                            <li class="mb-2"><a href="#" class="text-white">Nos services</a></li>
+                            <li class="mb-2"><a href="#" class="text-white">À propos</a></li>
+                            <li><a href="#" class="text-white">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3 mb-4 mb-md-0">
+                        <h5 class="mb-3">Services</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white">Achat immobilier</a></li>
+                            <li class="mb-2"><a href="#" class="text-white">Vente immobilière</a></li>
+                            <li class="mb-2"><a href="#" class="text-white">Gestion locative</a></li>
+                            <li class="mb-2"><a href="#" class="text-white">Évaluation de bien</a></li>
+                            <li><a href="#" class="text-white">Conseil en investissement</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="mb-3">Contact</h5>
+                        <address>
+                            <p><i class="bi bi-geo-alt me-2"></i> 123 Avenue du Luxe, 75008 Paris</p>
+                            <p><i class="bi bi-telephone me-2"></i> +33 1 23 45 67 89</p>
+                            <p><i class="bi bi-envelope me-2"></i> contact@luximmo.com</p>
+                            <p class="mb-0"><i class="bi bi-clock me-2"></i> Lun-Ven: 9h-18h</p>
+                        </address>
+                    </div>
+                </div>
+                <hr class="my-4 bg-secondary">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; 2023 LuxImmo. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <a href="#" class="text-white me-3">Mentions légales</a>
+                        <a href="#" class="text-white me-3">CGV</a>
+                        <a href="#" class="text-white">Politique de confidentialité</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch, nextTick } = Vue;
+        
+        createApp({
+            setup() {
+                // State
+                const currentView = ref('home');
+                const loading = ref(false);
+                const toasts = ref([]);
+                const properties = ref([]);
+                const cart = ref([]);
+                const selectedProperty = ref(null);
+                const selectedVariantOptions = ref({});
+                const quantity = ref(1);
+                const searchQuery = ref('');
+                const activeFilters = ref({
+                    type: '',
+                    location: '',
+                    minSurface: '',
+                    maxSurface: '',
+                    minPrice: '',
+                    maxPrice: '',
+                    rooms: ''
+                });
+                const sortOption = ref('price-asc');
+                const currentPage = ref(1);
+                const itemsPerPage = ref(9);
+                const quoteForm = ref({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                });
+                const cartNotes = ref('');
+                const checkoutForm = ref({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                    address: '',
+                    city: '',
+                    state: '',
+                    zip: '',
+                    paymentMethod: 'credit',
+                    cardNumber: '',
+                    cardExpiry: '',
+                    cardCvc: '',
+                    cardName: '',
+                    acceptTerms: false
+                });
+                const checkoutErrors = ref({});
+                const processingOrder = ref(false);
+                const orderConfirmation = ref({});
+                const currentImageIndex = ref(0);
+                const regions = ref([
+                    'Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Bretagne', 'Centre-Val de Loire', 
+                    'Corse', 'Grand Est', 'Hauts-de-France', 'Île-de-France', 'Normandie', 
+                    'Nouvelle-Aquitaine', 'Occitanie', 'Pays de la Loire', 'Provence-Alpes-Côte d\'Azur'
+                ]);
+                let map = null;
+                let marker = null;
+
+                // Computed
+                const filteredProperties = computed(() => {
+                    let filtered = properties.value;
+                    
+                    // Apply type filter
+                    if (activeFilters.value.type) {
+                        filtered = filtered.filter(property => 
+                            property.type === activeFilters.value.type
+                        );
+                    }
+                    
+                    // Apply location filter
+                    if (activeFilters.value.location) {
+                        filtered = filtered.filter(property => 
+                            property.location.includes(activeFilters.value.location)
+                        );
+                    }
+                    
+                    // Apply surface filter
+                    if (activeFilters.value.minSurface) {
+                        filtered = filtered.filter(property => 
+                            property.surface >= activeFilters.value.minSurface
+                        );
+                    }
+                    
+                    if (activeFilters.value.maxSurface) {
+                        filtered = filtered.filter(property => 
+                            property.surface <= activeFilters.value.maxSurface
+                        );
+                    }
+                    
+                    // Apply price filter
+                    if (activeFilters.value.minPrice) {
+                        filtered = filtered.filter(property => 
+                            property.price >= activeFilters.value.minPrice
+                        );
+                    }
+                    
+                    if (activeFilters.value.maxPrice) {
+                        filtered = filtered.filter(property => 
+                            property.price <= activeFilters.value.maxPrice
+                        );
+                    }
+                    
+                    // Apply rooms filter
+                    if (activeFilters.value.rooms) {
+                        filtered = filtered.filter(property => 
+                            property.rooms >= activeFilters.value.rooms
+                        );
+                    }
+                    
+                    // Apply search query
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        filtered = filtered.filter(property => 
+                            property.title.toLowerCase().includes(query) || 
+                            property.description.toLowerCase().includes(query) ||
+                            property.location.toLowerCase().includes(query)
+                        );
+                    }
+                    
+                    return filtered;
+                });
+                
+                const sortedProperties = computed(() => {
+                    const properties = [...filteredProperties.value];
+                    
+                    switch (sortOption.value) {
+                        case 'price-asc':
+                            return properties.sort((a, b) => a.price - b.price);
+                        case 'price-desc':
+                            return properties.sort((a, b) => b.price - a.price);
+                        case 'surface-asc':
+                            return properties.sort((a, b) => a.surface - b.surface);
+                        case 'surface-desc':
+                            return properties.sort((a, b) => b.surface - a.surface);
+                        case 'newest':
+                            return properties.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        default:
+                            return properties;
+                    }
+                });
+                
+                const paginatedProperties = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage.value;
+                    const end = start + itemsPerPage.value;
+                    return sortedProperties.value.slice(start, end);
+                });
+                
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredProperties.value.length / itemsPerPage.value);
+                });
+                
+                const availableLocations = computed(() => {
+                    const locations = new Set();
+                    properties.value.forEach(property => {
+                        locations.add(property.location);
+                    });
+                    return Array.from(locations).sort();
+                });
+                
+                const subtotal = computed(() => {
+                    return cart.value.reduce((total, item) => {
+                        return total + (item.price * item.quantity);
+                    }, 0);
+                });
+
+                // Methods
+                const showToast = (message, type = 'success') => {
+                    const icons = {
+                        success: 'bi-check-circle',
+                        error: 'bi-exclamation-circle',
+                        info: 'bi-info-circle',
+                        warning: 'bi-exclamation-triangle'
+                    };
+                    
+                    toasts.value.push({
+                        message,
+                        type,
+                        icon: icons[type] || 'bi-info-circle'
+                    });
+                    
+                    setTimeout(() => {
+                        toasts.value.shift();
+                    }, 5000);
+                };
+                
+                const removeToast = (index) => {
+                    toasts.value.splice(index, 1);
+                };
+                
+                const fetchProperties = async () => {
+                    loading.value = true;
+                    try {
+                        // In a real app, this would be an API call
+                        // const response = await axios.get('/api/properties');
+                        // properties.value = response.data;
+                        
+                        // Mock data for demo
+                        properties.value = [
+                            {
+                                id: 1,
+                                title: 'Appartement luxueux avec vue sur la Tour Eiffel',
+                                type: 'appartement',
+                                price: 1200000,
+                                surface: 85,
+                                rooms: 3,
+                                bedrooms: 2,
+                                location: 'Paris 7ème',
+                                description: 'Magnifique appartement entièrement rénové avec vue imprenable sur la Tour Eiffel. Séjour lumineux, cuisine équipée haut de gamme, deux chambres avec dressing, salle de bain en marbre. Parquet ancien, hauteur sous plafond 3m20.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                video: 'https://www.youtube.com/embed/example1',
+                                floor: 5,
+                                orientation: 'Sud',
+                                constructionYear: 1930,
+                                equipments: ['Ascenseur', 'Parking', 'Conciergerie', 'Double vitrage'],
+                                variants: [
+                                    { type: 'Vue', value: 'Tour Eiffel', price: 0 },
+                                    { type: 'Vue', value: 'Cour intérieure', price: -50000 },
+                                    { type: 'Étage', value: '5ème', price: 0 },
+                                    { type: 'Étage', value: '6ème', price: 20000 }
+                                ],
+                                coordinates: [48.8584, 2.2945],
+                                created_at: '2023-05-15'
+                            },
+                            {
+                                id: 2,
+                                title: 'Villa contemporaine avec piscine à Saint-Tropez',
+                                type: 'villa',
+                                price: 3500000,
+                                surface: 220,
+                                rooms: 5,
+                                bedrooms: 4,
+                                location: 'Saint-Tropez',
+                                description: 'Villa d\'architecte de 220m² sur terrain arboré de 1500m². Grandes baies vitrées, piscine chauffée, cuisine professionnelle, suite parentale avec dressing et salle de bain spa. Garage double, système domotique complet.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                video: 'https://www.youtube.com/embed/example2',
+                                floor: 0,
+                                orientation: 'Sud-Ouest',
+                                constructionYear: 2018,
+                                equipments: ['Piscine', 'Domotique', 'Alarme', 'Climatisation', 'Garage'],
+                                variants: [
+                                    { type: 'Piscine', value: 'Chauffée', price: 50000 },
+                                    { type: 'Piscine', value: 'Non chauffée', price: 0 }
+                                ],
+                                coordinates: [43.2697, 6.6396],
+                                created_at: '2023-03-10'
+                            },
+                            {
+                                id: 3,
+                                title: 'Maison de caractère en bord de mer à Deauville',
+                                type: 'maison',
+                                price: 1850000,
+                                surface: 150,
+                                rooms: 4,
+                                bedrooms: 3,
+                                location: 'Deauville',
+                                description: 'Charmante maison normande rénovée avec goût à 200m de la plage. Grand salon avec cheminée, cuisine équipée, trois chambres dont une suite, bureau, jardin clos et terrasse en bois exotique. Garage et cave.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600585154084-4e5fe7c39198?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600607688969-a5bf29f4cf1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                floor: 0,
+                                orientation: 'Ouest',
+                                constructionYear: 1925,
+                                equipments: ['Cheminée', 'Jardin', 'Terrasse', 'Cave'],
+                                coordinates: [49.3576, 0.0711],
+                                created_at: '2023-01-20'
+                            },
+                            {
+                                id: 4,
+                                title: 'Appartement neuf standing aux Champs-Élysées',
+                                type: 'appartement',
+                                price: 2800000,
+                                surface: 110,
+                                rooms: 4,
+                                bedrooms: 2,
+                                location: 'Paris 8ème',
+                                description: 'Appartement de prestige dans immeuble haussmannien entièrement rénové. Séjour de 40m² avec terrasse, cuisine bulthaup, deux chambres avec dressing, salle de bain et salle d\'eau en marbre. Ascenseur, concierge 24/7.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1586023492125-27c2d0d4b0a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1586023492125-27c2d0d4b0a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                floor: 3,
+                                orientation: 'Est',
+                                constructionYear: 2020,
+                                equipments: ['Ascenseur', 'Conciergerie', 'Parking', 'Terrasse'],
+                                variants: [
+                                    { type: 'Terrasse', value: 'Oui', price: 0 },
+                                    { type: 'Terrasse', value: 'Non', price: -100000 }
+                                ],
+                                coordinates: [48.8698, 2.3079],
+                                created_at: '2023-04-05'
+                            },
+                            {
+                                id: 5,
+                                title: 'Loft d\'artiste dans le Marais',
+                                type: 'appartement',
+                                price: 950000,
+                                surface: 65,
+                                rooms: 2,
+                                bedrooms: 1,
+                                location: 'Paris 4ème',
+                                description: 'Authentique loft d\'artiste de 65m² dans cour calme du Marais. Hauteur sous plafond 4m50, grande verrière, béton ciré, cuisine ouverte équipée. Chambre en mezzanine, salle d\'eau et WC séparés.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1600121848594-d8644e57abab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600566752355-35792bedcfea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                floor: 2,
+                                orientation: 'Nord',
+                                constructionYear: 1950,
+                                equipments: ['Mezzanine', 'Verrière', 'Double vitrage'],
+                                coordinates: [48.8559, 2.3624],
+                                created_at: '2023-02-15'
+                            },
+                            {
+                                id: 6,
+                                title: 'Château historique en Dordogne',
+                                type: 'villa',
+                                price: 4500000,
+                                surface: 600,
+                                rooms: 12,
+                                bedrooms: 8,
+                                location: 'Périgueux',
+                                description: 'Exceptionnel château du XVIIIe siècle entièrement restauré sur 15ha. Grand salon, salle à manger, bibliothèque, cuisine professionnelle, 8 chambres d\'hôtes, piscine naturelle. Dépendances, tennis, parc arboré.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1585771724684-38269d6639fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1585771724684-38269d6639fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1585771724684-38269d6639fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                video: 'https://www.youtube.com/embed/example3',
+                                floor: 2,
+                                orientation: 'Sud',
+                                constructionYear: 1750,
+                                equipments: ['Piscine', 'Tennis', 'Parc', 'Dépendances'],
+                                variants: [
+                                    { type: 'Dépendances', value: 'Oui', price: 0 },
+                                    { type: 'Dépendances', value: 'Non', price: -500000 }
+                                ],
+                                coordinates: [45.1839, 0.7216],
+                                created_at: '2022-12-10'
+                            },
+                            {
+                                id: 7,
+                                title: 'Penthouse avec rooftop à New York',
+                                type: 'appartement',
+                                price: 7500000,
+                                surface: 180,
+                                rooms: 4,
+                                bedrooms: 3,
+                                location: 'New York',
+                                description: 'Spectaculaire penthouse avec rooftop privatif à Manhattan. Vue à 360° sur la skyline, grande terrasse avec jacuzzi, intérieur design par Philippe Starck, cuisine Molteni, trois suites avec dressing. Service hôtelier.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1554995207-c18c203602cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1554995207-c18c203602cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1554995207-c18c203602cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                video: 'https://www.youtube.com/embed/example4',
+                                floor: 42,
+                                orientation: 'Sud',
+                                constructionYear: 2015,
+                                equipments: ['Jacuzzi', 'Ascenseur', 'Conciergerie', 'Service hôtelier'],
+                                variants: [
+                                    { type: 'Rooftop', value: 'Oui', price: 0 },
+                                    { type: 'Rooftop', value: 'Non', price: -1000000 }
+                                ],
+                                coordinates: [40.7128, -74.0060],
+                                created_at: '2023-01-05'
+                            },
+                            {
+                                id: 8,
+                                title: 'Mas provençal avec oliveraie',
+                                type: 'maison',
+                                price: 1250000,
+                                surface: 180,
+                                rooms: 5,
+                                bedrooms: 3,
+                                location: 'Aix-en-Provence',
+                                description: 'Authentique mas provençal rénové avec goût sur 2ha d\'oliviers. Pièces de vie spacieuses, cuisine en pierre, trois chambres, piscine à débordement, dépendances. Vue imprenable sur les Alpilles.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1600607688969-a5bf29f4cf1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600607688969-a5bf29f4cf1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                                    'https://images.unsplash.com/photo-1600607688969-a5bf29f4cf1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                                ],
+                                floor: 1,
+                                orientation: 'Sud',
+                                constructionYear: 1850,
+                                equipments: ['Piscine', 'Dépendances', 'Jardin', 'Terrasse'],
+                                variants: [
+                                    { type: 'Piscine', value: 'Débordement', price: 50000 },
+                                    { type: 'Piscine', value: 'Traditionnelle', price: 0 }
+                                ],
+                                coordinates: [43.5297, 5.4474],
+                                created_at: '2023-03-20'
+                            },
+                            {
+                                id: 9,
+                                title: 'Appartement haussmannien à Bordeaux',
+                                type: 'appartement',
+                                price: 850000,
+                                surface: 95,
+                                rooms: 3,
+                                bedrooms: 2,
+                                location: 'Bordeaux',
+                                description: 'Superbe appartement haussmannien de 95m² entièrement rénové. Parquets anciens, moulures, cheminée en marbre, cuisine ouverte équipée, deux chambres, salle de bain avec baignoire balnéo. Cour calme.',
+                                images: [
+                                    'https://images.unsplash.com/photo-1600607687920-4e2
+</html>

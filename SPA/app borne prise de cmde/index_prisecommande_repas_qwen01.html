@@ -1,0 +1,374 @@
+```vue
+<template>
+  <div id="app" class="d-flex flex-column min-vh-100">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-sm">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">McVue</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav gap-3">
+              <li class="nav-item">
+                <a @click="setActiveTab('home')" :class="{ active: activeTab === 'home' }" class="nav-link">Accueil</a>
+              </li>
+              <li class="nav-item">
+                <a @click="setActiveTab('menu')" :class="{ active: activeTab === 'menu' }" class="nav-link">Menu</a>
+              </li>
+              <li class="nav-item">
+                <a @click="setActiveTab('cart')" :class="{ active: activeTab === 'cart' }" class="nav-link d-flex align-items-center">
+                  Panier
+                  <span v-if="cart.length > 0" class="badge bg-white text-danger ms-2 rounded-circle">{{ cart.reduce((sum, item) => sum + item.quantity, 0) }}</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a @click="setActiveTab('admin')" :class="{ active: activeTab === 'admin' }" class="nav-link">Admin</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Home Page -->
+      <main class="flex-grow-1 container my-4">
+        <div v-if="activeTab === 'home'" class="text-center">
+          <h1 class="display-5 fw-bold mb-4">Bienvenue chez McVue</h1>
+          <p class="mb-5">Commandez vos repas facilement via notre borne interactive.</p>
+          <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+              <div class="card border-success h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Menus du Jour</h5>
+                  <p class="card-text">Profitez de nos menus spéciaux à prix réduit !</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card border-info h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Nouvelles Salades</h5>
+                  <p class="card-text">Découvrez notre nouvelle gamme de salades fraîches et saines.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card border-warning h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Offres Spéciales</h5>
+                  <p class="card-text">Jusqu'à 20% de réduction sur les boissons aujourd'hui !</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button @click="setActiveTab('menu')" class="btn btn-danger btn-lg mt-5 px-4">Découvrir le Menu</button>
+        </div>
+
+        <!-- Menu Page -->
+        <div v-if="activeTab === 'menu'">
+          <h2 class="text-center display-6 fw-bold mb-4">Notre Menu</h2>
+          <div class="d-flex justify-content-center mb-4 flex-wrap gap-2">
+            <button 
+              v-for="category in categories" 
+              :key="category" 
+              @click="selectedCategory = category"
+              class="btn btn-outline-secondary"
+              :class="{ active: selectedCategory === category }"
+            >
+              {{ capitalizeFirstLetter(category) }}
+            </button>
+          </div>
+          <div class="row g-4">
+            <div v-for="product in filteredProducts" :key="product.id" class="col-md-4">
+              <div class="card h-100 shadow-sm">
+                <img :src="product.image" alt="Product Image" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">{{ product.name }}</h5>
+                  <p class="card-text text-muted">{{ product.price.toFixed(2) }} €</p>
+                  <button @click="addToCart(product)" class="btn btn-danger mt-auto">Ajouter au panier</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart Page -->
+        <div v-if="activeTab === 'cart'">
+          <h2 class="text-center display-6 fw-bold mb-4">Votre Panier</h2>
+          <div v-if="cart.length === 0" class="alert alert-info text-center">Votre panier est vide.</div>
+          <div v-else class="row">
+            <div class="col-md-8">
+              <div class="list-group mb-4">
+                <div v-for="item in cart" :key="item.id" class="list-group-item d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <img :src="item.image" alt="" width="60" class="rounded me-3">
+                    <div>
+                      <h6 class="mb-0">{{ item.name }}</h6>
+                      <small>{{ item.price.toFixed(2) }} €</small>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <button @click="updateQuantity(item.id, item.quantity - 1)" class="btn btn-sm btn-outline-secondary">-</button>
+                    <span class="mx-2">{{ item.quantity }}</span>
+                    <button @click="updateQuantity(item.id, item.quantity + 1)" class="btn btn-sm btn-outline-secondary">+</button>
+                    <button @click="removeFromCart(item.id)" class="btn btn-sm btn-outline-danger ms-3"><i class="bi bi-trash"></i></button>
+                  </div>
+                  <strong>{{ (item.price * item.quantity).toFixed(2) }} €</strong>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">Récapitulatif</h5>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Total:</span>
+                    <strong>{{ calculateTotal().toFixed(2) }} €</strong>
+                  </div>
+                  <hr>
+                  <div class="d-grid gap-2">
+                    <button @click="setActiveTab('menu')" class="btn btn-outline-secondary">Continuer mes achats</button>
+                    <button @click="processPayment" class="btn btn-success">Payer {{ calculateTotal().toFixed(2) }} €</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Receipt Page -->
+        <div v-if="activeTab === 'receipt' && orderNumber" class="text-center">
+          <h2 class="display-6 fw-bold mb-4">Ticket de Commande</h2>
+          <p class="lead mb-4">Numéro de commande: <strong>#{{ orderNumber }}</strong></p>
+          <div class="d-flex justify-content-center mb-4">
+            <img :src="qrCodeUrl" alt="QR Code" style="width: 200px; height: 200px;">
+          </div>
+          <p class="text-muted mb-4">Présentez ce QR code à la caisse</p>
+          
+          <div class="mb-4">
+            <h5>Statut de la commande:</h5>
+            <div class="btn-group w-100" role="group">
+              <button @click="updateOrderStatus('preparation')" type="button" class="btn btn-warning" :class="{ active: orderStatus === 'preparation' }">En préparation</button>
+              <button @click="updateOrderStatus('ready')" type="button" class="btn btn-primary" :class="{ active: orderStatus === 'ready' }">Prête</button>
+              <button @click="updateOrderStatus('served')" type="button" class="btn btn-success" :class="{ active: orderStatus === 'served' }">Servie</button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-center gap-3">
+            <button @click="printReceipt" class="btn btn-outline-primary"><i class="bi bi-printer"></i> Imprimer</button>
+            <button @click="sendEmail" class="btn btn-outline-secondary"><i class="bi bi-envelope"></i> E-mail</button>
+            <button @click="sendSMS" class="btn btn-outline-success"><i class="bi bi-chat-dots"></i> SMS</button>
+          </div>
+        </div>
+
+        <!-- Admin Page -->
+        <div v-if="activeTab === 'admin'">
+          <h2 class="text-center display-6 fw-bold mb-4">Interface d'Administration</h2>
+          <div class="row g-4">
+            <!-- Product Management -->
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">Gestion des Produits</h5>
+                  <button class="btn btn-sm btn-success" @click="addNewProduct"><i class="bi bi-plus"></i> Ajouter</button>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Nom</th>
+                          <th>Catégorie</th>
+                          <th>Prix</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(product, index) in products" :key="product.id">
+                          <td>{{ product.id }}</td>
+                          <td>{{ product.name }}</td>
+                          <td>{{ capitalizeFirstLetter(product.category) }}</td>
+                          <td>{{ product.price.toFixed(2) }} €</td>
+                          <td>
+                            <button @click="editProduct(index)" class="btn btn-sm btn-primary me-1"><i class="bi bi-pencil"></i></button>
+                            <button @click="deleteProduct(index)" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Management -->
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-header">Suivi des Commandes</div>
+                <div class="card-body">
+                  <div v-if="orderNumber" class="d-flex justify-content-between align-items-center p-3 mb-2 bg-light rounded">
+                    <span>Commande #{{ orderNumber }}</span>
+                    <span :class="{
+                      'badge bg-warning': orderStatus === 'preparation',
+                      'badge bg-primary': orderStatus === 'ready',
+                      'badge bg-success': orderStatus === 'served'
+                    }">
+                      {{ orderStatus === 'preparation' ? 'En préparation' : orderStatus === 'ready' ? 'Prête' : 'Servie' }}
+                    </span>
+                  </div>
+                  <p v-else>Aucune commande en cours</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sales Statistics -->
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-header">Statistiques de Ventes</div>
+                <div class="card-body d-flex align-items-center justify-content-center" style="height: 200px;">
+                  <p class="text-muted">Graphique de statistiques (à implémenter)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="bg-dark text-white py-3 mt-auto">
+        <div class="container text-center">
+          <p class="mb-0">&copy; 2025 McVue. Tous droits réservés.</p>
+        </div>
+      </footer>
+    </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  name: 'App',
+  data() {
+    return {
+      activeTab: 'home',
+      cart: [],
+      orderNumber: null,
+      qrCodeUrl: '',
+      orderStatus: 'pending',
+      products: [
+        { id: 1, name: 'Big Mac', category: 'sandwich', price: 5.99, image: 'https://placehold.co/300x200?text=Big+Mac' },
+        { id: 2, name: 'Salade César', category: 'salade', price: 4.49, image: 'https://placehold.co/300x200?text=Salade+Cesar' },
+        { id: 3, name: 'Frites Medium', category: 'frites', price: 2.99, image: 'https://placehold.co/300x200?text=Frites' },
+        { id: 4, name: 'Coca-Cola', category: 'boisson', price: 1.99, image: 'https://placehold.co/300x200?text=Coke' },
+        { id: 5, name: 'Cheesecake', category: 'gateau', price: 3.49, image: 'https://placehold.co/300x200?text=Cheesecake' },
+      ],
+      categories: ['sandwich', 'salade', 'frites', 'boisson', 'gateau'],
+      selectedCategory: 'sandwich'
+    };
+  },
+  computed: {
+    filteredProducts() {
+      return this.products.filter(product => product.category === this.selectedCategory);
+    }
+  },
+  methods: {
+    setActiveTab(tab) {
+      this.activeTab = tab;
+    },
+    capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+    addToCart(product) {
+      const existingItem = this.cart.find(item => item.id === product.id);
+      if (existingItem) {
+        this.cart = this.cart.map(item =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      } else {
+        this.cart.push({ ...product, quantity: 1 });
+      }
+    },
+    updateQuantity(id, quantity) {
+      if (quantity <= 0) {
+        this.removeFromCart(id);
+        return;
+      }
+      this.cart = this.cart.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      );
+    },
+    removeFromCart(id) {
+      this.cart = this.cart.filter(item => item.id !== id);
+    },
+    calculateTotal() {
+      return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    },
+    processPayment() {
+      const newOrderNumber = Math.floor(1000 + Math.random() * 9000);
+      this.orderNumber = newOrderNumber;
+      this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${newOrderNumber}&size=200x200`;
+      this.orderStatus = 'preparation';
+      this.cart = [];
+      this.setActiveTab('receipt');
+    },
+    updateOrderStatus(status) {
+      this.orderStatus = status;
+    },
+    printReceipt() {
+      window.print();
+    },
+    sendEmail() {
+      alert('Ticket envoyé par e-mail !');
+    },
+    sendSMS() {
+      alert('Ticket envoyé par SMS !');
+    },
+    addNewProduct() {
+      const newId = Math.max(...this.products.map(p => p.id)) + 1;
+      this.products.push({
+        id: newId,
+        name: 'Nouveau Produit',
+        category: 'sandwich',
+        price: 0,
+        image: 'https://placehold.co/300x200?text=Image'
+      });
+    },
+    editProduct(index) {
+      const newName = prompt('Modifier le nom du produit:', this.products[index].name);
+      if (newName !== null) {
+        this.products[index].name = newName;
+      }
+    },
+    deleteProduct(index) {
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+        this.products.splice(index, 1);
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+.card:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease-in-out;
+}
+.btn-group .btn.active {
+  font-weight: bold;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .container, .container * {
+    visibility: visible;
+  }
+  .container {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+</style>

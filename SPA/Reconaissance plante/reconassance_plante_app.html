@@ -1,0 +1,611 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Identifier</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+  
+  <style>
+    /* Custom CSS for elements that can't be styled with Tailwind */
+    .camera-preview {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    
+    .plant-card {
+      transition: all 0.3s ease;
+    }
+    
+    .plant-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.35s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    
+    @media (max-width: 640px) {
+      .plant-details {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-green-600 text-white shadow-lg">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-leaf text-2xl"></i>
+          <h1 class="text-xl font-bold">Plant Identifier</h1>
+        </div>
+        <button @click="toggleDarkMode" class="p-2 rounded-full hover:bg-green-700 transition">
+          <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'" class="text-lg"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+      <!-- Camera Section -->
+      <section class="mb-12 bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Identify a Plant</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Camera Preview -->
+          <div class="flex flex-col items-center">
+            <div class="relative w-full">
+              <video v-show="!photoTaken" ref="video" class="camera-preview bg-gray-200" autoplay playsinline></video>
+              <canvas v-show="photoTaken" ref="canvas" class="camera-preview bg-gray-200"></canvas>
+              
+              <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-xl">
+                <div class="text-white text-center">
+                  <div class="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p>Analyzing plant...</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-4 flex space-x-4">
+              <button 
+                @click="takePhoto" 
+                :disabled="isLoading"
+                class="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition disabled:opacity-50 flex items-center"
+              >
+                <i class="fas fa-camera mr-2"></i> Take Photo
+              </button>
+              
+              <button 
+                @click="retakePhoto" 
+                v-show="photoTaken"
+                class="px-6 py-2 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition"
+              >
+                <i class="fas fa-redo mr-2"></i> Retake
+              </button>
+            </div>
+          </div>
+          
+          <!-- Instructions -->
+          <div class="flex flex-col justify-center">
+            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+              <h3 class="font-medium text-green-800 mb-2 flex items-center">
+                <i class="fas fa-lightbulb mr-2"></i> Tips for best results:
+              </h3>
+              <ul class="list-disc pl-5 text-green-700 space-y-1">
+                <li>Take a clear photo of leaves or flowers</li>
+                <li>Ensure good lighting conditions</li>
+                <li>Focus on one plant at a time</li>
+                <li>Get close but keep the plant in focus</li>
+              </ul>
+            </div>
+            
+            <div v-if="apiError" class="mt-4 bg-red-50 p-4 rounded-lg border border-red-100">
+              <p class="text-red-700"><i class="fas fa-exclamation-triangle mr-2"></i> {{ apiError }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Results Section -->
+      <section v-if="results.length > 0" class="mb-12">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-800">Identification Results</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div 
+            v-for="(result, index) in results" 
+            :key="index"
+            @click="selectPlant(result)"
+            class="plant-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition"
+            :class="{ 'ring-2 ring-green-500': selectedPlant === result }"
+          >
+            <div class="p-4">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-gray-800">{{ result.plant_name }}</h3>
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                  {{ (result.probability * 100).toFixed(1) }}%
+                </span>
+              </div>
+              
+              <p class="text-gray-600 text-sm mb-3">{{ result.plant_details.family || 'Plant family not available' }}</p>
+              
+              <div class="flex items-center text-yellow-500 mb-3">
+                <i v-for="star in 5" :key="star" 
+                  :class="star <= Math.round(result.probability * 5) ? 'fas fa-star' : 'far fa-star'" 
+                  class="text-sm"
+                ></i>
+              </div>
+              
+              <div class="flex space-x-2">
+                <span v-if="result.plant_details.toxicity" class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  <i class="fas fa-skull-crossbones mr-1"></i> Toxic
+                </span>
+                <span v-if="result.plant_details.edible" class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  <i class="fas fa-utensils mr-1"></i> Edible
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Plant Details Section -->
+      <section v-if="selectedPlant" class="mb-12 bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="plant-details flex flex-col md:flex-row">
+          <!-- Plant Image -->
+          <div class="w-full md:w-1/3 bg-gray-100 flex items-center justify-center p-6">
+            <img 
+              :src="selectedPlantImage" 
+              alt="Selected plant" 
+              class="max-h-80 w-auto rounded-lg object-contain"
+            >
+          </div>
+          
+          <!-- Plant Info -->
+          <div class="w-full md:w-2/3 p-6">
+            <div class="flex justify-between items-start mb-4">
+              <h2 class="text-2xl font-bold text-gray-800">{{ selectedPlant.plant_name }}</h2>
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                {{ (selectedPlant.probability * 100).toFixed(1) }}% match
+              </span>
+            </div>
+            
+            <p class="text-gray-600 mb-6">{{ selectedPlant.plant_details.description || 'No description available' }}</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-1 flex items-center">
+                  <i class="fas fa-seedling mr-2 text-green-600"></i> Family
+                </h3>
+                <p class="text-gray-600">{{ selectedPlant.plant_details.family || 'Unknown' }}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-1 flex items-center">
+                  <i class="fas fa-globe-americas mr-2 text-green-600"></i> Origin
+                </h3>
+                <p class="text-gray-600">{{ selectedPlant.plant_details.origin || 'Unknown' }}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-1 flex items-center">
+                  <i class="fas fa-tint mr-2 text-blue-600"></i> Water Needs
+                </h3>
+                <p class="text-gray-600">{{ selectedPlant.plant_details.water || 'Moderate' }}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-medium text-gray-700 mb-1 flex items-center">
+                  <i class="fas fa-sun mr-2 text-yellow-600"></i> Light Needs
+                </h3>
+                <p class="text-gray-600">{{ selectedPlant.plant_details.light || 'Partial sun' }}</p>
+              </div>
+            </div>
+            
+            <div v-if="selectedPlant.plant_details.toxicity" class="bg-red-50 p-3 rounded-lg mb-4">
+              <h3 class="font-medium text-red-700 mb-1 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i> Toxicity Warning
+              </h3>
+              <p class="text-red-700">{{ selectedPlant.plant_details.toxicity_details || 'This plant may be toxic to humans or animals.' }}</p>
+            </div>
+            
+            <div v-if="selectedPlant.plant_details.care_tips" class="bg-green-50 p-3 rounded-lg">
+              <h3 class="font-medium text-green-700 mb-1 flex items-center">
+                <i class="fas fa-heart mr-2"></i> Care Tips
+              </h3>
+              <p class="text-green-700">{{ selectedPlant.plant_details.care_tips }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- History Section -->
+      <section v-if="history.length > 0" class="mb-12">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-semibold text-gray-800">Identification History</h2>
+          <button 
+            @click="clearHistory" 
+            class="text-sm text-red-600 hover:text-red-800 flex items-center"
+          >
+            <i class="fas fa-trash-alt mr-1"></i> Clear History
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white rounded-lg overflow-hidden shadow">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plant</th>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Confidence</th>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="(item, index) in history" :key="index">
+                <td class="py-4 px-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <img class="h-10 w-10 rounded-full object-cover" :src="item.image" alt="">
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ item.plant_name }}</div>
+                      <div class="text-sm text-gray-500">{{ item.plant_details.family }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatDate(item.timestamp) }}
+                </td>
+                <td class="py-4 px-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="w-20 mr-2">
+                      <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          class="bg-green-600 h-2 rounded-full" 
+                          :style="{ width: (item.probability * 100) + '%' }"
+                        ></div>
+                      </div>
+                    </div>
+                    <span class="text-sm text-gray-600">{{ (item.probability * 100).toFixed(1) }}%</span>
+                  </div>
+                </td>
+                <td class="py-4 px-4 whitespace-nowrap text-sm font-medium">
+                  <button 
+                    @click="viewHistoryItem(item)" 
+                    class="text-green-600 hover:text-green-900 mr-3"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button 
+                    @click="deleteHistoryItem(index)" 
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Plant Identifier</h3>
+            <p class="text-gray-400">Identify plants instantly with our AI-powered recognition technology.</p>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul class="space-y-2">
+              <li><a href="#" class="text-gray-400 hover:text-white transition">Home</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition">How It Works</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition">Plant Database</a></li>
+              <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Connect With Us</h3>
+            <div class="flex space-x-4">
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-facebook"></i></a>
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="text-gray-400 hover:text-white transition text-xl"><i class="fab fa-github"></i></a>
+            </div>
+            <p class="text-gray-400 mt-4">plant.identifier@example.com</p>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+          <p>&copy; 2023 Plant Identifier. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Install PWA Banner -->
+    <div v-if="showInstallBanner" class="fixed bottom-0 left-0 right-0 bg-green-700 text-white p-4 shadow-lg z-50">
+      <div class="container mx-auto flex justify-between items-center">
+        <div>
+          <h3 class="font-bold">Install Plant Identifier</h3>
+          <p class="text-sm">Get the best experience by installing our app on your home screen!</p>
+        </div>
+        <div class="flex space-x-2">
+          <button @click="dismissInstallBanner" class="px-4 py-2 bg-transparent border border-white rounded hover:bg-green-800 transition">
+            Not Now
+          </button>
+          <button @click="installPWA" class="px-4 py-2 bg-white text-green-700 rounded font-medium hover:bg-gray-100 transition">
+            Install
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted, computed } = Vue;
+    
+    createApp({
+      setup() {
+        // State
+        const video = ref(null);
+        const canvas = ref(null);
+        const photoTaken = ref(false);
+        const isLoading = ref(false);
+        const results = ref([]);
+        const selectedPlant = ref(null);
+        const selectedPlantImage = ref('');
+        const history = ref([]);
+        const apiError = ref(null);
+        const darkMode = ref(false);
+        const showInstallBanner = ref(false);
+        const deferredPrompt = ref(null);
+        
+        // Mock API data for demonstration
+        const mockApiResponse = [
+          {
+            plant_name: "Monstera Deliciosa",
+            probability: 0.92,
+            plant_details: {
+              family: "Araceae",
+              origin: "Central America",
+              description: "Also known as the Swiss Cheese Plant, this popular houseplant is loved for its large, glossy leaves with natural holes.",
+              water: "Moderate - allow soil to dry between waterings",
+              light: "Bright, indirect light",
+              toxicity: true,
+              toxicity_details: "Toxic to pets if ingested. Contains calcium oxalate crystals.",
+              care_tips: "Wipe leaves occasionally to remove dust. Can grow very large with proper support."
+            }
+          },
+          {
+            plant_name: "Philodendron",
+            probability: 0.85,
+            plant_details: {
+              family: "Araceae",
+              origin: "South America",
+              description: "A large genus of flowering plants with many popular houseplant varieties.",
+              water: "Moderate - keep soil slightly moist",
+              light: "Medium to bright indirect light",
+              toxicity: true,
+              care_tips: "Prune regularly to maintain shape. Can be propagated easily in water."
+            }
+          },
+          {
+            plant_name: "Pothos",
+            probability: 0.78,
+            plant_details: {
+              family: "Araceae",
+              origin: "Southeast Asia",
+              description: "One of the easiest houseplants to grow, with heart-shaped green leaves.",
+              water: "Allow soil to dry between waterings",
+              light: "Low to bright indirect light",
+              toxicity: true,
+              care_tips: "Great for beginners. Can grow in water indefinitely."
+            }
+          }
+        ];
+        
+        // Methods
+        const startCamera = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: "environment" },
+              audio: false
+            });
+            video.value.srcObject = stream;
+          } catch (err) {
+            console.error("Error accessing camera:", err);
+            apiError.value = "Could not access camera. Please ensure you've granted camera permissions.";
+          }
+        };
+        
+        const takePhoto = () => {
+          const context = canvas.value.getContext('2d');
+          canvas.value.width = video.value.videoWidth;
+          canvas.value.height = video.value.videoHeight;
+          context.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height);
+          
+          photoTaken.value = true;
+          identifyPlant();
+        };
+        
+        const retakePhoto = () => {
+          photoTaken.value = false;
+          results.value = [];
+          selectedPlant.value = null;
+          apiError.value = null;
+        };
+        
+        const identifyPlant = () => {
+          isLoading.value = true;
+          
+          // In a real app, you would send the image to an API like Plant.id
+          // For this demo, we'll use mock data after a short delay
+          setTimeout(() => {
+            results.value = mockApiResponse;
+            isLoading.value = false;
+            
+            // Save to history
+            const historyItem = {
+              ...mockApiResponse[0],
+              image: canvas.value.toDataURL('image/jpeg'),
+              timestamp: new Date().getTime()
+            };
+            history.value.unshift(historyItem);
+          }, 2000);
+        };
+        
+        const selectPlant = (plant) => {
+          selectedPlant.value = plant;
+          selectedPlantImage.value = canvas.value.toDataURL('image/jpeg');
+        };
+        
+        const viewHistoryItem = (item) => {
+          selectedPlant.value = item;
+          selectedPlantImage.value = item.image;
+          
+          // Scroll to details section
+          document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        const deleteHistoryItem = (index) => {
+          history.value.splice(index, 1);
+        };
+        
+        const clearHistory = () => {
+          history.value = [];
+        };
+        
+        const formatDate = (timestamp) => {
+          const date = new Date(timestamp);
+          return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        };
+        
+        const toggleDarkMode = () => {
+          darkMode.value = !darkMode.value;
+          document.documentElement.classList.toggle('dark', darkMode.value);
+          localStorage.setItem('darkMode', darkMode.value);
+        };
+        
+        const installPWA = () => {
+          if (deferredPrompt.value) {
+            deferredPrompt.value.prompt();
+            deferredPrompt.value.userChoice.then(choiceResult => {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+              } else {
+                console.log('User dismissed the install prompt');
+              }
+              deferredPrompt.value = null;
+              showInstallBanner.value = false;
+            });
+          }
+        };
+        
+        const dismissInstallBanner = () => {
+          showInstallBanner.value = false;
+          localStorage.setItem('hideInstallBanner', 'true');
+        };
+        
+        // Lifecycle Hooks
+        onMounted(() => {
+          startCamera();
+          
+          // Check for saved dark mode preference
+          if (localStorage.getItem('darkMode') === 'true') {
+            darkMode.value = true;
+            document.documentElement.classList.add('dark');
+          }
+          
+          // Load history from localStorage
+          const savedHistory = localStorage.getItem('plantHistory');
+          if (savedHistory) {
+            history.value = JSON.parse(savedHistory);
+          }
+          
+          // Listen for beforeinstallprompt event
+          window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt.value = e;
+            
+            // Only show banner if not dismissed before
+            if (!localStorage.getItem('hideInstallBanner')) {
+              showInstallBanner.value = true;
+            }
+          });
+          
+          // Save history to localStorage when it changes
+          watch(history, (newHistory) => {
+            localStorage.setItem('plantHistory', JSON.stringify(newHistory));
+          }, { deep: true });
+        });
+        
+        return {
+          video,
+          canvas,
+          photoTaken,
+          isLoading,
+          results,
+          selectedPlant,
+          selectedPlantImage,
+          history,
+          apiError,
+          darkMode,
+          showInstallBanner,
+          
+          takePhoto,
+          retakePhoto,
+          selectPlant,
+          viewHistoryItem,
+          deleteHistoryItem,
+          clearHistory,
+          formatDate,
+          toggleDarkMode,
+          installPWA,
+          dismissInstallBanner
+        };
+      }
+    }).mount('#app');
+    
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+    
+    // Add to homescreen for iOS
+    let isIos = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      return /iphone|ipad|ipod/.test(userAgent);
+    };
+    
+    let isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+    
+    if (isIos() && !isInStandaloneMode()) {
+      document.querySelector('#ios-install-banner').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

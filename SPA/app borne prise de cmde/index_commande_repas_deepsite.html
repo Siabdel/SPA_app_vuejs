@@ -1,0 +1,1451 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastFood Kiosk - Commande Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .category-active {
+            border-bottom: 3px solid #f59e0b;
+            color: #f59e0b;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .slide-fade-enter-active {
+            transition: all 0.3s ease-out;
+        }
+        .slide-fade-leave-active {
+            transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+        }
+        .slide-fade-enter-from,
+        .slide-fade-leave-to {
+            transform: translateX(20px);
+            opacity: 0;
+        }
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-red-600 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-hamburger text-2xl"></i>
+                    <h1 class="text-xl font-bold">FastFood Kiosk</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="toggleCart" class="relative p-2 rounded-full hover:bg-red-700 transition">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span v-if="cart.length > 0" class="absolute -top-1 -right-1 bg-yellow-500 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ cart.reduce((total, item) => total + item.quantity, 0) }}
+                        </span>
+                    </button>
+                    <button v-if="isAdmin" @click="currentView = 'admin'" class="px-3 py-1 bg-white text-red-600 rounded hover:bg-gray-100 transition">
+                        Admin
+                    </button>
+                    <button v-else @click="loginAdmin" class="px-3 py-1 bg-white text-red-600 rounded hover:bg-gray-100 transition">
+                        Connexion
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- Customer View -->
+            <div v-if="currentView === 'customer'">
+                <!-- Categories Navigation -->
+                <div class="bg-white rounded-lg shadow mb-6 overflow-x-auto">
+                    <div class="flex space-x-8 px-4 py-3">
+                        <button 
+                            v-for="category in categories" 
+                            :key="category.id" 
+                            @click="selectCategory(category.id)"
+                            :class="{'category-active': selectedCategory === category.id}"
+                            class="px-2 py-2 font-medium text-gray-700 hover:text-yellow-500 transition whitespace-nowrap"
+                        >
+                            {{ category.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Special Offers -->
+                <div v-if="selectedCategory === 'offers'" class="mb-8">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Offres Spéciales</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div 
+                            v-for="offer in specialOffers" 
+                            :key="offer.id" 
+                            class="bg-white rounded-lg shadow overflow-hidden border border-yellow-300 transform hover:scale-105 transition duration-300"
+                        >
+                            <div class="relative">
+                                <img :src="offer.image" :alt="offer.name" class="w-full h-48 object-cover">
+                                <div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                                    PROMO
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-lg font-bold mb-1">{{ offer.name }}</h3>
+                                <p class="text-gray-600 text-sm mb-3">{{ offer.description }}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-lg font-bold text-red-600">{{ offer.price }} €</span>
+                                    <button 
+                                        @click="addToCart(offer)"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-medium transition"
+                                    >
+                                        Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div v-else>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">{{ categories.find(c => c.id === selectedCategory)?.name }}</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div 
+                            v-for="product in filteredProducts" 
+                            :key="product.id" 
+                            class="bg-white rounded-lg shadow overflow-hidden transform hover:scale-105 transition duration-300"
+                        >
+                            <div class="relative">
+                                <img :src="product.image" :alt="product.name" class="w-full h-40 object-cover">
+                                <div v-if="product.isNew" class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
+                                    NOUVEAU
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-lg font-bold mb-1">{{ product.name }}</h3>
+                                <p class="text-gray-600 text-sm mb-3">{{ product.description }}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-lg font-bold text-red-600">{{ product.price }} €</span>
+                                    <button 
+                                        @click="showProductDetails(product)"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-medium transition"
+                                    >
+                                        Personnaliser
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin View -->
+            <div v-else-if="currentView === 'admin'" class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Panneau d'administration</h2>
+                    <button @click="currentView = 'customer'" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition">
+                        Retour au kiosk
+                    </button>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="border-b border-gray-200 mb-6">
+                    <div class="flex space-x-8">
+                        <button 
+                            v-for="tab in adminTabs" 
+                            :key="tab.id" 
+                            @click="adminActiveTab = tab.id"
+                            :class="{'border-b-2 border-red-600 text-red-600': adminActiveTab === tab.id}"
+                            class="px-4 py-2 font-medium text-gray-700 hover:text-red-600 transition"
+                        >
+                            {{ tab.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Management -->
+                <div v-if="adminActiveTab === 'products'">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Gestion des produits</h3>
+                        <button @click="showAddProductModal" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Ajouter un produit
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr v-for="product in products" :key="product.id">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <img :src="product.image" :alt="product.name" class="h-10 w-10 rounded-full object-cover">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-500">{{ categories.find(c => c.id === product.category)?.name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ product.price }} €</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span v-if="product.available" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Disponible
+                                        </span>
+                                        <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            Indisponible
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button @click="editProduct(product)" class="text-yellow-600 hover:text-yellow-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button @click="confirmDeleteProduct(product.id)" class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Orders Management -->
+                <div v-else-if="adminActiveTab === 'orders'">
+                    <h3 class="text-xl font-semibold mb-4">Gestion des commandes</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div 
+                            v-for="order in orders" 
+                            :key="order.id" 
+                            class="border rounded-lg overflow-hidden shadow-sm"
+                            :class="{
+                                'border-yellow-300 bg-yellow-50': order.status === 'pending',
+                                'border-blue-300 bg-blue-50': order.status === 'preparing',
+                                'border-green-300 bg-green-50': order.status === 'ready',
+                                'border-gray-300 bg-gray-50': order.status === 'completed'
+                            }"
+                        >
+                            <div class="p-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold">Commande #{{ order.id }}</h4>
+                                        <p class="text-sm text-gray-600">{{ formatDate(order.createdAt) }}</p>
+                                    </div>
+                                    <span 
+                                        class="px-2 py-1 text-xs font-semibold rounded-full"
+                                        :class="{
+                                            'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                                            'bg-blue-100 text-blue-800': order.status === 'preparing',
+                                            'bg-green-100 text-green-800': order.status === 'ready',
+                                            'bg-gray-100 text-gray-800': order.status === 'completed'
+                                        }"
+                                    >
+                                        {{ getStatusText(order.status) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="mb-3">
+                                    <h5 class="font-semibold text-sm mb-1">Articles:</h5>
+                                    <ul class="text-sm">
+                                        <li v-for="item in order.items" :key="item.id" class="flex justify-between py-1">
+                                            <span>{{ item.quantity }}x {{ item.name }}</span>
+                                            <span>{{ (item.price * item.quantity).toFixed(2) }} €</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <div class="flex justify-between font-semibold">
+                                        <span>Total:</span>
+                                        <span>{{ order.total.toFixed(2) }} €</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 flex justify-between items-center border-t">
+                                <div class="flex space-x-2">
+                                    <button 
+                                        @click="updateOrderStatus(order.id, 'preparing')" 
+                                        :disabled="order.status !== 'pending'"
+                                        :class="{'opacity-50 cursor-not-allowed': order.status !== 'pending'}"
+                                        class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition"
+                                    >
+                                        Préparer
+                                    </button>
+                                    <button 
+                                        @click="updateOrderStatus(order.id, 'ready')" 
+                                        :disabled="order.status !== 'preparing'"
+                                        :class="{'opacity-50 cursor-not-allowed': order.status !== 'preparing'}"
+                                        class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition"
+                                    >
+                                        Prêt
+                                    </button>
+                                    <button 
+                                        @click="updateOrderStatus(order.id, 'completed')" 
+                                        :disabled="order.status !== 'ready'"
+                                        :class="{'opacity-50 cursor-not-allowed': order.status !== 'ready'}"
+                                        class="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition"
+                                    >
+                                        Servi
+                                    </button>
+                                </div>
+                                <button @click="viewOrderDetails(order)" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div v-else-if="adminActiveTab === 'stats'">
+                    <h3 class="text-xl font-semibold mb-4">Statistiques de ventes</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Chiffre d'affaires</h4>
+                            <p class="text-2xl font-bold text-gray-900">{{ stats.totalRevenue.toFixed(2) }} €</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ stats.orderCount }} commandes</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Panier moyen</h4>
+                            <p class="text-2xl font-bold text-gray-900">{{ stats.averageOrderValue.toFixed(2) }} €</p>
+                            <p class="text-sm text-gray-500 mt-1">par commande</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-500 mb-1">Produits populaires</h4>
+                            <p class="text-2xl font-bold text-gray-900">{{ stats.topProduct.name }}</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ stats.topProduct.count }} ventes</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg shadow border border-gray-200 mb-6">
+                        <h4 class="text-sm font-medium text-gray-500 mb-4">Ventes par catégorie</h4>
+                        <div class="h-64">
+                            <!-- Chart would be implemented with a library like Chart.js in a real app -->
+                            <div class="flex items-end h-48 space-x-2">
+                                <div 
+                                    v-for="category in stats.categorySales" 
+                                    :key="category.id" 
+                                    class="bg-red-600 rounded-t w-12 flex-1" 
+                                    :style="{ height: (category.percentage * 2) + 'px' }"
+                                >
+                                    <div class="text-white text-xs text-center rotate-90 origin-left transform translate-x-2 translate-y-8 whitespace-nowrap">
+                                        {{ category.name }} ({{ category.percentage }}%)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Confirmation View -->
+            <div v-else-if="currentView === 'confirmation'" class="bg-white rounded-lg shadow p-6 max-w-2xl mx-auto">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-green-600 text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Commande confirmée!</h2>
+                    <p class="text-gray-600">Votre commande a été passée avec succès.</p>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg p-4 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold">Récapitulatif de la commande</h3>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">#{{ currentOrder.id }}</span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div v-for="item in currentOrder.items" :key="item.id" class="flex justify-between">
+                            <div>
+                                <span class="font-medium">{{ item.quantity }}x {{ item.name }}</span>
+                                <div v-if="item.options" class="text-xs text-gray-500 ml-2">
+                                    <div v-for="(option, idx) in item.options" :key="idx">
+                                        {{ option }}
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="font-medium">{{ (item.price * item.quantity).toFixed(2) }} €</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-3">
+                        <div class="flex justify-between font-semibold">
+                            <span>Total:</span>
+                            <span>{{ currentOrder.total.toFixed(2) }} €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div id="qrcode" class="mb-4 p-2 bg-white border border-gray-200 rounded"></div>
+                    <p class="text-sm text-gray-500 mb-4">Scannez ce QR code pour suivre votre commande</p>
+                    
+                    <div class="flex space-x-3">
+                        <button @click="printOrder" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition flex items-center">
+                            <i class="fas fa-print mr-2"></i> Imprimer
+                        </button>
+                        <button @click="sendOrderByEmail" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition flex items-center">
+                            <i class="fas fa-envelope mr-2"></i> Envoyer par email
+                        </button>
+                    </div>
+                    
+                    <button 
+                        @click="currentView = 'customer'; cart = []; currentOrder = null" 
+                        class="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition"
+                    >
+                        Retour à l'accueil
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Side Cart -->
+        <transition name="slide-fade">
+            <div v-if="showCart" class="fixed inset-0 overflow-hidden z-50">
+                <div class="absolute inset-0 overflow-hidden">
+                    <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="toggleCart"></div>
+                    <div class="fixed inset-y-0 right-0 max-w-full flex">
+                        <div class="relative w-screen max-w-md">
+                            <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
+                                <div class="flex-1 py-6 overflow-y-auto px-4 sm:px-6">
+                                    <div class="flex items-start justify-between">
+                                        <h2 class="text-lg font-medium text-gray-900">Votre panier</h2>
+                                        <div class="ml-3 h-7 flex items-center">
+                                            <button @click="toggleCart" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none">
+                                                <span class="sr-only">Fermer le panier</span>
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-8">
+                                        <div class="flow-root">
+                                            <ul class="-my-6 divide-y divide-gray-200">
+                                                <li v-for="(item, index) in cart" :key="index" class="py-6 flex">
+                                                    <div class="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
+                                                        <img :src="item.image" :alt="item.name" class="w-full h-full object-center object-cover">
+                                                    </div>
+
+                                                    <div class="ml-4 flex-1 flex flex-col">
+                                                        <div>
+                                                            <div class="flex justify-between text-base font-medium text-gray-900">
+                                                                <h3>{{ item.name }}</h3>
+                                                                <p class="ml-4">{{ (item.price * item.quantity).toFixed(2) }} €</p>
+                                                            </div>
+                                                            <p class="mt-1 text-sm text-gray-500">{{ item.category }}</p>
+                                                        </div>
+                                                        <div class="flex-1 flex items-end justify-between text-sm">
+                                                            <div class="flex items-center border rounded-md">
+                                                                <button @click="decreaseQuantity(index)" class="px-3 py-1 text-gray-600 hover:text-gray-900">
+                                                                    <i class="fas fa-minus"></i>
+                                                                </button>
+                                                                <span class="px-2">{{ item.quantity }}</span>
+                                                                <button @click="increaseQuantity(index)" class="px-3 py-1 text-gray-600 hover:text-gray-900">
+                                                                    <i class="fas fa-plus"></i>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="flex">
+                                                                <button @click="removeFromCart(index)" class="font-medium text-red-600 hover:text-red-500">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-gray-200 py-6 px-4 sm:px-6">
+                                    <div class="flex justify-between text-base font-medium text-gray-900 mb-4">
+                                        <p>Sous-total</p>
+                                        <p>{{ cartTotal.toFixed(2) }} €</p>
+                                    </div>
+                                    <p class="mt-0.5 text-sm text-gray-500">Les taxes et frais seront calculés à la caisse.</p>
+                                    <div class="mt-6">
+                                        <button 
+                                            @click="proceedToCheckout" 
+                                            :disabled="cart.length === 0"
+                                            :class="{'bg-gray-400 cursor-not-allowed': cart.length === 0, 'bg-red-600 hover:bg-red-700': cart.length > 0}"
+                                            class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white"
+                                        >
+                                            Passer la commande
+                                        </button>
+                                    </div>
+                                    <div class="mt-6 flex justify-center text-sm text-center text-gray-500">
+                                        <p>
+                                            ou
+                                            <button @click="toggleCart" class="text-red-600 font-medium hover:text-red-500 ml-1">
+                                                Continuer vos achats
+                                            </button>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Product Details Modal -->
+        <transition name="fade">
+            <div v-if="selectedProduct" class="fixed inset-0 overflow-y-auto z-50">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" @click="selectedProduct = null"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+                                            {{ selectedProduct.name }}
+                                        </h3>
+                                        <button @click="selectedProduct = null" class="text-gray-400 hover:text-gray-500">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500 mb-4">{{ selectedProduct.description }}</p>
+                                        
+                                        <div v-if="selectedProduct.options" class="mb-4">
+                                            <h4 class="text-sm font-medium text-gray-700 mb-2">Options:</h4>
+                                            <div class="space-y-2">
+                                                <div v-for="(option, key) in selectedProduct.options" :key="key" class="flex items-center">
+                                                    <input 
+                                                        :id="'option-' + key" 
+                                                        type="checkbox" 
+                                                        v-model="selectedOptions[key]"
+                                                        class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                                                    >
+                                                    <label :for="'option-' + key" class="ml-2 block text-sm text-gray-700">
+                                                        {{ option.name }} (+{{ option.price }} €)
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div v-if="selectedProduct.sizes" class="mb-4">
+                                            <h4 class="text-sm font-medium text-gray-700 mb-2">Taille:</h4>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <div 
+                                                    v-for="size in selectedProduct.sizes" 
+                                                    :key="size.name"
+                                                    @click="selectedSize = size.name"
+                                                    :class="{'border-red-500 bg-red-50': selectedSize === size.name}"
+                                                    class="border rounded-md p-2 text-center cursor-pointer hover:bg-gray-50"
+                                                >
+                                                    <p class="text-sm font-medium">{{ size.name }}</p>
+                                                    <p class="text-xs text-gray-500">+{{ size.price }} €</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center justify-between mt-6">
+                                            <div class="flex items-center border rounded-md">
+                                                <button @click="productQuantity > 1 ? productQuantity-- : null" class="px-3 py-1 text-gray-600 hover:text-gray-900">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <span class="px-2">{{ productQuantity }}</span>
+                                                <button @click="productQuantity++" class="px-3 py-1 text-gray-600 hover:text-gray-900">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-lg font-bold text-red-600">
+                                                {{ calculateProductPrice().toFixed(2) }} €
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button 
+                                @click="addCustomizedProductToCart" 
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Ajouter au panier
+                            </button>
+                            <button 
+                                @click="selectedProduct = null" 
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Checkout Modal -->
+        <transition name="fade">
+            <div v-if="showCheckout" class="fixed inset-0 overflow-y-auto z-50">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" @click="showCheckout = false"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+                                            Paiement
+                                        </h3>
+                                        <button @click="showCheckout = false" class="text-gray-400 hover:text-gray-500">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="mb-4">
+                                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                            <input 
+                                                type="email" 
+                                                id="email" 
+                                                v-model="customerEmail"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                placeholder="votre@email.com"
+                                            >
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="card-number" class="block text-sm font-medium text-gray-700">Numéro de carte</label>
+                                            <input 
+                                                type="text" 
+                                                id="card-number" 
+                                                v-model="cardNumber"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                placeholder="4242 4242 4242 4242"
+                                            >
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label for="expiry" class="block text-sm font-medium text-gray-700">Date d'expiration</label>
+                                                <input 
+                                                    type="text" 
+                                                    id="expiry" 
+                                                    v-model="cardExpiry"
+                                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                    placeholder="MM/AA"
+                                                >
+                                            </div>
+                                            <div>
+                                                <label for="cvc" class="block text-sm font-medium text-gray-700">CVC</label>
+                                                <input 
+                                                    type="text" 
+                                                    id="cvc" 
+                                                    v-model="cardCvc"
+                                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                    placeholder="123"
+                                                >
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="border-t pt-4">
+                                            <div class="flex justify-between font-semibold text-lg">
+                                                <span>Total:</span>
+                                                <span>{{ cartTotal.toFixed(2) }} €</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button 
+                                @click="processPayment" 
+                                :disabled="processingPayment"
+                                :class="{'bg-red-600 hover:bg-red-700': !processingPayment, 'bg-gray-400 cursor-not-allowed': processingPayment}"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                <span v-if="!processingPayment">Payer maintenant</span>
+                                <span v-else class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Traitement...
+                                </span>
+                            </button>
+                            <button 
+                                @click="showCheckout = false" 
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Add/Edit Product Modal -->
+        <transition name="fade">
+            <div v-if="showProductModal" class="fixed inset-0 overflow-y-auto z-50">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" @click="closeProductModal"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+                                            {{ editingProduct ? 'Modifier le produit' : 'Ajouter un produit' }}
+                                        </h3>
+                                        <button @click="closeProductModal" class="text-gray-400 hover:text-gray-500">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="mb-4">
+                                            <label for="product-name" class="block text-sm font-medium text-gray-700">Nom</label>
+                                            <input 
+                                                type="text" 
+                                                id="product-name" 
+                                                v-model="productForm.name"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                            >
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="product-category" class="block text-sm font-medium text-gray-700">Catégorie</label>
+                                            <select 
+                                                id="product-category" 
+                                                v-model="productForm.category"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                            >
+                                                <option v-for="category in categories" :key="category.id" :value="category.id">
+                                                    {{ category.name }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="product-price" class="block text-sm font-medium text-gray-700">Prix (€)</label>
+                                            <input 
+                                                type="number" 
+                                                id="product-price" 
+                                                v-model="productForm.price"
+                                                step="0.01"
+                                                min="0"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                            >
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="product-description" class="block text-sm font-medium text-gray-700">Description</label>
+                                            <textarea 
+                                                id="product-description" 
+                                                v-model="productForm.description"
+                                                rows="3"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                            ></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="product-image" class="block text-sm font-medium text-gray-700">Image URL</label>
+                                            <input 
+                                                type="text" 
+                                                id="product-image" 
+                                                v-model="productForm.image"
+                                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                placeholder="https://example.com/image.jpg"
+                                            >
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700">Statut</label>
+                                            <div class="mt-2 flex items-center">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="product-available" 
+                                                    v-model="productForm.available"
+                                                    class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                                                >
+                                                <label for="product-available" class="ml-2 block text-sm text-gray-700">
+                                                    Disponible
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700">Options</label>
+                                            <div v-for="(option, index) in productForm.options" :key="index" class="mt-2 grid grid-cols-3 gap-2 items-center">
+                                                <input 
+                                                    type="text" 
+                                                    v-model="option.name"
+                                                    placeholder="Nom de l'option"
+                                                    class="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                >
+                                                <input 
+                                                    type="number" 
+                                                    v-model="option.price"
+                                                    placeholder="Prix"
+                                                    step="0.01"
+                                                    min="0"
+                                                    class="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                                                >
+                                                <button 
+                                                    @click="removeProductOption(index)"
+                                                    class="text-red-600 hover:text-red-800"
+                                                >
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                            <button 
+                                                @click="addProductOption"
+                                                class="mt-2 text-sm text-red-600 hover:text-red-800 flex items-center"
+                                            >
+                                                <i class="fas fa-plus mr-1"></i> Ajouter une option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button 
+                                @click="saveProduct" 
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                {{ editingProduct ? 'Mettre à jour' : 'Ajouter' }}
+                            </button>
+                            <button 
+                                @click="closeProductModal" 
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Delete Confirmation Modal -->
+        <transition name="fade">
+            <div v-if="showDeleteModal" class="fixed inset-0 overflow-y-auto z-50">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" @click="showDeleteModal = false"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                    <i class="fas fa-exclamation text-red-600"></i>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                        Confirmer la suppression
+                                    </h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">
+                                            Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button 
+                                @click="deleteProduct" 
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Supprimer
+                            </button>
+                            <button 
+                                @click="showDeleteModal = false" 
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Order Details Modal -->
+        <transition name="fade">
+            <div v-if="selectedOrder" class="fixed inset-0 overflow-y-auto z-50">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" @click="selectedOrder = null"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">
+                                            Détails de la commande #{{ selectedOrder.id }}
+                                        </h3>
+                                        <button @click="selectedOrder = null" class="text-gray-400 hover:text-gray-500">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="mb-4">
+                                            <p class="text-sm text-gray-500">
+                                                <span class="font-medium">Date:</span> {{ formatDate(selectedOrder.createdAt) }}
+                                            </p>
+                                            <p class="text-sm text-gray-500">
+                                                <span class="font-medium">Statut:</span> 
+                                                <span :class="{
+                                                    'text-yellow-600': selectedOrder.status === 'pending',
+                                                    'text-blue-600': selectedOrder.status === 'preparing',
+                                                    'text-green-600': selectedOrder.status === 'ready',
+                                                    'text-gray-600': selectedOrder.status === 'completed'
+                                                }">
+                                                    {{ getStatusText(selectedOrder.status) }}
+                                                </span>
+                                            </p>
+                                            <p class="text-sm text-gray-500" v-if="selectedOrder.customerEmail">
+                                                <span class="font-medium">Email:</span> {{ selectedOrder.customerEmail }}
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="border-t pt-3 mb-4">
+                                            <h4 class="font-medium mb-2">Articles:</h4>
+                                            <ul class="divide-y divide-gray-200">
+                                                <li v-for="item in selectedOrder.items" :key="item.id" class="py-2">
+                                                    <div class="flex justify-between">
+                                                        <div>
+                                                            <p class="font-medium">{{ item.quantity }}x {{ item.name }}</p>
+                                                            <p v-if="item.options" class="text-xs text-gray-500 mt-1">
+                                                                Options: {{ item.options.join(', ') }}
+                                                            </p>
+                                                        </div>
+                                                        <p class="font-medium">{{ (item.price * item.quantity).toFixed(2) }} €</p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="border-t pt-3">
+                                            <div class="flex justify-between font-medium">
+                                                <span>Total:</span>
+                                                <span>{{ selectedOrder.total.toFixed(2) }} €</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button 
+                                @click="selectedOrder = null" 
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+        
+        createApp({
+            setup() {
+                // State
+                const currentView = ref('customer');
+                const isAdmin = ref(false);
+                const showCart = ref(false);
+                const cart = ref([]);
+                const selectedCategory = ref('offers');
+                const selectedProduct = ref(null);
+                const selectedOptions = ref({});
+                const selectedSize = ref(null);
+                const productQuantity = ref(1);
+                const showCheckout = ref(false);
+                const customerEmail = ref('');
+                const cardNumber = ref('');
+                const cardExpiry = ref('');
+                const cardCvc = ref('');
+                const processingPayment = ref(false);
+                const currentOrder = ref(null);
+                const showProductModal = ref(false);
+                const editingProduct = ref(false);
+                const productForm = ref({
+                    name: '',
+                    category: 'sandwich',
+                    price: 0,
+                    description: '',
+                    image: '',
+                    available: true,
+                    options: [],
+                    sizes: []
+                });
+                const showDeleteModal = ref(false);
+                const productToDelete = ref(null);
+                const adminActiveTab = ref('products');
+                const selectedOrder = ref(null);
+                
+                // Mock data
+                const categories = ref([
+                    { id: 'offers', name: 'Offres spéciales' },
+                    { id: 'sandwich', name: 'Sandwichs' },
+                    { id: 'salad', name: 'Salades' },
+                    { id: 'fries', name: 'Frites & accompagnements' },
+                    { id: 'drink', name: 'Boissons' },
+                    { id: 'dessert', name: 'Desserts' }
+                ]);
+                
+                const products = ref([
+                    {
+                        id: 1,
+                        name: 'Big Burger',
+                        category: 'sandwich',
+                        price: 5.99,
+                        description: 'Notre burger signature avec viande 100% bœuf, fromage, laitue, tomate et sauce spéciale.',
+                        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true,
+                        isNew: false,
+                        options: [
+                            { name: 'Extra fromage', price: 1.00 },
+                            { name: 'Bacon', price: 1.50 },
+                            { name: 'Oignons grillés', price: 0.50 }
+                        ],
+                        sizes: [
+                            { name: 'Petit', price: 0 },
+                            { name: 'Moyen', price: 1.50 },
+                            { name: 'Grand', price: 2.50 }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        name: 'Chicken Deluxe',
+                        category: 'sandwich',
+                        price: 6.49,
+                        description: 'Filet de poulet croustillant avec laitue, tomate et sauce mayonnaise.',
+                        image: 'https://images.unsplash.com/photo-1562967914-01d0f9bde0fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true,
+                        isNew: true,
+                        options: [
+                            { name: 'Extra sauce', price: 0.50 },
+                            { name: 'Fromage', price: 1.00 }
+                        ]
+                    },
+                    {
+                        id: 3,
+                        name: 'César Salad',
+                        category: 'salad',
+                        price: 7.99,
+                        description: 'Salade fraîche avec poulet grillé, croûtons, parmesan et sauce césar.',
+                        image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true,
+                        isNew: false,
+                        options: [
+                            { name: 'Extra poulet', price: 2.00 },
+                            { name: 'Avocat', price: 1.50 }
+                        ]
+                    },
+                    {
+                        id: 4,
+                        name: 'Frites Classiques',
+                        category: 'fries',
+                        price: 3.49,
+                        description: 'Frites dorées et croustillantes, salées à perfection.',
+                        image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true,
+                        isNew: false,
+                        options: [
+                            { name: 'Fromage fondu', price: 1.50 },
+                            { name: 'Bacon', price: 1.00 },
+                            { name: 'Sauce supplémentaire', price: 0.50 }
+                        ],
+                        sizes: [
+                            { name: 'Petit', price: 0 },
+                            { name: 'Moyen', price: 1.00 },
+                            { name: 'Grand', price: 1.80 }
+                        ]
+                    },
+                    {
+                        id: 5,
+                        name: 'Coca-Cola',
+                        category: 'drink',
+                        price: 2.49,
+                        description: 'Boisson gazeuse rafraîchissante.',
+                        image: 'https://images.unsplash.com/photo-1554866585-cd94860890b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true,
+                        isNew: false,
+                        sizes: [
+                            { name: 'Petit', price: 0 },
+                            { name: 'Moyen', price: 0.50 },
+                            { name: 'Grand', price: 0.80 }
+                        ]
+                    },
+                    {
+                        id: 6,
+                        name: 'Sundae Chocolat',
+                        category: 'dessert',
+                        price: 3.99,
+                        description: 'Crème glacée vanille avec sauce chocolat chaude et noisettes concassées.',
+                        image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true,
+                        isNew: true,
+                        options: [
+                            { name: 'Extra sauce', price: 0.50 },
+                            { name: 'Fruits rouges', price: 1.00 }
+                        ]
+                    }
+                ]);
+                
+                const specialOffers = ref([
+                    {
+                        id: 101,
+                        name: 'Menu Big Burger',
+                        category: 'offers',
+                        price: 8.99,
+                        description: 'Big Burger + Frites Moyennes + Boisson Moyenne',
+                        image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true
+                    },
+                    {
+                        id: 102,
+                        name: 'Menu Chicken Deluxe',
+                        category: 'offers',
+                        price: 9.99,
+                        description: 'Chicken Deluxe + Frites Moyennes + Boisson Moyenne',
+                        image: 'https://images.unsplash.com/photo-1606755456206-b25206bfd2a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true
+                    },
+                    {
+                        id: 103,
+                        name: 'Menu Enfant',
+                        category: 'offers',
+                        price: 6.49,
+                        description: 'Petit Burger + Petites Frites + Petit Boisson + Jouet',
+                        image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+                        available: true
+                    }
+                ]);
+                
+                const orders = ref([
+                    {
+                        id: 1001,
+                        createdAt: new Date(),
+                        status: 'pending',
+                        items: [
+                            { id: 1, name: 'Big Burger', price: 5.99, quantity: 1, options: ['Extra fromage'] },
+                            { id: 4, name: 'Frites Classiques', price: 3.49, quantity: 1, options: [] }
+                        ],
+                        total: 9.48,
+                        customerEmail: 'client1@example.com'
+                    },
+                    {
+                        id: 1002,
+                        createdAt: new Date(Date.now() - 3600000),
+                        status: 'preparing',
+                        items: [
+                            { id: 101, name: 'Menu Big Burger', price: 8.99, quantity: 2, options: [] }
+                        ],
+                        total: 17.98,
+                        customerEmail: 'client2@example.com'
+                    },
+                    {
+                        id: 1003,
+                        createdAt: new Date(Date.now() - 7200000),
+                        status: 'ready',
+                        items: [
+                            { id: 2, name: 'Chicken Deluxe', price: 6.49, quantity: 1, options: ['Extra sauce'] },
+                            { id: 5, name: 'Coca-Cola', price: 2.49, quantity: 1, options: [] },
+                            { id: 6, name: 'Sundae Chocolat', price: 3.99, quantity: 1, options: [] }
+                        ],
+                        total: 12.97,
+                        customerEmail: 'client3@example.com'
+                    }
+                ]);
+                
+                const stats = ref({
+                    totalRevenue: 1254.76,
+                    orderCount: 243,
+                    averageOrderValue: 15.32,
+                    topProduct: { name: 'Big Burger', count: 87 },
+                    categorySales: [
+                        { id: 'sandwich', name: 'Sandwichs', percentage: 45 },
+                        { id: 'offers', name: 'Menus', percentage: 30 },
+                        { id: 'fries', name: 'Frites', percentage: 12 },
+                        { id: 'drink', name: 'Boissons', percentage: 8 },
+                        { id: 'dessert', name: 'Desserts', percentage: 5 }
+                    ]
+                });
+                
+                const adminTabs = ref([
+                    { id: 'products', name: 'Produits' },
+                    { id: 'orders', name: 'Commandes' },
+                    { id: 'stats', name: 'Statistiques' }
+                ]);
+                
+                // Computed
+                const filteredProducts = computed(() => {
+                    return products.value.filter(product => product.category === selectedCategory.value);
+                });
+                
+                const cartTotal = computed(() => {
+                    return cart.value.reduce((total, item) => {
+                        return total + (item.price * item.quantity);
+                    }, 0);
+                });
+                
+                // Methods
+                const toggleCart = () => {
+                    showCart.value = !showCart.value;
+                };
+                
+                const selectCategory = (categoryId) => {
+                    selectedCategory.value = categoryId;
+                };
+                
+                const addToCart = (product) => {
+                    const existingItem = cart.value.find(item => item.id === product.id && JSON.stringify(item.options) === JSON.stringify([]));
+                    
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cart.value.push({
+                            ...product,
+                            quantity: 1,
+                            options: []
+                        });
+                    }
+                    
+                    toggleCart();
+                };
+                
+                const showProductDetails = (product) => {
+                    selectedProduct.value = product;
+                    selectedOptions.value = {};
+                    selectedSize.value = null;
+                    productQuantity.value = 1;
+                    
+                    // Initialize options selection
+                    if (product.options) {
+                        product.options.forEach(option => {
+                            selectedOptions.value[option.name] = false;
+                        });
+                    }
+                };
+                
+                const calculateProductPrice = () => {
+                    let price = selectedProduct.value.price;
+                    
+                    // Add options price
+                    if (selectedProduct.value.options) {
+                        selectedProduct.value.options.forEach(option => {
+                            if (selectedOptions.value[option.name]) {
+                                price += option.price;
+                            }
+                        });
+                    }
+                    
+                    // Add size price
+                    if (selectedSize.value && selectedProduct.value.sizes) {
+                        const size = selectedProduct.value.sizes.find(s => s.name === selectedSize.value);
+                        if (size) {
+                            price += size.price;
+                        }
+                    }
+                    
+                    return price * productQuantity.value;
+                };
+                
+                const addCustomizedProductToCart = () => {
+                    const options = [];
+                    
+                    // Get selected options
+                    if (selectedProduct.value.options) {
+                        selectedProduct.value.options.forEach(option => {
+                            if (selectedOptions.value[option.name]) {
+                                options.push(`${option.name} (+${option.price} €)`);
+                            }
+                        });
+                    }
+                    
+                    // Add size if selected
+                    if (selectedSize.value) {
+                        options.push(`Taille: ${selectedSize.value}`);
+                    }
+                    
+                    const existingItem = cart.value.find(item => 
+                        item.id === selectedProduct.value.id && 
+                        JSON.stringify(item.options) === JSON.stringify(options)
+                    );
+                    
+                    if (existingItem) {
+                        existingItem.quantity += productQuantity.value;
+                    } else {
+                        cart.value.push({
+                            ...selectedProduct.value,
+                            quantity: productQuantity.value,
+                            options: options,
+                            price: calculateProductPrice() / productQuantity.value
+                        });
+                    }
+                    
+                    selectedProduct.value = null;
+                    toggleCart();
+                };
+                
+                const increaseQuantity = (index) => {
+                    cart.value[index].quantity++;
+                };
+                
+                const decreaseQuantity = (index) => {
+                    if (cart.value[index].quantity > 1) {
+                        cart.value[index].quantity--;
+                    } else {
+                        removeFromCart(index);
+                    }
+                };
+                
+                const removeFromCart = (index) => {
+                    cart.value.splice(index, 1);
+                };
+                
+                const proceedToCheckout = () => {
+                    if (cart.value.length > 0) {
+                        showCart.value = false;
+                        showCheckout.value = true;
+                    }
+                };
+                
+                const processPayment = () => {
+                    processingPayment.value = true;
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        // Generate order
+                        const orderId = Math.floor(Math.random() * 9000) + 1000;
+                        const newOrder = {
+                            id: orderId,
+                            createdAt: new Date(),
+                            status: 'pending',
+                            items: cart.value.map(item => ({
+                                id: item.id,
+                                name: item.name,
+                                price: item.price,
+                                quantity: item.quantity,
+                                options: item.options
+                            })),
+                            total: cartTotal.value,
+                            customerEmail: customerEmail.value
+                        };
+                        
+                        // Add to orders
+                        orders.value.unshift(newOrder);
+                        currentOrder.value = newOrder;
+                        
+                        // Reset cart and payment form
+                        cart.value = [];
+                        customerEmail.value = '';
+                        cardNumber.value = '';
+                        cardExpiry.value = '';
+                        cardCvc.value = '';
+                        processingPayment.value = false;
+                        showCheckout.value = false;
+                        
+                        // Show confirmation
+                        currentView.value = 'confirmation';
+                        
+                        // Generate QR code
+                        nextTick(() => {
+                            QRCode.toCanvas(document.getElementById('qrcode'), `order:${orderId}`, {
+                                width: 150,
+                                margin: 1
+                            }, (error) => {
+                                if (error) console.error(error);
+                            });
+                        });
+                    }, 1500);
+                };
+                
+                const printOrder = () => {
+                    window.print();
+                };
+                
+                const sendOrderByEmail = () => {
+                    alert(`Ticket envoyé par email à ${currentOrder.value.customerEmail}`);
+                };
+                
+                const loginAdmin = () => {
+                    const password = prompt('Entrez le mot de passe admin:');
+                    if (password === 'admin123') {
+                        isAdmin.value = true;
+                        currentView.value = 'admin';
+                    } else {
+                        alert('Mot de passe incorrect');
+                    }
+                };
+                
+                const showAddProductModal = () => {
+                    productForm.value = {
+                        name: '',
+                        category: 'sandwich',
+                        price: 0,
+                        description: '',
+                        image: '',
+                        available: true,
+                        options: [],
+                        sizes: []
+                    };
+                    editingProduct.value = false;
+                    showProductModal.value = true;
+                };
+                
+                const editProduct = (product) => {
+                    productForm.value = {
+                        ...product,
+                        options: product.options ? [...product
+</html>
