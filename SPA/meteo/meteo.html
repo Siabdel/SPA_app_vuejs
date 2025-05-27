@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Vue Bootstrap Table</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="../dist/bootstrap/css/bootstrap.min.css">
+    <!--   <script src="../dist/vue.min.js"></script>  -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+
+<body>
+<div class="container">
+  <div class="jumbotron text-center text-warning"> VUEJS examples ***</div>
+  <div id="app">
+    <div class="row">
+          <meteo v-for="(elem, index) in list_villes"
+            :ville="elem"
+            :key="elem.key">
+          </meteo>
+    </div>
+  </div>
+
+</div>
+
+<template id="id_template">
+  <div class="col-md-4">
+    <legend> ville {{ ville.nom }} {{ conditions.condition_key }} <img v-bind:src="conditions.icon_big" />  </legend>
+    <h5> Date : {{ conditions.date }} heure :  {{ conditions.hour }}</h5>
+    <h5> Temperature : {{ conditions.tmp }} C°</h5>
+    <h5> humidité : {{ conditions.humidity }} </h5>
+    <h5> Vitesse de vent : {{ conditions.wnd_spd }} km/h direction {{ conditions.wnd_dir }}</h5>
+    <h5> latitude : {{ ville.latitude }}  longitude : {{ ville.longitude }} </h5>
+    <h5> levée de soleil : {{ meteo_data.sunrise }} </h5>
+    <h5> couché du soleil : {{ meteo_data.sunset }} </h5>
+</div>
+</template>
+
+<script  src="app.js"> </script>
+
+
+</body>
+</html>

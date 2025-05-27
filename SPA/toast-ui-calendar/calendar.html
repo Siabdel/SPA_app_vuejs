@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Vue Bootstrap Table</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+    <!--   <script src="../dist/vue.min.js"></script>  -->
+</head>
+
+
+<body>
+
+<div class="container">
+  <div class="jumbotron text-center text-warning"> TOAST UI CALENDAR </div>
+  <div id="app">
+    <h1> {{ titre }}</h1>
+    <div class="row">
+          <calendar :schedules="schedules" :calendars="calendars" :city="pays" > </calendar>
+    </div>
+  </div>
+</div>
+
+<template id="id_template">
+  <div class="col-md-10">
+    <legend> ville {{ message }}  <img v-bind:src="photo" />  </legend>
+    <div class="container"> <h1> {{ horaires.lenght }} </h1></div>
+      <div id="calendar" style="height:800px"></div>
+</div>
+</template>
+
+ <!-- Vue.JS -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.13/dist/vue.js"></script>
+ <!--local toastui-calendar -->
+<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+<!-- Import as es module -->
+<!-- <script type="module" src="https://uicdn.toast.com/calendar/latest/toastui-calendar.mjs"></script> --> 
+<!--local app.JS -->
+<script  src="app.js"></script>
+
+</body>
+</html>

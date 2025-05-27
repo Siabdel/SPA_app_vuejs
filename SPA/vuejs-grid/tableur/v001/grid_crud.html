@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang='fr'>
+	<head>
+	  <meta charset="UTF-8">
+		<link href="../static/css/bootstrap3.css" rel="stylesheet">
+	  <link href="../static/css/popup.css" rel="stylesheet"  >
+	  <link href="../static/css/jquery-ui.css" rel="stylesheet"  >
+
+	  <script src="../static/js/jquery.js"></script>
+	  <script src="../static/js/jquery-ui.js"></script>
+	  <script src="../static/js/bootstrap.js"></script>
+
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.js"></script>
+
+
+	</head>
+
+	<BODY class="container">
+
+		<div class="jumbotron">
+			<h2 class="text-center"> CA par Article et par mois</h2>
+			<h4 class="text-center text-primary"> Année  2018</h4>
+		</div>
+
+		<!-- ----------------------------------------------------->
+		<!--  Tableau OF    -->
+		<!-- ----------------------------------------------------->
+
+		<div class="row" id="app">
+
+					<div class="container">
+						<!-- Ligne OF	  -->
+							<compof @supp="remove"  v-on:statut_change="change_st"  v-bind:ofs="dict_ofs"> </compof>
+					</div>
+		</div>
+
+	 	<script src="app.js"></script>
+	</BODY>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang='fr'>
+<head>
+	<meta charset="UTF-8">
+  <link href="static/css/bootstrap3.css" rel="stylesheet" id="bootstrap-css">
+  <link href="static/css/popup.css" rel="stylesheet"  >
+  <link href="static/css/jquery-ui.css" rel="stylesheet"  >
+
+  <script src="static/js/jquery.js"></script>
+  <script src="static/js/jquery-ui.js"></script>
+  <script src="static/js/bootstrap.js"></script>
+  
+  <script src="static/vuejs/vue.min.js"></script>
+
+</head>
+
+
+<body>
+<div id='mydialog' > </div>
+
+
+<div class="col-md-6">
+    <div class="panel with-nav-tabs panel-primary">
+        <div class="panel-heading">
+                 
+        </div>
+        <div class="panel-body">
+            <div id="app">
+
+			  <form class="vue-form" @submit.prevent="submit">
+			    
+			      <div>
+
+				<div>	<span> Email: </span>
+					<input type="text" :value="mail">
+				 
+				</div>
+			        <h4>Features</h4>
+			        <ul class="vue-form-list">
+			          <li v-for="(feature, index) in features">
+			            <input type="checkbox" 
+			                   :value="feature" 
+			                   :id="'cb-feature-'+index" 
+			                   v-model="selection.features">
+			            <label :for="'cb-feature-'+index">{{feature}}</label>
+			          </li>
+			          <li>
+			            <input type="checkbox" id="checkbox-all" @click="checkAll">
+			            <label for="checkbox-all">Check All</label>
+			          </li>
+			        </ul>
+			      </div>
+			      <div>
+			        <label class="label" for="textarea">Message with Counter</label>
+			        <textarea class="message" name="textarea" id="textarea" required="" 
+			                  v-model="message.text" 
+			                  :maxlength="message.maxlength"></textarea>
+			        <span class="counter">{{ message.text.length }} / {{ message.maxlength }}</span>
+			      </div>
+			      <div>
+			        <input type="submit" value="Send Form">
+				<Button class="btn btn-info" @click="validate" > valider</Button>
+			      </div>
+			    </fieldset>
+			  </form>
+
+  <div class="debug hidden">
+    <pre><code>{{ $data | json }}</code></pre>
+  </div>
+
+</div> 
+        </div>
+    </div>
+</div>
+
+	<script src="contacte.js"></script>
+	</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta charset="UTF-8">
+    <link href="static/css/bootstrap3.css" rel="stylesheet" id="bootstrap-css">
+    <link href="static/css/popup.css" rel="stylesheet"  >
+    <link href="static/css/jquery-ui.css" rel="stylesheet"  >
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/jquery-ui.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <script src="static/vuejs/vue.min.js"></script>
+    </head>
+  <body>
+
+<h2> test api images random  **</h2>
+
+<div class="container well">
+  <div id="slide">
+     <img id='slide-image' class="beach-image" src="" alt="beach image" width="800px"/>
+  </div>
+</div>
+
+    <script type="text/javascript">
+
+      $(document).ready(function() {
+        const numItemsToGenerate = 1;
+        // API random image
+        function renderItem(){
+          fetch(`https://source.unsplash.com/1600x900/?beach`).then((response) => {
+            $("#slide-image").attr('src', `${response.url}` );
+          })
+        }
+
+
+       //-----------------
+       //----
+       //-----------------
+       function boucle() {
+           console.log("error " + $(this).text());
+           renderItem()
+
+           $('#slide').fadeTo(1000, 0);
+           $('#slide').delay(1000).each(function(i) {
+               $(this).delay((i++) * 1500).fadeTo(1500, 1);
+           });
+         }
+
+       setInterval(boucle, 10000);
+
+       });
+
+    </script>
+
+
+<!------------------
+    <script type="text/javascript">
+      //-----------------------
+
+      function boucle() {
+          console.log("error " + $(this).text());
+          renderItem()
+
+          $('#slide').fadeTo(1000, 0);
+          $('#slide').shuffle().delay(1000).each(function(i) {
+              $(this).delay((i++) * 1500).fadeTo(1500, 1);
+          });
+      }
+
+      function renderItem(){
+        fetch(`https://source.unsplash.com/1600x900/?beach`).then((response) => {
+          let item = document.createElement('div');
+          item.classList.add('item');
+          $("#slide").innerHTML = `<img id='slide' class="beach-image" src="${response.url}" alt="beach image" width="800px"/>`
+          $("#slide").append(`<img id='slide' class="beach-image" src="${response.url}" alt="beach image" width="800px"/>`
+          document.body.appendChild(item);
+        })
+
+      (function($) {
+        $.fn.shuffle = function() {
+          // credits: http://bost.ocks.org/mike/shuffle/
+          var m = this.length, t, i;
+
+          while (m) {
+            i = Math.floor(Math.random() * m--);
+
+            t = this[m];
+            this[m] = this[i];
+            this[i] = t;
+          }
+
+          return this;
+        };
+      }(jQuery));
+
+      jQuery(function($) {
+        $('div').shuffle().each(function() {
+          console.log($(this).text());
+        });
+      });
+
+      $(document).ready(function() {
+    function boucle() {
+        var i = 0;
+        new Query($('#test img').fadeTo(1000, 0).delay(1000))
+        .orderBy(function() {
+            return Math.random();
+        }).iterate(function(t) {
+            $(t).delay((i++) * 1500).fadeTo(1500, 1);
+        });
+    }
+    boucle();
+    setInterval(boucle, 15000);
+    });
+    </script>
+
+    ---------------------->
+  </body>
+</html>

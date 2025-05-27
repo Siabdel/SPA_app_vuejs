@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang='fr'>
+	<head>
+	  <meta charset="UTF-8">
+	  <link href="../static/css/bootstrap3.css" rel="stylesheet" id="bootstrap-css">
+	  <link href="../static/css/popup.css" rel="stylesheet"  >
+	  <link href="../static/css/jquery-ui.css" rel="stylesheet"  >
+
+	  <script src="../static/js/jquery.js"></script>
+	  <script src="../static/js/jquery-ui.js"></script>
+	  <script src="../static/js/bootstrap.js"></script>
+	  
+	  <script src="../static/vuejs/vue.min.js"></script>
+
+	</head>
+
+	<BODY class="container">
+	   
+		<div class="jumbotron">
+			<h2 class="text-center"> CA par Article et par mois</h2>
+			<h4 class="text-center text-primary"> Année  2018</h4>
+		</div>
+
+	<!-- ----------------------------------------------------->
+	<!-- Affiche formulaire des données variables -->
+	<!-- ----------------------------------------------------->
+
+		<div class="row" id="app">
+		      <!-- ----------------------------------------------------->
+		      <!--FORMULAIRE  -->
+		      <!-- ----------------------------------------------------->
+			<div class="col-lg-6">
+				<stock v-bind:articles="dict_mois"> </stock>
+			</div>
+
+
+		    <div class="col-lg-6">
+		      <FORM name="form_calend_indus" ACTION="update_calend_indus" method="POST" onsubmit="f5();" target="_blank" class="form-inline">
+		        <table class="table table-bordered table-striped">
+		          <!-- ROW 1 -->
+		            <tbody>
+		              <!-- ROW 1 Entete Articles -->
+		              <tr class="font-weight-bold">
+		              	<th v-for="produit in tab_articles "> {{ produit }}</th>
+		              </tr>
+
+		              <!-- ROW 2 Quantite-->
+		              <tr class="font-weight-bold" >
+		                <th>Quantite à produire</th>
+		                <!--  Données quantites  -->
+		                    <td v-for="article in dict_articles"> <input id=""  class="form-input"   v-model="article.qte_dispo" > </td>
+		              </tr>
+		              <!-- ROW 2 Prix- -->
+		              <tr class="font-weight-bold" >
+		                <th>Prix</th>
+		                <!--  Données prix -->
+		                 
+		                  <td v-for="article in dict_articles">
+		                    <input id=""  class="form-input"    v-model="article.prix" >
+		                  </td>
+		              </tr>
+		              <!-- ROW 2 Taux -->
+		              <tr class="font-weight-bold" >
+		                <th>Taux accroissement</th>
+		                
+		                  <td v-for="article in dict_articles">
+		                    <input id="taux_{{ article.id }}" type="text"  class="form-input"     pattern="[0-9]{1,2}" required v-model="article.taux" >
+		                  </td>
+		              </tr>
+		            </tbody>
+		        </table>
+		        <input type="submit" class="bt bt-default" value="Mettre à jour et recharger la page" >
+		      </FORM>
+		    </div>
+
+
+	  		<HR/>
+		    <!-- ----------------------------------------------------->
+		    <!--  Tableau evolution chiffre affaire par mois     -->
+		    <!-- ----------------------------------------------------->
+			<div class="container">
+				<table class="table table-bordered table-striped">
+					<!-- Ligne 1 -->
+					<thead>
+					  <tr class="font-weight-bold text-center" >
+					    <th class="bg-info text-white"> CA par mos  </th>
+					  </tr>
+					</thead>
+					<tbody>
+						<!-- Ligne entete Les 12 mois -->
+						<tr class="font-weight-bold text-center">
+							<th class="bg-info text-white"> Mois 2018</th>
+							<td v-for="mois in dict_mois" >	  {{ mois }} </td>
+						</tr>
+
+
+						<td v-for="article in tab_articles"></td>
+						 
+						<!-- Ligne 2 CA par mois / Article  -->
+						<tr v-for="article in dict_articles" class="font-weight-bold text-center" >
+							<td> {{ article.nom  }}</td>
+
+							<td v-for="mois in dict_mois" > {{ article.prix * article.qte_dispo }} </td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+
+		</div>
+
+	 	<script src="app.js"></script>
+	</BODY>
+</html>
+

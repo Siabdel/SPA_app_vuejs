@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Vue Bootstrap Table</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="../dist/bootstrap/css/bootstrap.min.css">
+    <script src="../dist/vue.min.js"></script>
+</head>
+
+
+<body>
+<div class="container">
+  <div class="jumbotron text-center text-warning"> VUEJS examples </div>
+  <div id="app_m">
+    
+    <div class="row">
+      <div v-for="item in list_villes"> 
+
+        <input v-model="new_ville"  :value="item.nom"> 
+
+        <div class="col-md-12">
+          <fieldset>
+            <legend> Meteo {{ new_ville }} <img v-bind:src="conditions.icon_big" />  </legend>
+            <h5> {{ meteo.country }} </h5>
+            <h5> latitude : {{ meteo.latitude }}  longitude : {{ meteo.longitude }} </h5>
+            <h5> levée de soleil : {{ meteo.sunrise }} </h5>
+            <h5> couché du soleil : {{ meteo.sunset }} </h5>
+
+             
+
+
+            <ul>
+              <li> date :  {{ conditions.date }} à {{ conditions.hour }}</li>
+              <li> temperature :  {{ conditions.tmp }} Celsius Vitesse du vent : {{ conditions.wnd_spd }} Km/h </li>
+              <li> Pression Atmospherique : {{ conditions.pressure }} bar Humidité : {{ conditions.humidity }}  </li>
+              <li> Condition  :  {{ conditions.condition }}  </li>
+            </ul>
+          </fieldset>
+          <hr/>
+      </div>
+    </div>
+  </div>
+    
+</div>
+
+
+<script  src="../js/app.js"> </script>
+
+
+</body>
+</html>
