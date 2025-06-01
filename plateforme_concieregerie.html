@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeSweet - Conciergerie de location</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS personnalisé -->
+    <style>
+        :root {
+            --primary-color: #FF5A5F;
+            --secondary-color: #008489;
+            --dark-color: #484848;
+            --light-color: #f7f7f7;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--dark-color);
+        }
+        
+        /* Navigation */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            margin: 0 10px;
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: #e04e54;
+            color: white;
+        }
+        
+        /* Section Hero */
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                        url('https://images.unsplash.com/photo-1558036117-15e82a5b9dc0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 80vh;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        /* Formulaire de recherche */
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            padding: 25px;
+            margin-top: -80px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        /* Cartes de propriétés */
+        .property-card {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .property-img {
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .property-card:hover .property-img {
+            transform: scale(1.03);
+        }
+        
+        .property-price {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        .property-rating {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        .property-title {
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        /* Section services */
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .footer-link {
+            color: #b0b0b0;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .footer-link:hover {
+            color: white;
+        }
+        
+        .social-icon {
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        
+        .copyright {
+            border-top: 1px solid #666;
+            padding-top: 20px;
+            margin-top: 40px;
+            color: #b0b0b0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .search-card {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-home me-2"></i>HomeSweet
+            </a>
+            
+            <!-- Menu hamburger mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Liens de navigation -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Nos services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">À propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+                
+                <!-- Boutons connexion/inscription -->
+                <div class="d-flex">
+                    <a href="#" class="btn btn-outline-dark me-2">Connexion</a>
+                    <a href="#" class="btn btn-primary-custom">Inscription</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Section Hero avec image de fond -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Trouvez votre logement parfait</h1>
+                <p class="hero-subtitle">Découvrez des hébergements uniques pour vos prochains voyages</p>
+                <a href="#search" class="btn btn-primary-custom btn-lg">Explorer maintenant</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulaire de recherche -->
+    <section id="search" class="container">
+        <div class="search-card">
+            <form>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="location" class="form-label">Destination</label>
+                        <input type="text" class="form-control" id="location" placeholder="Où allez-vous ?">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="check-in" class="form-label">Arrivée</label>
+                        <input type="date" class="form-control" id="check-in">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="check-out" class="form-label">Départ</label>
+                        <input type="date" class="form-control" id="check-out">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="guests" class="form-label">Voyageurs</label>
+                        <select class="form-select" id="guests">
+                            <option value="1">1 voyageur</option>
+                            <option value="2">2 voyageurs</option>
+                            <option value="3">3 voyageurs</option>
+                            <option value="4">4 voyageurs</option>
+                            <option value="5">5+ voyageurs</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="type" class="form-label">Type de logement</label>
+                        <select class="form-select" id="type">
+                            <option value="all">Tous types</option>
+                            <option value="apartment">Appartement</option>
+                            <option value="house">Maison</option>
+                            <option value="villa">Villa</option>
+                            <option value="loft">Loft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary-custom px-4">
+                            <i class="fas fa-search me-2"></i>Rechercher
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Section des logements populaires -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="fw-bold">Nos logements populaires</h2>
+                    <p class="text-muted">Découvrez les hébergements les mieux notés par nos voyageurs</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Logement 1 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card property-card h-100">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 class="card-img-top property-img" alt="Appartement moderne">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <button class="btn btn-sm btn-light rounded-circle">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title property-title">Appartement moderne à Paris</h5>
+                                <div class="property-rating">
+                                    <i class="fas fa-star"></i> 4.9
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">Saint-Germain-des-Prés, Paris</p>
+                            <p class="card-text">Magnifique appartement lumineux avec vue sur les toits de Paris.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="property-price">120€ <small class="text-muted">/nuit</small></span>
+                                <a href="#" class="btn btn-outline-primary">Voir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logement 2 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card property-card h-100">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 class="card-img-top property-img" alt="Villa de luxe">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <button class="btn btn-sm btn-light rounded-circle">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title property-title">Villa de luxe à Nice</h5>
+                                <div class="property-rating">
+                                    <i class="fas fa-star"></i> 4.8
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">Cimiez, Nice</p>
+                            <p class="card-text">Villa spacieuse avec piscine privée et vue sur la mer.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="property-price">250€ <small class="text-muted">/nuit</small></span>
+                                <a href="#" class="btn btn-outline-primary">Voir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logement 3 -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card property-card h-100">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 class="card-img-top property-img" alt="Chalet montagne">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <button class="btn btn-sm btn-light rounded-circle">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title property-title">Chalet cosy à Chamonix</h5>
+                                <div class="property-rating">
+                                    <i class="fas fa-star"></i> 4.7
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">Chamonix-Mont-Blanc</p>
+                            <p class="card-text">Chalet en bois avec cheminée et accès direct aux pistes.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="property-price">180€ <small class="text-muted">/nuit</small></span>
+                                <a href="#" class="btn btn-outline-primary">Voir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="#" class="btn btn-primary-custom px-4">Voir plus de logements</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Nos services -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="fw-bold">Nos services de conciergerie</h2>
+                    <p class="text-muted">Nous nous occupons de tout pour que vous puissiez profiter sereinement</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="service-icon">
+                        <i class="fas fa-broom"></i>
+                    </div>
+                    <h4>Ménage professionnel</h4>
+                    <p class="text-muted">Nettoyage complet avant et après chaque location par des professionnels.</p>
+                </div>
+                
+                <div class="col-md-4 text-center mb-4">
+                    <div class="service-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h4>Remise des clés</h4>
+                    <p class="text-muted">Accueil personnalisé des voyageurs et gestion des arrivées/départs.</p>
+                </div>
+                
+                <div class="col-md-4 text-center mb-4">
+                    <div class="service-icon">
+                        <i class="fas fa-concierge-bell"></i>
+                    </div>
+                    <h4>Service 24/7</h4>
+                    <p class="text-muted">Assistance disponible à tout moment pour vos voyageurs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section CTA -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container text-center">
+            <h2 class="fw-bold mb-4">Prêt à louer votre logement ?</h2>
+            <p class="mb-4">Rejoignez notre plateforme et bénéficiez de notre expertise pour maximiser vos revenus.</p>
+            <a href="#" class="btn btn-light btn-lg px-4">Devenir hôte</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title">HomeSweet</h5>
+                    <p>La solution de conciergerie pour vos locations saisonnières.</p>
+                    <div class="mt-3">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title">Explorer</h5>
+                    <a href="#" class="footer-link">Destinations populaires</a>
+                    <a href="#" class="footer-link">Logements premium</a>
+                    <a href="#" class="footer-link">Dernières nouveautés</a>
+                    <a href="#" class="footer-link">Guides de voyage</a>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title">Hôtes</h5>
+                    <a href="#" class="footer-link">Devenir hôte</a>
+                    <a href="#" class="footer-link">Nos services</a>
+                    <a href="#" class="footer-link">Ressources</a>
+                    <a href="#" class="footer-link">Forum communautaire</a>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title">Support</h5>
+                    <a href="#" class="footer-link">Centre d'aide</a>
+                    <a href="#" class="footer-link">Nous contacter</a>
+                    <a href="#" class="footer-link">Politique de confidentialité</a>
+                    <a href="#" class="footer-link">Conditions générales</a>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 text-center copyright">
+                    <p>&copy; 2023 HomeSweet. Tous droits réservés.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

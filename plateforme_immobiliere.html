@@ -1,0 +1,721 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImmoPro - Votre partenaire immobilier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .gallery-thumbnail:hover {
+            opacity: 0.8;
+            border: 2px solid #3b82f6;
+        }
+        .active-filter {
+            background-color: #3b82f6;
+            color: white;
+        }
+        #map {
+            height: 300px;
+            width: 100%;
+            background-color: #f0f0f0;
+        }
+        .main-image {
+            height: 400px;
+            object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            .main-image {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <a href="#" class="text-2xl font-bold text-blue-600">Immo<span class="text-blue-800">Pro</span></a>
+                </div>
+                
+                <div class="hidden md:flex space-x-6">
+                    <a href="#" class="text-blue-600 font-medium">Acheter</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600">Louer</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600">Nouveautés</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600">Agences</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="md:hidden text-gray-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <button class="hidden md:block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                        <i class="fas fa-plus mr-2"></i>Déposer une annonce
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-blue-700 text-white py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">Trouvez votre propriété idéale</h1>
+            <p class="text-lg mb-8">Plus de 10,000 propriétés à travers le Maroc</p>
+            
+            <!-- Search Form -->
+            <div class="bg-white rounded-lg shadow-lg p-4 mb-8">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <select class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Type de bien</option>
+                            <option value="appartement">Appartement</option>
+                            <option value="villa">Villa</option>
+                            <option value="riad">Riad</option>
+                            <option value="terrain">Terrain</option>
+                            <option value="bureau">Bureau</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <select class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Ville</option>
+                            <option value="casablanca">Casablanca</option>
+                            <option value="rabat">Rabat</option>
+                            <option value="marrakech">Marrakech</option>
+                            <option value="tanger">Tanger</option>
+                            <option value="agadir">Agadir</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <select class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Budget</option>
+                            <option value="500000">500,000 MAD</option>
+                            <option value="1000000">1,000,000 MAD</option>
+                            <option value="2000000">2,000,000 MAD</option>
+                            <option value="5000000">5,000,000 MAD</option>
+                            <option value="10000000">10,000,000 MAD</option>
+                        </select>
+                    </div>
+                    <button class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition flex items-center justify-center">
+                        <i class="fas fa-search mr-2"></i> Rechercher
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Filters -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Filtrer par :</h2>
+            <div class="flex flex-wrap gap-2">
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full hover:bg-blue-100 transition active-filter">
+                    Tous
+                </button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full hover:bg-blue-100 transition">
+                    Appartements
+                </button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full hover:bg-blue-100 transition">
+                    Villas
+                </button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full hover:bg-blue-100 transition">
+                    Maisons
+                </button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full hover:bg-blue-100 transition">
+                    Terrains
+                </button>
+                <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full hover:bg-blue-100 transition">
+                    Bureaux
+                </button>
+            </div>
+        </div>
+
+        <!-- Property List -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Nos dernières offres</h2>
+                <div class="flex items-center">
+                    <span class="mr-2">Trier par :</span>
+                    <select class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Plus récent</option>
+                        <option>Prix croissant</option>
+                        <option>Prix décroissant</option>
+                        <option>Superficie</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Property Card 1 -->
+                <div class="property-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Appartement moderne à Casablanca" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-sm">
+                            À vendre
+                        </div>
+                        <div class="absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-md text-sm font-medium">
+                            3 photos
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">Appartement moderne à Casablanca</h3>
+                        <p class="text-gray-600 mb-2">Casablanca, Maarif</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700"><i class="fas fa-ruler-combined mr-1"></i> 120 m²</span>
+                            <span class="text-gray-700"><i class="fas fa-bed mr-1"></i> 3 chambres</span>
+                            <span class="text-gray-700"><i class="fas fa-bath mr-1"></i> 2 salles de bain</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-xl">1,450,000 MAD</span>
+                            <a href="detail.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                Voir détail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Card 2 -->
+                <div class="property-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Villa luxueuse à Marrakech" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded-md text-sm">
+                            À louer
+                        </div>
+                        <div class="absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-md text-sm font-medium">
+                            5 photos
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">Villa luxueuse à Marrakech</h3>
+                        <p class="text-gray-600 mb-2">Marrakech, Palmeraie</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700"><i class="fas fa-ruler-combined mr-1"></i> 350 m²</span>
+                            <span class="text-gray-700"><i class="fas fa-bed mr-1"></i> 5 chambres</span>
+                            <span class="text-gray-700"><i class="fas fa-bath mr-1"></i> 4 salles de bain</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-xl">25,000 MAD/mois</span>
+                            <a href="detail.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                Voir détail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Card 3 -->
+                <div class="property-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Appartement neuf à Rabat" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-sm">
+                            À vendre
+                        </div>
+                        <div class="absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-md text-sm font-medium">
+                            4 photos
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">Appartement neuf à Rabat</h3>
+                        <p class="text-gray-600 mb-2">Rabat, Agdal</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700"><i class="fas fa-ruler-combined mr-1"></i> 90 m²</span>
+                            <span class="text-gray-700"><i class="fas fa-bed mr-1"></i> 2 chambres</span>
+                            <span class="text-gray-700"><i class="fas fa-bath mr-1"></i> 1 salle de bain</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-xl">950,000 MAD</span>
+                            <a href="detail.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                Voir détail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Card 4 -->
+                <div class="property-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Riad traditionnel à Fès" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-sm">
+                            À vendre
+                        </div>
+                        <div class="absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-md text-sm font-medium">
+                            6 photos
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">Riad traditionnel à Fès</h3>
+                        <p class="text-gray-600 mb-2">Fès, Médina</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700"><i class="fas fa-ruler-combined mr-1"></i> 280 m²</span>
+                            <span class="text-gray-700"><i class="fas fa-bed mr-1"></i> 4 chambres</span>
+                            <span class="text-gray-700"><i class="fas fa-bath mr-1"></i> 3 salles de bain</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-xl">2,750,000 MAD</span>
+                            <a href="detail.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                Voir détail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Card 5 -->
+                <div class="property-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Bureau moderne à Casablanca" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded-md text-sm">
+                            À louer
+                        </div>
+                        <div class="absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-md text-sm font-medium">
+                            3 photos
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">Bureau moderne à Casablanca</h3>
+                        <p class="text-gray-600 mb-2">Casablanca, Centre ville</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700"><i class="fas fa-ruler-combined mr-1"></i> 80 m²</span>
+                            <span class="text-gray-700"><i class="fas fa-door-open mr-1"></i> 1 pièce</span>
+                            <span class="text-gray-700"><i class="fas fa-bath mr-1"></i> 1 salle de bain</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-xl">12,000 MAD/mois</span>
+                            <a href="detail.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                Voir détail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Card 6 -->
+                <div class="property-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1605146769289-440113cc3d00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Terrain constructible à Tanger" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-sm">
+                            À vendre
+                        </div>
+                        <div class="absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-md text-sm font-medium">
+                            2 photos
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">Terrain constructible à Tanger</h3>
+                        <p class="text-gray-600 mb-2">Tanger, Malabata</p>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-700"><i class="fas fa-ruler-combined mr-1"></i> 500 m²</span>
+                            <span class="text-gray-700"><i class="fas fa-map-marked-alt mr-1"></i> Zone résidentielle</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-xl">1,200,000 MAD</span>
+                            <a href="detail.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                Voir détail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-center mt-8">
+            <nav class="flex items-center space-x-2">
+                <button class="px-4 py-2 border rounded-md bg-blue-600 text-white">
+                    1
+                </button>
+                <button class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                    2
+                </button>
+                <button class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                    3
+                </button>
+                <button class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="bg-blue-50 py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold mb-4">Restez informé des nouvelles offres</h2>
+            <p class="text-gray-600 mb-6 max-w-2xl mx-auto">Abonnez-vous à notre newsletter pour recevoir les dernières propriétés directement dans votre boîte email.</p>
+            <div class="flex flex-col md:flex-row max-w-md mx-auto md:max-w-xl">
+                <input type="email" placeholder="Votre email" class="flex-1 p-3 border border-gray-300 rounded-md mb-2 md:mb-0 md:mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition">
+                    S'abonner
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">ImmoPro</h3>
+                    <p class="text-gray-400">Votre partenaire immobilier de confiance au Maroc depuis 2010.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Liens rapides</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Accueil</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">À propos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Nos services</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Catégories</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Appartements</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Villas</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Riads</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terrains</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">123 Avenue Mohammed V, Casablanca</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">+212 6 12 34 56 78</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">contact@immopro.ma</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 ImmoPro. Tous droits réservés.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail Page (hidden by default, shown when navigating from index) -->
+    <div id="detail-page" class="hidden">
+        <!-- Property Detail Header -->
+        <div class="bg-white shadow-md">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center text-sm text-gray-600">
+                    <a href="#" class="text-blue-600 hover:underline">Accueil</a>
+                    <span class="mx-2">/</span>
+                    <a href="#" class="text-blue-600 hover:underline">Casablanca</a>
+                    <span class="mx-2">/</span>
+                    <span>Appartement moderne à Casablanca</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Detail Content -->
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Main Content -->
+                <div class="lg:w-2/3">
+                    <!-- Property Title -->
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold mb-2">Appartement moderne à Casablanca</h1>
+                        <p class="text-gray-600 mb-4">Casablanca, Maarif</p>
+                        <div class="flex items-center">
+                            <span class="text-blue-600 font-bold text-2xl mr-4">1,450,000 MAD</span>
+                            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">À vendre</span>
+                        </div>
+                    </div>
+
+                    <!-- Image Gallery -->
+                    <div class="mb-8">
+                        <div class="relative mb-4">
+                            <img id="main-image" src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Appartement moderne à Casablanca" class="w-full main-image rounded-lg object-cover">
+                            <button class="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+                                <i class="fas fa-heart text-gray-600"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Appartement moderne à Casablanca" class="gallery-thumbnail h-20 object-cover rounded cursor-pointer border border-gray-200">
+                            <img src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" 
+                                 alt="Salon" class="gallery-thumbnail h-20 object-cover rounded cursor-pointer border border-gray-200">
+                            <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Cuisine" class="gallery-thumbnail h-20 object-cover rounded cursor-pointer border border-gray-200">
+                            <img src="https://images.unsplash.com/photo-1560448205-17d3a8ddf919?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Chambre" class="gallery-thumbnail h-20 object-cover rounded cursor-pointer border border-gray-200">
+                        </div>
+                    </div>
+
+                    <!-- Property Details -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-4">Détails de la propriété</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="text-gray-500 mb-1">Superficie</div>
+                                <div class="font-semibold">120 m²</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="text-gray-500 mb-1">Chambres</div>
+                                <div class="font-semibold">3</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="text-gray-500 mb-1">Salles de bain</div>
+                                <div class="font-semibold">2</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="text-gray-500 mb-1">Étage</div>
+                                <div class="font-semibold">5ème</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="text-gray-500 mb-1">Année de construction</div>
+                                <div class="font-semibold">2020</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="text-gray-500 mb-1">Meublé</div>
+                                <div class="font-semibold">Oui</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-4">Description</h2>
+                        <p class="text-gray-700 mb-4">
+                            Magnifique appartement moderne situé dans le quartier huppé de Maarif à Casablanca. 
+                            Cet appartement de 120 m² se compose d'un spacieux salon/séjour, d'une cuisine équipée, 
+                            de trois chambres dont une suite parentale, deux salles de bain et un balcon offrant 
+                            une vue dégagée.
+                        </p>
+                        <p class="text-gray-700">
+                            L'appartement est situé dans une résidence sécurisée avec piscine, salle de sport et 
+                            parking privé. À proximité des écoles internationales, centres commerciaux et transports 
+                            en commun. Livraison immédiate.
+                        </p>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-4">Équipements</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-wifi text-blue-600 mr-2"></i>
+                                <span>Wi-Fi</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-swimming-pool text-blue-600 mr-2"></i>
+                                <span>Piscine</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-dumbbell text-blue-600 mr-2"></i>
+                                <span>Salle de sport</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-car text-blue-600 mr-2"></i>
+                                <span>Parking</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-utensils text-blue-600 mr-2"></i>
+                                <span>Cuisine équipée</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-tshirt text-blue-600 mr-2"></i>
+                                <span>Buanderie</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floor Plan -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-4">Plan architectural</h2>
+                        <img src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Plan architectural" class="w-full rounded-lg border border-gray-200">
+                    </div>
+
+                    <!-- Location -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-4">Localisation</h2>
+                        <div id="map" class="rounded-lg mb-4">
+                            <!-- Map placeholder -->
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <div class="text-center">
+                                    <i class="fas fa-map-marker-alt text-4xl text-gray-500 mb-2"></i>
+                                    <p class="text-gray-600">Casablanca, Maarif</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-gray-700">
+                            <p class="mb-2"><strong>Adresse exacte :</strong> Résidence Les Jardins de Maarif, étage 5, appartement 12</p>
+                            <p><strong>À proximité :</strong> École internationale, centre commercial Anfa Place, tramway</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="lg:w-1/3">
+                    <!-- Contact Form -->
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h3 class="text-lg font-bold mb-4">Contacter l'agent</h3>
+                        <form>
+                            <div class="mb-4">
+                                <input type="text" placeholder="Votre nom" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <input type="email" placeholder="Votre email" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <input type="tel" placeholder="Votre téléphone" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <textarea placeholder="Votre message" rows="4" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition">
+                                Envoyer le message
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Agent Info -->
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h3 class="text-lg font-bold mb-4">Agent immobilier</h3>
+                        <div class="flex items-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Agent" class="w-16 h-16 rounded-full object-cover mr-4">
+                            <div>
+                                <h4 class="font-bold">Karim El Mansouri</h4>
+                                <p class="text-gray-600">ImmoPro Casablanca</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-blue-600 mr-2"></i>
+                                <span>+212 6 12 34 56 78</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-blue-600 mr-2"></i>
+                                <span>karim@immopro.ma</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+                                <span>Casablanca, Maarif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Similar Properties -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold mb-4">Propriétés similaires</h3>
+                        <div class="space-y-4">
+                            <!-- Similar Property 1 -->
+                            <div class="flex">
+                                <img src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" 
+                                     alt="Appartement similaire" class="w-24 h-20 object-cover rounded-md mr-3">
+                                <div>
+                                    <h4 class="font-medium">Appartement à Casablanca</h4>
+                                    <p class="text-gray-600 text-sm">100 m² • 2 chambres</p>
+                                    <p class="text-blue-600 font-semibold">1,200,000 MAD</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Similar Property 2 -->
+                            <div class="flex">
+                                <img src="https://images.unsplash.com/photo-1600607688969-a5bfcd646154?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                     alt="Appartement similaire" class="w-24 h-20 object-cover rounded-md mr-3">
+                                <div>
+                                    <h4 class="font-medium">Appartement neuf à Casablanca</h4>
+                                    <p class="text-gray-600 text-sm">85 m² • 2 chambres</p>
+                                    <p class="text-blue-600 font-semibold">950,000 MAD</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Similar Property 3 -->
+                            <div class="flex">
+                                <img src="https://images.unsplash.com/photo-1600566752227-8f3e8a57d521?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                     alt="Appartement similaire" class="w-24 h-20 object-cover rounded-md mr-3">
+                                <div>
+                                    <h4 class="font-medium">Appartement luxueux à Casablanca</h4>
+                                    <p class="text-gray-600 text-sm">150 m² • 3 chambres</p>
+                                    <p class="text-blue-600 font-semibold">1,800,000 MAD</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter buttons functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active-filter', 'bg-blue-600', 'text-white'));
+                button.classList.add('active-filter', 'bg-blue-600', 'text-white');
+            });
+        });
+
+        // Gallery thumbnail click functionality
+        const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+        const mainImage = document.getElementById('main-image');
+        
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', () => {
+                // Remove active class from all thumbnails
+                thumbnails.forEach(t => t.classList.remove('border-blue-500', 'border-2'));
+                
+                // Add active class to clicked thumbnail
+                thumbnail.classList.add('border-blue-500', 'border-2');
+                
+                // Change main image
+                mainImage.src = thumbnail.src;
+            });
+        });
+
+        // Simulate navigation to detail page
+        const detailLinks = document.querySelectorAll('a[href="detail.html"]');
+        detailLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('detail-page').classList.remove('hidden');
+                window.scrollTo(0, 0);
+            });
+        });
+
+        // Back to list button (in detail page)
+        const backButton = document.createElement('button');
+        backButton.innerHTML = '<i class="fas fa-arrow-left mr-2"></i> Retour à la liste';
+        backButton.className = 'bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition mb-4';
+        backButton.addEventListener('click', () => {
+            document.getElementById('detail-page').classList.add('hidden');
+        });
+        
+        const detailHeader = document.querySelector('#detail-page > div:first-child');
+        if(detailHeader) {
+            detailHeader.appendChild(backButton);
+        }
+    </script>
+</body>
+</html>
