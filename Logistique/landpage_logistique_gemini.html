@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>COLISBAR - Gestion de Colis Simplifiée et Moderne</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #007BFF; /* Bleu moderne et accessible */
+      --secondary-color: #6c757d; /* Gris neutre */
+      --accent-color: #28a745;  /* Vert pour les actions positives ou accents */
+      --light-bg: #f8f9fa;
+      --dark-text: #343a40;
+      --light-text: #ffffff;
+      --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+      --border-radius: 0.5rem; /* Rayon de bordure unifié */
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--dark-text);
+      line-height: 1.6;
+      padding-top: 70px; /* Hauteur de la navbar fixe */
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary-color) !important;
+    }
+
+    .nav-link {
+      color: var(--secondary-color) !important;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary-color) !important;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+
+    .btn-primary-custom {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: var(--light-text);
+    }
+    .btn-primary-custom:hover {
+      background-color: #0056b3; /* Bleu plus foncé */
+      border-color: #0056b3;
+      color: var(--light-text);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary-custom {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: var(--light-text);
+    }
+    .btn-secondary-custom:hover {
+      background-color: #1e7e34; /* Vert plus foncé */
+      border-color: #1e7e34;
+      color: var(--light-text);
+      transform: translateY(-2px);
+    }
+    
+    .btn-outline-primary-custom {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    .btn-outline-primary-custom:hover {
+      background-color: var(--primary-color);
+      color: var(--light-text);
+      transform: translateY(-2px);
+    }
+
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 123, 255, 0.1), rgba(0, 123, 255, 0.1)), url('https://images.unsplash.com/photo-1586528116311-069241548138?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80'); /* Image de logistique/technologie abstraite */
+      background-size: cover;
+      background-position: center;
+      padding: 6rem 0;
+      color: var(--dark-text); /* Texte foncé sur fond clair pour contraste */
+    }
+    .hero-section h2 {
+        color: var(--primary-color); /* Titre principal en couleur primaire */
+    }
+    .hero-section .lead {
+        color: var(--secondary-color); /* Texte secondaire plus doux */
+    }
+
+
+    .section-title {
+      margin-bottom: 3rem;
+      font-weight: 700;
+    }
+
+    .feature-icon-wrapper {
+      width: 70px;
+      height: 70px;
+      background-color: rgba(0, 123, 255, 0.1); /* Couleur primaire avec opacité */
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem; /* Taille de l'icône */
+    }
+
+    .card {
+      border: none;
+      box-shadow: var(--card-shadow);
+      border-radius: var(--border-radius);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 2rem rgba(0,0,0,0.12);
+    }
+    .card .card-title {
+        color: var(--primary-color);
+    }
+    
+    .pricing-card.popular {
+        border: 2px solid var(--accent-color);
+        position: relative;
+    }
+    .pricing-card.popular::before {
+        content: "Populaire";
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--accent-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+
+    #why img {
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+    }
+
+    .form-control {
+        border-radius: var(--border-radius);
+        padding: 0.75rem 1rem;
+    }
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    }
+
+    footer {
+      background-color: var(--dark-text);
+      color: rgba(255,255,255,0.7);
+      padding: 2rem 0;
+    }
+    footer a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+    }
+    footer a:hover {
+      color: var(--light-text);
+      text-decoration: underline;
+    }
+    
+    /* Smooth scroll */
+    html {
+        scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body class="bg-white">
+
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top py-3">
+      <div class="container">
+        <a class="navbar-brand" href="#">COLISBAR</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="#features">Fonctionnalités</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#why">Pourquoi nous ?</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#pricing">Tarifs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contact">Contact</a>
+            </li>
+          </ul>
+          <a href="#contact" class="btn btn-secondary-custom btn-sm ms-lg-3">Commencer</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+      <div class="container">
+        <!-- Image retirée d'ici, mise en fond de section -->
+        <h2 class="display-4 fw-bold mb-3">
+          Gestion de Colis Simplifiée <br/>
+          <span style="color: var(--accent-color);">pour les PME Logistiques</span>
+        </h2>
+        <p class="lead mb-4 mx-auto" style="max-width: 700px;">
+          COLISBAR automatise, suit et optimise vos expéditions sans complexité ni coût excessif. Conçu pour vous simplifier la vie.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <a href="#contact" class="btn btn-primary-custom btn-lg px-4">Essayer gratuitement</a> 
+          <a href="#features" class="btn btn-outline-primary-custom btn-lg px-4">Découvrir les fonctionnalités</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5 bg-light">
+      <div class="container">
+        <h3 class="text-center section-title">Fonctionnalités Clés pour votre Succès</h3>
+        <div class="row text-center g-4">
+          <!-- Feature 1 -->
+          <div class="col-md-4">
+            <div class="feature-icon-wrapper">
+              <i class="bi bi-truck"></i> <!-- Icône plus pertinente -->
+            </div>
+            <h4 class="fw-semibold mb-2">Suivi en temps réel</h4>
+            <p class="text-muted">Suivez chaque colis depuis son départ jusqu’à sa livraison finale avec précision.</p>
+          </div>
+          <!-- Feature 2 -->
+          <div class="col-md-4">
+            <div class="feature-icon-wrapper">
+              <i class="bi bi-diagram-3"></i> <!-- Icône pour intégrations -->
+            </div>
+            <h4 class="fw-semibold mb-2">Intégrations Multiples</h4>
+            <p class="text-muted">Connectez-vous facilement à vos transporteurs (Chronopost, Colissimo, etc.) et plateformes e-commerce.</p>
+          </div>
+          <!-- Feature 3 -->
+          <div class="col-md-4">
+            <div class="feature-icon-wrapper">
+              <i class="bi bi-receipt-cutoff"></i> <!-- Icône pour facturation -->
+            </div>
+            <h4 class="fw-semibold mb-2">Facturation Simplifiée</h4>
+            <p class="text-muted">Éditez vos factures et générez automatiquement vos états de frais de transport.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Us Section -->
+    <section id="why" class="py-5 bg-white">
+      <div class="container">
+        <h3 class="text-center section-title">Pourquoi Choisir COLISBAR ?</h3>
+        <div class="row align-items-center g-5">
+          <div class="col-md-6">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="Interface utilisateur intuitive COLISBAR" class="img-fluid" />
+            <!-- Image: Une équipe souriante travaillant sur des ordinateurs, ou une interface utilisateur épurée -->
+          </div>
+          <div class="col-md-6">
+            <div class="mb-4 d-flex">
+              <i class="bi bi-people-fill fs-2 text-primary me-3"></i>
+              <div>
+                <h4 class="h5 fw-semibold">Conçu pour les PME</h4>
+                <p class="text-muted">Pas de configuration complexe, pas de surcoût. COLISBAR s'adapte à vous, pas l'inverse.</p>
+              </div>
+            </div>
+            <div class="mb-4 d-flex">
+                <i class="bi bi-headset fs-2 text-primary me-3"></i>
+              <div>
+                <h4 class="h5 fw-semibold">Support Local et Personnalisé</h4>
+                <p class="text-muted">Notre équipe est à votre disposition pour vous accompagner dans la mise en place et au quotidien.</p>
+              </div>
+            </div>
+            <div class="d-flex">
+                <i class="bi bi-tags-fill fs-2 text-primary me-3"></i>
+              <div>
+                <h4 class="h5 fw-semibold">À Partir de 29€/mois</h4>
+                <p class="text-muted">Des tarifs transparents et adaptés aux petits budgets, sans engagement contraignant.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-5 bg-light">
+      <div class="container">
+        <h3 class="text-center section-title">Des Formules Adaptées à Vos Besoins</h3>
+        <div class="row g-4 justify-content-center">
+          <!-- Plan Starter -->
+          <div class="col-lg-4 col-md-6">
+            <div class="card p-4 h-100 pricing-card">
+              <div class="card-body text-center">
+                <h4 class="card-title fw-semibold">Starter</h4>
+                <p class="text-muted">Idéal pour démarrer</p>
+                <h5 class="display-5 fw-bold my-3">29€<small class="fs-6 text-muted">/mois</small></h5>
+                <ul class="list-unstyled my-4 text-muted">
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Jusqu'à 100 colis/mois</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Suivi de colis</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Facturation automatisée</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Export CSV</li>
+                </ul>
+                <a href="#contact" class="btn btn-outline-primary-custom w-100">S'inscrire</a> 
+              </div>
+            </div>
+          </div>
+          <!-- Plan Pro -->
+          <div class="col-lg-4 col-md-6">
+            <div class="card p-4 h-100 pricing-card popular"> <!-- Ajout de la classe 'popular' -->
+              <div class="card-body text-center">
+                <h4 class="card-title fw-semibold">Pro</h4>
+                <p class="text-muted">Pour les entreprises en croissance</p>
+                <h5 class="display-5 fw-bold my-3">99€<small class="fs-6 text-muted">/mois</small></h5>
+                <ul class="list-unstyled my-4 text-muted">
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Toutes les fonctions Starter</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Jusqu'à 1000 colis/mois</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Intégration API</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Support prioritaire</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Dashboard avancé</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary-custom w-100">S'inscrire</a>
+              </div>
+            </div>
+          </div>
+          <!-- Plan Entreprise -->
+          <div class="col-lg-4 col-md-6">
+            <div class="card p-4 h-100 pricing-card">
+              <div class="card-body text-center">
+                <h4 class="card-title fw-semibold">Entreprise</h4>
+                <p class="text-muted">Solutions sur mesure</p>
+                <h5 class="display-5 fw-bold my-3">Sur devis</h5>
+                <ul class="list-unstyled my-4 text-muted">
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Volume illimité</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Personnalisation totale</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Formation & support dédié</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Accompagnement stratégique</li>
+                </ul>
+                <a href="#contact" class="btn btn-outline-primary-custom w-100">Demander un devis</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5 bg-white">
+      <div class="container" style="max-width: 700px;">
+        <h3 class="text-center section-title">Prêt à Simplifier Votre Logistique ?</h3>
+        <p class="text-center text-muted mb-4">Contactez-nous ou créez votre compte gratuitement dès maintenant. Notre équipe est là pour vous aider.</p>
+        <form>
+          <div class="mb-3">
+            <label for="contactCompanyName" class="form-label visually-hidden">Nom de votre entreprise</label>
+            <input type="text" class="form-control" id="contactCompanyName" placeholder="Nom de votre entreprise" required />
+          </div>
+          <div class="mb-3">
+            <label for="contactEmail" class="form-label visually-hidden">Votre email</label>
+            <input type="email" class="form-control" id="contactEmail" placeholder="Votre email" required />
+          </div>
+          <div class="mb-3">
+            <label for="contactMessage" class="form-label visually-hidden">Votre message</label>
+            <textarea rows="4" class="form-control" id="contactMessage" placeholder="Votre message (optionnel)"></textarea>
+          </div>
+          <button type="submit" class="btn btn-secondary-custom w-100 btn-lg">Envoyer ma demande</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center">
+    <div class="container">
+      <p class="mb-2">© <span id="currentYear"></span> COLISBAR – Tous droits réservés.</p>
+      <div>
+        <a href="#" class="me-3">Conditions Générales d'Utilisation</a>
+        <a href="#">Politique de confidentialité</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle (includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
+  <script>
+    // Petit script pour l'année en cours dans le footer
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
