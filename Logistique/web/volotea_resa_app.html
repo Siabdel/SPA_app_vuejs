@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volotea | Billets d'avion pas chers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        volotea: '#2a5699',
+                        'volotea-light': '#3a6ab9',
+                        secondary: '#ff9900',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        .volotea-font {
+            font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+        }
+        .destination-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .calendar-modal {
+            transition: all 0.3s ease;
+        }
+        .flight-form {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .special-offer {
+            background: linear-gradient(135deg, #ff9900 0%, #ff6600 100%);
+        }
+        .promo-card:hover img {
+            transform: scale(1.05);
+        }
+        .tab-active {
+            border-bottom: 3px solid #ff9900;
+        }
+    </style>
+</head>
+<body class="volotea-font bg-gray-50 smooth-scroll">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white shadow">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <div class="text-volotea text-2xl font-bold">VOLOTEA</div>
+                    <nav class="hidden md:flex ml-10 space-x-6">
+                        <a href="#" class="font-semibold text-gray-700 hover:text-volotea">Destinations</a>
+                        <a href="#" class="font-semibold text-gray-700 hover:text-volotea">A propos de Volotea</a>
+                        <a href="#" class="font-semibold text-gray-700 hover:text-volotea">Services</a>
+                        <a href="#" class="font-semibold text-gray-700 hover:text-volotea">Informations</a>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-600 hover:text-volotea">
+                        <i class="fas fa-user-circle text-xl"></i>
+                    </button>
+                    <select class="px-3 py-1 border rounded text-gray-700">
+                        <option>FR</option>
+                        <option>EN</option>
+                        <option>ES</option>
+                    </select>
+                    <button class="md:hidden text-gray-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section with Flight Form -->
+    <section class="py-10 bg-volotea text-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-5xl mx-auto text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Réservez votre vol pas cher</h1>
+                <p class="text-xl opacity-90">Plus de 12 millions de passagers ont choisi Volotea</p>
+            </div>
+            
+            <!-- Flight Search Form -->
+            <div class="bg-white rounded-xl overflow-hidden flight-form max-w-5xl mx-auto">
+                <div class="flex border-b">
+                    <button class="flex-1 py-4 px-2 font-semibold text-gray-800 tab-active">Aller-retour</button>
+                    <button class="flex-1 py-4 px-2 font-semibold text-gray-600">Aller simple</button>
+                    <button class="flex-1 py-4 px-2 font-semibold text-gray-600">Plusieurs destinations</button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">De</label>
+                            <div class="relative">
+                                <input type="text" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-volotea-light focus:border-transparent" placeholder="Ville de départ">
+                                <button class="absolute right-3 top-3 text-gray-400">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">À</label>
+                            <input type="text" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-volotea-light focus:border-transparent" placeholder="Ville d'arrivée">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Dates</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="departureDateBtn" class="p-3 border rounded-lg text-left">
+                                    <div class="text-gray-500 text-sm">Départ</div>
+                                    <div class="font-medium">Sélectionner</div>
+                                </button>
+                                <button id="returnDateBtn" class="p-3 border rounded-lg text-left">
+                                    <div class="text-gray-500 text-sm">Retour</div>
+                                    <div class="font-medium">Sélectionner</div>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Passagers</label>
+                            <div class="flex items-center justify-between p-3 border rounded-lg">
+                                <div>
+                                    <div class="text-gray-500 text-sm">Passagers</div>
+                                    <div class="font-medium">1 Adulte</div>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <input id="flexible" type="checkbox" class="rounded text-volotea">
+                            <label for="flexible" class="ml-2 text-gray-700">Dates flexibles</label>
+                        </div>
+                        <button class="bg-secondary hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-lg flex items-center">
+                            <i class="fas fa-search mr-2"></i>
+                            Rechercher
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offers Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900">Nos offres spéciales</h2>
+                <p class="text-gray-600 mt-2">Profitez de nos meilleurs prix</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow overflow-hidden promo-card">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Venise" class="w-full h-full object-cover transition-transform duration-500">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-secondary font-bold">À partir de 29€</span>
+                        <h3 class="text-xl font-bold mt-2">Escapade à Venise</h3>
+                        <p class="text-gray-600 mt-2">Découvrez la cité des canaux pour un prix incroyable.</p>
+                        <button class="mt-4 text-volotea font-semibold">Réserver maintenant →</button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow overflow-hidden promo-card">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Bordeaux" class="w-full h-full object-cover transition-transform duration-500">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-secondary font-bold">À partir de 35€</span>
+                        <h3 class="text-xl font-bold mt-2">Week-end à Bordeaux</h3>
+                        <p class="text-gray-600 mt-2">Dégustez les meilleurs vins dans la région viticole.</p>
+                        <button class="mt-4 text-volotea font-semibold">Réserver maintenant →</button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow overflow-hidden promo-card">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Athènes" class="w-full h-full object-cover transition-transform duration-500">
+                    </div>
+                    <div class="p-6 special-offer text-white rounded-lg">
+                        <span class="font-bold">OFFRE EXCLUSIVE</span>
+                        <h3 class="text-xl font-bold mt-2">Découverte d'Athènes</h3>
+                        <p class="mt-2">Vols à prix cassés vers la capitale grecque.</p>
+                        <button class="mt-4 bg-white text-volotea font-semibold px-4 py-2 rounded">Voir l'offre →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Destinations -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900">Destinations populaires</h2>
+                <p class="text-gray-600 mt-2">Parcourez nos villes les plus demandées</p>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                <div class="destination-card transition-transform rounded-xl overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1523531294919-4bcd7c65c216?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Nantes" class="w-full h-32 object-cover">
+                    <div class="p-3 text-center">
+                        <span class="font-semibold">Nantes</span>
+                        <p class="text-sm text-gray-600">À partir de 25€</p>
+                    </div>
+                </div>
+                <div class="destination-card transition-transform rounded-xl overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1567690346810-07de5a137826?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Marseille" class="w-full h-32 object-cover">
+                    <div class="p-3 text-center">
+                        <span class="font-semibold">Marseille</span>
+                        <p class="text-sm text-gray-600">À partir de 29€</p>
+                    </div>
+                </div>
+                <div class="destination-card transition-transform rounded-xl overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1591809604888-84f4e1d6fcc1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Bordeaux" class="w-full h-32 object-cover">
+                    <div class="p-3 text-center">
+                        <span class="font-semibold">Bordeaux</span>
+                        <p class="text-sm text-gray-600">À partir de 31€</p>
+                    </div>
+                </div>
+                <div class="destination-card transition-transform rounded-xl overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Rome" class="w-full h-32 object-cover">
+                    <div class="p-3 text-center">
+                        <span class="font-semibold">Rome</span>
+                        <p class="text-sm text-gray-600">À partir de 45€</p>
+                    </div>
+                </div>
+                <div class="destination-card transition-transform rounded-xl overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1570136608981-0a2bacc73eec?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Venise" class="w-full h-32 object-cover">
+                    <div class="p-3 text-center">
+                        <span class="font-semibold">Venise</span>
+                        <p class="text-sm text-gray-600">À partir de 39€</p>
+                    </div>
+                </div>
+                <div class="destination-card transition-transform rounded-xl overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1599394022918-697a7d2a8bec?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Palma" class="w-full h-32 object-cover">
+                    <div class="p-3 text-center">
+                        <span class="font-semibold">Palma</span>
+                        <p class="text-sm text-gray-600">À partir de 59€</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendar Modal -->
+    <div id="calendarModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="calendar-modal bg-white rounded-xl max-w-4xl mx-auto mt-10 p-6 relative">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Sélectionnez vos dates</h3>
+                <button id="closeCalendar" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="calendar"></div>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button class="px-4 py-2 border border-gray-300 rounded-lg">Effacer</button>
+                <button id="applyDates" class="px-4 py-2 bg-volotea text-white rounded-lg">Appliquer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Volotea</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white">À propos de nous</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Carrières</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Presse</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Investisseurs</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Informations</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white">Contact</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Centre d'aide</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Bagages</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Check-in</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Conditions</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white">Conditions de transport</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Politique de cookies</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Politique de confidentialité</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Télécharger notre app</h3>
+                    <div class="flex space-x-4">
+                        <button class="p-2 bg-black rounded">
+                            <i class="fab fa-apple text-2xl"></i>
+                        </button>
+                        <button class="p-2 bg-black rounded">
+                            <i class="fab fa-android text-2xl"></i>
+                        </button>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-bold mb-2">Suivez-nous</h3>
+                        <div class="flex space-x-4">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>© 2023 Volotea. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery and Calendar Script -->
+    <script>
+        $(document).ready(function() {
+            // Initialize FullCalendar
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
+                },
+                selectable: true,
+                locale: 'fr',
+                buttonText: {
+                    today: 'Aujourd\'hui',
+                    month: 'Mois',
+                    week: 'Semaine'
+                },
+                firstDay: 1 // Monday
+            });
+            calendar.render();
+
+            // Show calendar modal
+            $('#departureDateBtn, #returnDateBtn').click(function() {
+                $('#calendarModal').removeClass('hidden').addClass('flex');
+            });
+
+            // Close calendar modal
+            $('#closeCalendar, #applyDates').click(function() {
+                $('#calendarModal').removeClass('flex').addClass('hidden');
+                // In a real implementation, we would set the selected dates here
+                $('#departureDateBtn div.font-medium').text('Dim 10 Sept');
+                $('#returnDateBtn div.font-medium').text('Dim 17 Sept');
+            });
+
+            // Close modal when clicking outside
+            $(document).click(function(event) {
+                if ($(event.target).is('#calendarModal')) {
+                    $('#calendarModal').removeClass('flex').addClass('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

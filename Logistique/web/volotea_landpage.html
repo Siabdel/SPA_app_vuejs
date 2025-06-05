@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctolib Clone | Prenez rendez-vous en ligne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        doctolib: {
+                            primary: '#00a9a5',
+                            secondary: '#00908c',
+                            highlight: '#00d3cd',
+                            dark: '#002d38',
+                            light: '#f0f7fa',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .search-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 169, 165, 0.3), 0 2px 4px -2px rgba(0, 169, 165, 0.3);
+        }
+        
+        .specialty-card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        
+        .hero-wave {
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            transform: rotate(180deg);
+        }
+        
+        .hero-wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 80px;
+        }
+        
+        .hero-wave .shape-fill {
+            fill: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Top Navigation Bar -->
+    <div class="bg-doctolib-dark py-2 text-white text-sm">
+        <div class="container mx-auto px-4 flex justify-between">
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-doctolib-highlight">Doctolib pour les professionnels de santé</a>
+                <a href="#" class="hover:text-doctolib-highlight">Solutions pour les entreprises</a>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-doctolib-highlight">Se connecter</a>
+                <a href="#" class="hover:text-doctolib-highlight">S'inscrire</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="#" class="text-2xl font-bold text-doctolib-primary">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-doctolib-primary">
+                                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2">Doctolib</span>
+                        </div>
+                    </a>
+                    <div class="hidden md:flex ml-10 space-x-6">
+                        <a href="#" class="font-medium hover:text-doctolib-primary">Rendez-vous</a>
+                        <a href="#" class="font-medium hover:text-doctolib-primary">Téléconsultation</a>
+                        <a href="#" class="font-medium hover:text-doctolib-primary">Médecins</a>
+                        <a href="#" class="font-medium hover:text-doctolib-primary">Centres médicaux</a>
+                        <a href="#" class="font-medium hover:text-doctolib-primary">Centres de vaccination</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="md:hidden text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                    <button class="bg-doctolib-primary hover:bg-doctolib-secondary text-white px-4 py-2 rounded-lg font-medium text-sm">
+                        Prendre RDV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section with Flight Search -->
+    <div class="relative bg-gradient-to-r from-violet-600 to-purple-800 py-16">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-white text-3xl md:text-4xl font-bold mb-6 text-center">Réservez votre vol à petit prix</h1>
+                
+                <!-- Flight Search Form -->
+                <div class="bg-white rounded-xl p-4 shadow-lg">
+                    <div class="flex flex-col md:flex-row mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                <input type="radio" id="aller-retour" name="voyage-type" class="text-purple-600" checked>
+                                <label for="aller-retour" class="text-gray-700">Aller-retour</label>
+                                <input type="radio" id="aller-simple" name="voyage-type" class="text-purple-600 ml-4">
+                                <label for="aller-simple" class="text-gray-700">Aller simple</label>
+                            </div>
+                        </div>
+                        <div class="flex-1 flex justify-end">
+                            <div class="flex items-center">
+                                <span class="text-gray-700 mr-2">Voyageurs:</span>
+                                <select class="border rounded px-3 py-1 text-gray-700">
+                                    <option>1 adulte</option>
+                                    <option>2 adultes</option>
+                                    <option>Famille (2+2)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="relative">
+                            <label class="block text-gray-700 mb-1">De</label>
+                            <input type="text" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" value="Paris (PAR)" placeholder="Ville ou aéroport">
+                            <div class="absolute left-3 top-9 text-gray-500">
+                                <i class="fas fa-plane-departure"></i>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-gray-700 mb-1">Vers</label>
+                            <input type="text" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" value="Venise (VCE)" placeholder="Ville ou aéroport">
+                            <div class="absolute left-3 top-9 text-gray-500">
+                                <i class="fas fa-plane-arrival"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="relative">
+                            <label class="block text-gray-700 mb-1">Départ</label>
+                            <input type="date" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" value="2024-06-15">
+                            <div class="absolute left-3 top-9 text-gray-500">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-gray-700 mb-1">Retour</label>
+                            <input type="date" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" value="2024-06-22">
+                            <div class="absolute left-3 top-9 text-gray-500">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                        <i class="fas fa-search mr-2"></i> Rechercher des vols
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <main>
+        <!-- Flight Results Section -->
+        <section class="py-12 container mx-auto px-4">
+            <h2 class="text-2xl font-bold mb-8">Résultats pour Paris (PAR) → Venise (VCE)</h2>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <!-- Flight Result Item -->
+                <div class="border-b last:border-b-0 hover:bg-gray-50">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row items-center">
+                            <!-- Airline Info -->
+                            <div class="flex items-center mb-4 md:mb-0 md:w-1/4">
+                                <img src="https://www.volotea.com/static/media/volotea-logo-small.3b3aa254.svg" alt="Volotea" class="h-8 mr-4">
+                                <div>
+                                    <div class="font-bold">Volotea</div>
+                                    <div class="text-gray-500 text-sm">V7 2458</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Flight Times -->
+                            <div class="flex-1 text-center mb-4 md:mb-0">
+                                <div class="flex justify-center items-center">
+                                    <div>
+                                        <div class="text-xl font-bold">16:30</div>
+                                        <div class="text-gray-500 text-sm">PAR</div>
+                                    </div>
+                                    <div class="mx-4 relative">
+                                        <div class="w-16 border-t border-gray-300"></div>
+                                        <div class="absolute -top-3 left-0 right-0 flex justify-center">
+                                            <i class="fas fa-plane text-gray-400 text-sm"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xl font-bold">18:15</div>
+                                        <div class="text-gray-500 text-sm">VCE</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500 mt-1">1h 45min • Direct</div>
+                            </div>
+                            
+                            <!-- Price & Book -->
+                            <div class="flex flex-col items-center md:w-1/4">
+                                <div class="text-xl font-bold text-purple-600 mb-2">€79</div>
+                                <button class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm font-medium">
+                                    Sélectionner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Second Flight Result -->
+                <div class="border-b last:border-b-0 hover:bg-gray-50">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row items-center">
+                            <!-- Airline Info -->
+                            <div class="flex items-center mb-4 md:mb-0 md:w-1/4">
+                                <img src="https://www.volotea.com/static/media/volotea-logo-small.3b3aa254.svg" alt="Volotea" class="h-8 mr-4">
+                                <div>
+                                    <div class="font-bold">Volotea</div>
+                                    <div class="text-gray-500 text-sm">V7 2462</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Flight Times -->
+                            <div class="flex-1 text-center mb-4 md:mb-0">
+                                <div class="flex justify-center items-center">
+                                    <div>
+                                        <div class="text-xl font-bold">21:30</div>
+                                        <div class="text-gray-500 text-sm">PAR</div>
+                                    </div>
+                                    <div class="mx-4 relative">
+                                        <div class="w-16 border-t border-gray-300"></div>
+                                        <div class="absolute -top-3 left-0 right-0 flex justify-center">
+                                            <i class="fas fa-plane text-gray-400 text-sm"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xl font-bold">23:15</div>
+                                        <div class="text-gray-500 text-sm">VCE</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500 mt-1">1h 45min • Direct</div>
+                            </div>
+                            
+                            <!-- Price & Book -->
+                            <div class="flex flex-col items-center md:w-1/4">
+                                <div class="text-xl font-bold text-purple-600 mb-2">€69</div>
+                                <button class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm font-medium">
+                                    Sélectionner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Return Flight Heading -->
+                <div class="bg-gray 100 p-4">
+                    <h3 class="font-bold text-lg">Vol retour: Venise (VCE) → Paris (PAR)</h3>
+                    <p class="text-sm text-gray-600">22 juin 2024</p>
+                </div>
+                
+                <!-- Return Flight Result -->
+                <div class="border-b last:border-b-0 hover:bg-gray-50">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row items-center">
+                            <!-- Airline Info -->
+                            <div class="flex items-center mb-4 md:mb-0 md:w-1/4">
+                                <img src="https://www.volotea.com/static/media/volotea-logo-small.3b3aa254.svg" alt="Volotea" class="h-8 mr-4">
+                                <div>
+                                    <div class="font-bold">Volotea</div>
+                                    <div class="text-gray-500 text-sm">V7 2463</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Flight Times -->
+                            <div class="flex-1 text-center mb-4 md:mb-0">
+                                <div class="flex justify-center items-center">
+                                    <div>
+                                        <div class="text-xl font-bold">19:45</div>
+                                        <div class="text-gray-500 text-sm">VCE</div>
+                                    </div>
+                                    <div class="mx-4 relative">
+                                        <div class="w-16 border-t border-gray-300"></div>
+                                        <div class="absolute -top-3 left-0 right-0 flex justify-center">
+                                            <i class="fas fa-plane text-gray-400 text-sm"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xl font-bold">21:30</div>
+                                        <div class="text-gray-500 text-sm">PAR</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500 mt-1">1h 45min • Direct</div>
+                            </div>
+                            
+                            <!-- Price & Book -->
+                            <div class="flex flex-col items-center md:w-1/4">
+                                <div class="text-xl font-bold text-purple-600 mb-2">€89</div>
+                                <button class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm font-medium">
+                                    Sélectionner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 mt-8">
+                <h3 class="font-bold text-lg mb-4">Total pour 1 adulte</h3>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-gray-600">Vol aller: €79</div>
+                        <div class="text-gray-600">Vol retour: €89</div>
+                        <div class="text-gray-600">Frais: €15</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">Total</div>
+                        <div class="text-3xl font-bold text-purple-600">€183</div>
+                    </div>
+                </div>
+                <button class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    Continuer vers le paiement
+                </button>
+            </div>
+       
+      
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-white font-bold mb-4">Doctolib</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white">À propos</a></li>
+                        <li><a href="#" class="hover:text-white">Recrutement</a></li>
+                        <li><a href="#" class="hover:text-white">Presse</a></li>
+                        <li><a href="#" class="hover:text-white">Blog</a></li>
+                        <li><a href="#" class="hover:text-white">Centre d'aide</a></li>
+                    </ul>
+                </div>
+                
+               
+                
+                <div>
+                    <h3 class="text-white font-bold mb-4">Télécharger l'application</h3>
+                    <div class="flex space-x-2">
+                        <a href="#" class="bg-black px-4 py-2 rounded flex items-center w-44">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.665 16.811a10.316 10.316 0 0 1-1.021 1.837c-.537.767-.978 1.297-1.316 1.592-.525.482-1.089.73-1.692.744-.432 0-.954-.123-1.562-.373-.61-.249-1.17-.371-1.683-.371-.537 0-1.113.123-1.73.371-.616.25-1.114.381-1.495.394-.577.025-1.154-.229-1.729-.764-.367-.32-.826-.87-1.377-1.648-.59-.829-1.075-1.794-1.455-2.891-.407-1.187-.611-2.335-.611-3.447 0-1.273.264-2.372.792-3.292a5.031 5.031 0 0 1 1.904-1.905 4.914 4.914 0 0 1 2.306-.659c.46 0 1.063.142 1.81.422.747.28 1.227.422 1.436.422.158 0 .689-.167 1.593-.498.853-.307 1.573-.434 2.163-.384 1.6.13 2.811.759 3.633 1.895 1.31-.515 2.302-1.317 2.968-2.402.671-1.086 1.006-2.244 1.006-3.47 0-.36-.033-.719-.1-1.078-1.056.053-2.176.339-3.358.855a9.52 9.52 0 0 0-2.794 2.1c-.73.789-1.219 1.704-1.465 2.747-1.181.477-2.17 1.151-2.968 2.014-.783.856-1.4 1.852-1.843 3.01-.449 1.17-.673 2.342-.673 3.518 0 1.242.2 2.416.603 3.521a10.1 10.1 0 0 0 1.708 2.922c.748.838 1.618 1.502 2.61 1.987.99.484 1.941.728 2.852.728.802 0 1.648-.176 2.537-.528l.017.01zm-4.002-18.48c-.034-1.022.187-1.98.662-2.874a4.685 4.685 0 0 1 1.843-1.964 4.49 4.49 0 0 1 2.343-.666c.064 1.03-.211 2.015-.83 2.958-.64 1.001-1.471 1.686-2.491 2.027a5.08 5.08 0 0 1-.021-.001 4.53 4.53 0 0 1-.526.156 4.37 4.37 0 0 1-1.001.118v-.002z"></path>
+                            </svg>
+                            <div>
+                                <div class="text-xs">Disponible sur</div>
+                                <div class="font-bold text-sm">App Store</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <span class="text-white mr-2">Doctolib</span>
+                        <span class="text-xs">&copy; 2023</span>
+                    </div>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-white">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="hover:text-white">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="hover:text-white">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" class="hover:text-white">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGIDIN - Professional Logistics Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0066CC',
+                        secondary: '#0052a3',
+                        accent: '#00C4B8',
+                        dark: '#1E293B',
+                        light: '#F1F5F9'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #F1F5F9, #E2E8F0);
+            min-height: 100vh;
+        }
+        
+        .scanner-container {
+            overflow: hidden;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        
+        .scan-animation {
+            animation: scan 3s ease-in-out infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(210px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .barcode-entry:focus {
+            border-color: #0066CC;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+        }
+        
+        .item-card {
+            transition: all 0.3s ease;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        #video {
+            transform: scaleX(-1); /* Flip video */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Top Navigation Bar -->
+    <header class="bg-white shadow-sm py-4 px-6 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+                    <i class="fas fa-box text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold ml-3 text-primary">LOGIDIN</h1>
+            </div>
+            
+            <nav class="hidden md:flex space-x-8">
+                <a href="#" class="text-gray-600 hover:text-primary font-medium">Dashboard</a>
+                <a href="#" class="text-gray-600 hover:text-primary font-medium">Inventory</a>
+                <a href="#" class="text-gray-600 hover:text-primary font-medium">Orders</a>
+                <a href="#" class="text-gray-600 hover:text-primary font-medium">Settings</a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <button class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg font-medium flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    <span>New Item</span>
+                </button>
+                <div class="w-9 h-9 rounded-full bg-gray-200 border-2 border-white"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Scan Products</h2>
+            <p class="text-gray-600">Scan barcodes to add items to inventory or process shipments</p>
+        </div>
+        
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Scanner Panel -->
+            <div class="scanner-container">
+                <div class="bg-gray-800 p-6 text-center">
+                    <div class="max-w-md mx-auto">
+                        <h3 class="text-xl font-semibold text-white mb-4">Scan Barcode</h3>
+                        
+                        <div class="relative w-full aspect-video bg-gray-900 rounded-xl overflow-hidden mb-4">
+                            <video id="video" autoplay playsinline class="w-full h-full object-cover opacity-70"></video>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="border-2 border-accent rounded-lg w-64 h-64 relative overflow-hidden">
+                                    <div class="scan-animation absolute w-full h-1 bg-accent z-10"></div>
+                                    <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-accent"></div>
+                                    <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-accent"></div>
+                                    <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-accent"></div>
+                                    <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-400 mb-6">Align barcode within the frame to scan</p>
+                        
+                        <div class="flex justify-center space-x-4 mb-6">
+                            <button class="bg-accent hover:bg-teal-500 text-white px-6 py-3 rounded-lg font-medium flex items-center">
+                                <i class="fas fa-camera mr-2"></i>
+                                <span>Scan</span>
+                            </button>
+                            <button class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium flex items-center">
+                                <i class="fas fa-bolt mr-2"></i>
+                                <span>Flash</span>
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center my-4">
+                            <div class="h-px bg-gray-700 flex-grow"></div>
+                            <span class="px-4 text-gray-500">or</span>
+                            <div class="h-px bg-gray-700 flex-grow"></div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-lg text-white mb-3">Enter Barcode Manually</h4>
+                            <div class="flex">
+                                <input type="text" placeholder="Enter barcode number" class="barcode-entry flex-grow px-4 py-3 rounded-l-lg focus:outline-none">
+                                <button class="bg-primary hover:bg-secondary px-5 rounded-r-lg text-white">
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Scanning Tips</h4>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-lightbulb text-xs"></i>
+                            </div>
+                            <span>Ensure good lighting conditions</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-lightbulb text-xs"></i>
+                            </div>
+                            <span>Hold scanner 6-12 inches from barcode</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-lightbulb text-xs"></i>
+                            </div>
+                            <span>Keep barcode steady and flat</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-lightbulb text-xs"></i>
+                            </div>
+                            <span>Clean damaged or dirty barcodes before scanning</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Recent Scans & Actions -->
+            <div class="space-y-8">
+                <!-- Actions Panel -->
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Quick Actions</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200 rounded-xl p-5 text-center transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-blue-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-warehouse text-xl text-primary"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">Add to Inventory</span>
+                        </button>
+                        <button class="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200 rounded-xl p-5 text-center transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-green-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-shipping-fast text-xl text-green-600"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">Process Shipping</span>
+                        </button>
+                        <button class="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200 rounded-xl p-5 text-center transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-orange-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-search text-xl text-orange-600"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">Lookup Product</span>
+                        </button>
+                        <button class="bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200 rounded-xl p-5 text-center transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-purple-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-file-invoice text-xl text-purple-600"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">Create Label</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Recent Scans -->
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Recent Scans</h3>
+                        <button class="text-gray-500 hover:text-primary flex items-center">
+                            <span>View All</span>
+                            <i class="fas fa-chevron-right ml-1 text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="item-card bg-gradient-to-r from-white to-gray-50 p-4 rounded-xl border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center mr-4">
+                                    <i class="fas fa-box text-blue-500"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <h4 class="font-medium">Power Tool Set</h4>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">INBOUND</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500">SKU: HW-8743-A • Scanned 5 min ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-card bg-gradient-to-r from-white to-gray-50 p-4 rounded-xl border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mr-4">
+                                    <i class="fas fa-laptop text-green-500"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <h4 class="font-medium">Laptop Pro 15"</h4>
+                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">OUTBOUND</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500">SKU: EL-2998-B • Scanned 20 min ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-card bg-gradient-to-r from-white to-gray-50 p-4 rounded-xl border border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-lg bg-purple-50 flex items-center justify-center mr-4">
+                                    <i class="fas fa-mobile-alt text-purple-500"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex justify-between">
+                                        <h4 class="font-medium">Smartphone X2</h4>
+                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">INVENTORY</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500">SKU: PH-7745-C • Scanned 2 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="bg-white rounded-2xl shadow p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Today's Activity</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 text-center">
+                            <p class="text-2xl font-bold text-cyan-700">42</p>
+                            <p class="text-sm text-cyan-900">Items Scanned</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 text-center">
+                            <p class="text-2xl font-bold text-green-700">38</p>
+                            <p class="text-sm text-green-900">Inbound</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 text-center">
+                            <p class="text-2xl font-bold text-orange-700">4</p>
+                            <p class="text-sm text-orange-900">Outbound</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Bottom Navigation - Mobile -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t">
+        <div class="flex justify-around items-center py-3">
+            <a href="#" class="text-primary flex flex-col items-center">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="#" class="text-gray-500 flex flex-col items-center">
+                <i class="fas fa-box text-lg"></i>
+                <span class="text-xs mt-1">Inventory</span>
+            </a>
+            <a href="#" class="text-gray-500 flex flex-col items-center">
+                <i class="fas fa-camera text-2xl bg-primary text-white rounded-full p-2"></i>
+                <span class="text-xs mt-1">Scan</span>
+            </a>
+            <a href="#" class="text-gray-500 flex flex-col items-center">
+                <i class="fas fa-shipping-fast text-lg"></i>
+                <span class="text-xs mt-1">Ship</span>
+            </a>
+            <a href="#" class="text-gray-500 flex flex-col items-center">
+                <i class="fas fa-user text-lg"></i>
+                <span class="text-xs mt-1">Account</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Initialize video preview for camera scanner (simulated)
+        function initCamera() {
+            const video = document.getElementById('video');
+            
+            // In a real app, this would get the camera stream
+            // For demo purposes, we'll just use a placeholder
+            
+            // Simulate camera feed with a gradient
+            const canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 480;
+            const ctx = canvas.getContext('2d');
+            
+            function draw() {
+                // Create gradient background simulating camera feed
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, "#3a3a3a");
+                gradient.addColorStop(1, "#1f1f1f");
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Add some noise
+                for (let i = 0; i < 200; i++) {
+                    const x = Math.floor(Math.random() * canvas.width);
+                    const y = Math.floor(Math.random() * canvas.height);
+                    const size = Math.random() * 3;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.2})`;
+                    ctx.fillRect(x, y, size, size);
+                }
+                
+                video.src = canvas.toDataURL('image/png');
+                requestAnimationFrame(draw);
+            }
+            
+            draw();
+        }
+        
+        // Simulate scanning functionality
+        document.querySelector('.bg-accent').addEventListener('click', function() {
+            const scanButton = this;
+            const originalText = scanButton.innerHTML;
+            
+            // Change button to loading state
+            scanButton.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Scanning...';
+            scanButton.classList.remove('bg-accent', 'hover:bg-teal-500');
+            scanButton.classList.add('bg-gray-500', 'cursor-not-allowed');
+            
+            // Simulate scanning for 1.5 seconds
+            setTimeout(function() {
+                // Reset button
+                scanButton.innerHTML = originalText;
+                scanButton.classList.add('bg-accent', 'hover:bg-teal-500');
+                scanButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
+                
+                // Success notification
+                showNotification('Barcode scanned successfully! Product added to inventory.', 'success');
+            }, 1500);
+        });
+        
+        // Show notification
+        function showNotification(message, type) {
+            // In a real app, this would show a toast notification
+            alert(message);
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            initCamera();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur d'Étiquettes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script> 
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script> 
+
+  <!-- JsBarcode (pour générer les codes-barres) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script> 
+
+  <!-- PDFLib (pour générer des PDFs) -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script> 
+
+  <!-- FileSaver.js (pour télécharger les fichiers) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script> 
+
+  <!-- QuaggaJS (pour scanner les codes-barres) -->
+  <script src="https://unpkg.com/@ericblade/quagga2@0.1.8/dist/quagga.min.js"></script> 
+  <link rel="stylesheet" href="https://unpkg.com/@ericblade/quagga2@0.1.8/dist/quagga.css"> 
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .scan-box {
+      width: 90%;
+      height: 40%;
+      border: 3px dashed #00ff00; 
+      position: absolute;
+      top: 30%;
+      left: 5%;
+    }
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background-color: #00ff00;
+      animation: scan 2s infinite linear;
+    }
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div id="app" class="max-w-3xl mx-auto px-4 py-6">
+  <header class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-indigo-600">Générateur d'Étiquettes</h1>
+    <p class="text-sm text-gray-500">Pour imprimante thermique JADEN JD-268 BT</p>
+  </header>
+
+  <!-- Scanner Section -->
+  <section v-if="showScanner" class="mb-6 bg-white p-4 rounded shadow">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-lg font-semibold">Scanner un code-barres</h2>
+      <button @click="stopScanner" class="text-red-500 hover:text-red-700">❌ Fermer</button>
+    </div>
+    <div id="scanner-container" class="relative h-64 bg-black rounded overflow-hidden">
+      <div id="scanner-viewport" class="w-full h-full"></div>
+      <div class="scan-box">
+        <div class="scan-line"></div>
+      </div>
+    </div>
+    <p v-if="scanStatus.message" class="mt-3 text-center" :class="{ 'text-green-600': scanStatus.success, 'text-red-600': !scanStatus.success }">
+      {{ scanStatus.message }}
+    </p>
+  </section>
+
+  <!-- Formulaire Article -->
+  <section class="mb-6 bg-white p-4 rounded shadow">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-lg font-semibold">Saisie de l'article</h2>
+      <button @click="startScanner" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded">📷 Scanner</button>
+    </div>
+    <form @submit.prevent="addArticle" class="space-y-3">
+      <div>
+        <label class="block text-sm font-medium">Nom de l'article</label>
+        <input v-model="article.name" type="text" required class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium">Prix (€)</label>
+        <input v-model.number="article.price" type="number" step="0.01" min="0" required class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium">Code-barres (EAN-13)</label>
+        <div class="flex gap-2">
+          <input v-model="article.barcode" type="text" pattern="\d{13}" placeholder="13 chiffres" class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+          <button type="button" @click="generateBarcode" class="bg-green-600 hover:bg-green-700 text-white px-3 rounded">🔄 Générer</button>
+        </div>
+        <p v-if="barcodeError" class="text-red-600 text-sm mt-1">{{ barcodeError }}</p>
+      </div>
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded font-medium">Créer Étiquette</button>
+    </form>
+  </section>
+
+  <!-- Prévisualisation -->
+  <section v-if="currentLabel" class="mb-6 bg-white p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-3">Prévisualisation</h2>
+    <div class="border border-dashed border-gray-300 p-4 text-center">
+      <h3 class="font-bold text-xl">{{ currentLabel.name }}</h3>
+      <p class="text-2xl font-bold my-2">{{ currentLabel.price }} €</p>
+      <svg id="barcode-svg" class="mx-auto"></svg>
+      <p class="text-sm mt-2">{{ currentLabel.barcode }}</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-4">
+      <button @click="printLabel" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">🖨️ Imprimer</button>
+      <button @click="downloadPDF" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded">📄 PDF</button>
+      <button @click="connectPrinter" class="bg-purple-600 hover:bg-purple-700 text-white py-2 rounded">🔌 Bluetooth</button>
+    </div>
+  </section>
+
+  <!-- Statut imprimante -->
+  <section v-if="printerStatus.connected || printerStatus.message" class="mb-6 bg-gray-50 p-4 rounded">
+    <h2 class="font-semibold">Statut imprimante</h2>
+    <p :class="printerStatus.connected ? 'text-green-600' : 'text-red-600'">
+      {{ printerStatus.connected ? 'Connecté' : 'Déconnecté' }} — {{ printerStatus.deviceName || 'Aucune' }}
+    </p>
+    <p class="text-sm text-gray-500 mt-1" v-if="printerStatus.message">{{ printerStatus.message }}</p>
+  </section>
+
+  <!-- Zone d'impression -->
+  <div id="print-area" class="hidden"></div>
+</div>
+
+<footer class="text-center text-sm text-gray-500 mt-6 pb-4">
+  © 2025 COLISBAR – Application compatible avec imprimante thermique
+</footer>
+
+<!-- Scripts -->
+<script>
+  const { createApp, ref, reactive, watch, onMounted, nextTick } = Vue;
+
+  createApp({
+    setup() {
+      const article = reactive({ name: '', price: '', barcode: '' });
+      const currentLabel = ref(null);
+      const barcodeError = ref('');
+      const showScanner = ref(false);
+      const scannedArticle = ref(null);
+      const scanStatus = reactive({ message: '', success: false });
+      const printerStatus = reactive({ connected: false, deviceName: '', message: '' });
+
+      // Génère un code-barres EAN13 valide
+      const generateBarcode = () => {
+        let code = '2'; // France
+        for (let i = 0; i < 11; i++) {
+          code += Math.floor(Math.random() * 10);
+        }
+        const checksum = calculateCheckSum(code);
+        article.barcode = code + checksum;
+      };
+
+      // Valide le code-barres
+      const validateBarcode = (code) => {
+        if (!code) return true;
+        if (!/^\d{13}$/.test(code)) {
+          barcodeError.value = 'Doit contenir exactement 13 chiffres';
+          return false;
+        }
+        if (parseInt(code[12]) !== calculateCheckSum(code)) {
+          barcodeError.value = 'Code-barres invalide';
+          return false;
+        }
+        barcodeError.value = '';
+        return true;
+      };
+
+      // Calcule le chiffre de contrôle
+      const calculateCheckSum = (code) => {
+        let sum = 0;
+        for (let i = 0; i < 12; i++) {
+          sum += parseInt(code[i]) * (i % 2 === 0 ? 1 : 3);
+        }
+        return (10 - (sum % 10)) % 10;
+      };
+
+      // Créer une étiquette
+      const addArticle = () => {
+        if (!validateBarcode(article.barcode)) return;
+        if (!article.barcode) generateBarcode();
+        currentLabel.value = {
+          name: article.name,
+          price: parseFloat(article.price).toFixed(2),
+          barcode: article.barcode
+        };
+        nextTick(() => {
+          JsBarcode("#barcode-svg", currentLabel.value.barcode, {
+            format: "EAN13",
+            lineColor: "#000",
+            width: 2,
+            height: 60,
+            displayValue: true
+          });
+        });
+      };
+
+      // Imprime via navigateur
+      const printLabel = () => {
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = `
+          <div style="width: 58mm; padding: 5mm; font-family: Arial; text-align: center;">
+            <h3 style="font-weight:bold; font-size:14pt;">${currentLabel.value.name}</h3>
+            <p style="font-weight:bold; font-size:16pt;">${currentLabel.value.price} €</p>
+            <svg id="print-barcode" style="margin:0 auto;"></svg>
+            <p>${currentLabel.value.barcode}</p>
+          </div>`;
+        JsBarcode("#print-barcode", currentLabel.value.barcode, { format: "EAN13", lineColor: "#000", width: 1.5, height: 40 });
+        window.print();
+        printArea.innerHTML = "";
+      };
+
+      // Télécharge en PDF
+      const downloadPDF = async () => {
+        const { PDFDocument, rgb } = PDFLib;
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([170, 113]);
+        page.drawText(currentLabel.value.name, { x: 10, y: 90, size: 14, color: rgb(0, 0, 0) });
+        page.drawText(`${currentLabel.value.price} €`, {
+          x: 10, y: 70, size: 16, color: rgb(0, 0, 0),
+          font: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold)
+        });
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        JsBarcode(svg, currentLabel.value.barcode, { format: "EAN13", lineColor: "#000", width: 1.5, height: 40, displayValue: false });
+        const svgString = new XMLSerializer().serializeToString(svg);
+        const img = await pdfDoc.embedSvg(svgString, 150, 50);
+        page.drawImage(img, { x: 10, y: 20, width: 150, height: 40 });
+        page.drawText(currentLabel.value.barcode, { x: 10, y: 10, size: 10, color: rgb(0, 0, 0) });
+        const pdfBytes = await pdfDoc.save();
+        saveAs(new Blob([pdfBytes], { type: 'application/pdf' }), `etiquette-${currentLabel.value.barcode}.pdf`);
+      };
+
+      // Connexion Bluetooth
+      const connectPrinter = async () => {
+        if (!currentLabel.value) {
+          printerStatus.message = "Veuillez créer une étiquette";
+          return;
+        }
+        try {
+          const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['generic_access']
+          });
+          printerStatus.deviceName = device.name;
+          const server = await device.gatt.connect();
+          printerStatus.connected = true;
+          printerStatus.message = "Connecté";
+          const service = await server.getPrimaryService('generic_access');
+          const characteristics = await service.getCharacteristics();
+          const characteristic = characteristics.find(c => c.properties.write);
+          if (characteristic) {
+            const escpos = buildESCPOSCmd(currentLabel.value);
+            await characteristic.writeValue(escpos);
+            printerStatus.message = "Impression terminée";
+          } else {
+            printerStatus.message = "Caractéristique non trouvée";
+          }
+        } catch (error) {
+          console.error(error);
+          printerStatus.connected = false;
+          printerStatus.message = `Erreur: ${error.message}`;
+        }
+      };
+
+      // Construit les commandes ESC/POS
+      const buildESCPOSCmd = (label) => {
+        const encoder = new TextEncoder();
+        return new Uint8Array([
+          ...encoder.encode(label.name + '\n'),
+          ...encoder.encode(label.price + ' €\n'),
+          ...encoder.encode(label.barcode + '\n'),
+          0x1B, 0x69 // Cut
+        ]);
+      };
+
+      // Scan
+      const startScanner = () => {
+        showScanner.value = true;
+        initScanner();
+      };
+
+      const stopScanner = () => {
+        showScanner.value = false;
+        Quagga.stop();
+      };
+
+      const initScanner = () => {
+        Quagga.init({
+          inputStream: {
+            type: "LiveStream",
+            target: document.querySelector('#scanner-viewport'),
+            constraints: { facingMode: "environment" }
+          },
+          decoder: { readers: ["ean_reader"] }
+        }, function(err) {
+          if (err) {
+            scanStatus.message = "Erreur du scanner";
+            return;
+          }
+          Quagga.start();
+        });
+        Quagga.onDetected(result => {
+          const code = result.codeResult.code;
+          if (validateBarcode(code)) {
+            scanStatus.success = true;
+            scanStatus.message = `Code détecté: ${code}`;
+            scannedArticle.value = { barcode: code };
+            stopScanner();
+          } else {
+            scanStatus.success = false;
+            scanStatus.message = "Code invalide";
+          }
+        });
+      };
+
+      // Remplit le formulaire après scan
+      const fillFormFromScannedArticle = () => {
+        if (scannedArticle.value) {
+          article.barcode = scannedArticle.value.barcode;
+          scannedArticle.value = null;
+        }
+      };
+
+      watch(() => article.barcode, (newVal) => {
+        if (newVal) validateBarcode(newVal);
+      });
+
+      return {
+        article,
+        currentLabel,
+        barcodeError,
+        showScanner,
+        scannedArticle,
+        scanStatus,
+        printerStatus,
+        generateBarcode,
+        addArticle,
+        printLabel,
+        downloadPDF,
+        connectPrinter,
+        startScanner,
+        stopScanner,
+        fillFormFromScannedArticle
+      };
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

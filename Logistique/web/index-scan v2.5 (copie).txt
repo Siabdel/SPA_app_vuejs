@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Générateur d'Étiquettes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script> 
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- QuaggaJS Styles -->
+  <link rel="stylesheet" href="https://unpkg.com/@ericblade/quagga2@0.1.8/dist/quagga.css">
+
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <!-- JsBarcode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+
+  <!-- PDFLib pour générer des PDF -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <!-- FileSaver.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- QuaggaJS -->
+  <script src="https://unpkg.com/@ericblade/quagga2@0.1.8/dist/quagga.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .scan-box {
+      width: 90%;
+      height: 40%;
+      border: 3px dashed #00ff00; 
+      position: absolute;
+      top: 30%;
+      left: 5%;
+    }
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background-color: #00ff00;
+      animation: scan 2s infinite linear;
+    }
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div id="app">
+    <!-- Contenu de l'app ici -->
+  </div>
+
+  <!-- Ton script personnalisé -->
+  <script>
+    const { createApp, ref, reactive, watch } = Vue;
+
+    createApp({
+      setup() {
+        // Ton code Vue ici
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
