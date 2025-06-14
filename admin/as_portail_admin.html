@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS Admin - Portail de gestion</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vue.js v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1a73e8;
+            --secondary-blue: #4285f4;
+            --light-blue: #e8f0fe;
+            --white: #ffffff;
+            --yellow: #fbbc05;
+            --dark-yellow: #f9ab00;
+            --gray: #5f6368;
+            --light-gray: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+        }
+        
+        .navbar-custom {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-custom .navbar-brand {
+            color: var(--primary-blue);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .navbar-custom .nav-link {
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        .navbar-custom .nav-link:hover {
+            color: var(--primary-blue);
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+        }
+        
+        .btn-yellow {
+            background-color: var(--yellow);
+            border-color: var(--yellow);
+            color: #000;
+        }
+        
+        .btn-yellow:hover {
+            background-color: var(--dark-yellow);
+            border-color: var(--dark-yellow);
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header-custom {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .sidebar {
+            background-color: var(--white);
+            min-height: calc(100vh - 56px);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar .nav-link {
+            color: var(--gray);
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: var(--light-blue);
+            color: var(--primary-blue);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            color: var(--primary-blue);
+        }
+        
+        .sidebar .nav-link.active i {
+            color: var(--white);
+        }
+        
+        .stat-card {
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .stat-card-warning {
+            border-left: 4px solid var(--yellow);
+        }
+        
+        .dashboard-header {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .quick-action-btn {
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quick-action-item {
+            text-align: center;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .dropdown-menu-custom {
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .dropdown-item-custom:hover {
+            background-color: var(--light-blue);
+            color: var(--primary-blue);
+        }
+        
+        .footer {
+            background-color: var(--white);
+            color: var(--gray);
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-shield-alt me-2"></i>AS Admin
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fas fa-cog"></i> Paramètres</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-th"></i> Modules
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-custom">
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-mosque me-2"></i> Islam</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-info-circle me-2"></i> Informations</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-tv me-2"></i> Radio/TV</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-code me-2"></i> Développement</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-microchip me-2"></i> Technologie</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-robot me-2"></i> IA</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-server me-2"></i> Hostingers</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-database me-2"></i> PgAdmin</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge bg-danger notification-badge">3</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="notificationsDropdown">
+                                <li><h6 class="dropdown-header">Notifications</h6></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-exclamation-circle text-warning me-2"></i> Mise à jour requise</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-server text-info me-2"></i> Serveur redémarré</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-user-plus text-success me-2"></i> Nouvel utilisateur</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-custom text-center" href="#">Voir toutes</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <img src="https://ui-avatars.com/api/?name=Admin+User&background=1a73e8&color=fff" class="user-avatar me-2">
+                                Admin
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-user me-2"></i> Profil</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-cog me-2"></i> Paramètres</a></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-question-circle me-2"></i> Aide</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-custom" href="#"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 col-lg-2 d-md-block sidebar collapse py-3">
+                    <div class="position-sticky pt-3">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    Tableau de bord
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-mosque"></i>
+                                    Islam
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-info-circle"></i>
+                                    Informations
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-tv"></i>
+                                    Radio/TV
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-code"></i>
+                                    Développement
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-microchip"></i>
+                                    Technologie
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-robot"></i>
+                                    Intelligence Artificielle
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-server"></i>
+                                    Hostingers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-database"></i>
+                                    PgAdmin
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-globe"></i>
+                                    Sites Web
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-concierge-bell"></i>
+                                    Services
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-lightbulb"></i>
+                                    AS Solutions Web
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-link"></i>
+                                    Base Links
+                                </a>
+                            </li>
+                            <li class="nav-item mt-3">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-cog"></i>
+                                    Paramètres
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                    <div class="dashboard-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h2><i class="fas fa-tachometer-alt text-primary me-2"></i> Tableau de bord</h2>
+                                <p class="mb-0">Bienvenue dans votre portail d'administration AS Admin</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <button class="btn btn-primary-custom me-2">
+                                    <i class="fas fa-plus me-1"></i> Nouveau
+                                </button>
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-sync-alt me-1"></i> Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-custom stat-card h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col me-2">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                                Visites aujourd'hui</div>
+                                            <div class="h5 mb-0 fw-bold text-gray-800">1,245</div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-arrow-up me-1"></i> 12%
+                                                </span>
+                                                <span class="text-xs ms-2">vs hier</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-custom stat-card h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col me-2">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                                Revenu mensuel</div>
+                                            <div class="h5 mb-0 fw-bold text-gray-800">$5,320</div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-arrow-up me-1"></i> 8%
+                                                </span>
+                                                <span class="text-xs ms-2">vs mois dernier</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-custom stat-card stat-card-warning h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col me-2">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                                Tâches en cours</div>
+                                            <div class="h5 mb-0 fw-bold text-gray-800">18</div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-exclamation-circle me-1"></i> 3 urgentes
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-tasks fa-2x text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card card-custom stat-card h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col me-2">
+                                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                                Serveurs actifs</div>
+                                            <div class="h5 mb-0 fw-bold text-gray-800">4/5</div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i> 80%
+                                                </span>
+                                                <span class="text-xs ms-2">uptime</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-server fa-2x text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card card-custom">
+                                <div class="card-header card-header-custom">
+                                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Actions rapides</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                            <div class="quick-action-item">
+                                                <a href="#" class="btn btn-primary-custom quick-action-btn">
+                                                    <i class="fas fa-plus"></i>
+                                                </a>
+                                                <h6 class="mb-0">Nouveau</h6>
+                                                <p class="text-muted small">Contenu</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                            <div class="quick-action-item">
+                                                <a href="#" class="btn btn-yellow quick-action-btn">
+                                                    <i class="fas fa-upload"></i>
+                                                </a>
+                                                <h6 class="mb-0">Uploader</h6>
+                                                <p class="text-muted small">Médias</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                            <div class="quick-action-item">
+                                                <a href="#" class="btn btn-primary-custom quick-action-btn">
+                                                    <i class="fas fa-users"></i>
+                                                </a>
+                                                <h6 class="mb-0">Utilisateurs</h6>
+                                                <p class="text-muted small">Gérer</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                            <div class="quick-action-item">
+                                                <a href="#" class="btn btn-yellow quick-action-btn">
+                                                    <i class="fas fa-cog"></i>
+                                                </a>
+                                                <h6 class="mb-0">Paramètres</h6>
+                                                <p class="text-muted small">Configurer</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                            <div class="quick-action-item">
+                                                <a href="#" class="btn btn-primary-custom quick-action-btn">
+                                                    <i class="fas fa-database"></i>
+                                                </a>
+                                                <h6 class="mb-0">Base de données</h6>
+                                                <p class="text-muted small">Backup</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                            <div class="quick-action-item">
+                                                <a href="#" class="btn btn-yellow quick-action-btn">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </a>
+                                                <h6 class="mb-0">Statistiques</h6>
+                                                <p class="text-muted small">Analyser</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity and Modules -->
+                    <div class="row">
+                        <!-- Recent Activity -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card card-custom h-100">
+                                <div class="card-header card-header-custom">
+                                    <h5 class="mb-0"><i class="fas fa-history me-2"></i> Activité récente</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="activity-feed">
+                                        <div class="d-flex mb-4">
+                                            <div class="flex-shrink-0">
+                                                <img src="https://ui-avatars.com/api/?name=John+Doe&background=4285f4&color=fff" class="user-avatar">
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0">John Doe <small class="text-muted ms-2">il y a 5 min</small></h6>
+                                                <p class="mb-1">A modifié la page "Accueil"</p>
+                                                <a href="#" class="text-primary small">Voir les modifications</a>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex mb-4">
+                                            <div class="flex-shrink-0">
+                                                <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=34a853&color=fff" class="user-avatar">
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0">Jane Smith <small class="text-muted ms-2">il y a 30 min</small></h6>
+                                                <p class="mb-1">A ajouté un nouvel article dans "Islam"</p>
+                                                <a href="#" class="text-primary small">Lire l'article</a>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex mb-4">
+                                            <div class="flex-shrink-0">
+                                                <img src="https://ui-avatars.com/api/?name=Admin+User&background=1a73e8&color=fff" class="user-avatar">
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0">Admin User <small class="text-muted ms-2">il y a 2 heures</small></h6>
+                                                <p class="mb-1">A mis à jour les paramètres du système</p>
+                                                <a href="#" class="text-primary small">Voir le journal</a>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <img src="https://ui-avatars.com/api/?name=System&background=ea4335&color=fff" class="user-avatar">
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0">Système <small class="text-muted ms-2">Aujourd'hui, 08:15</small></h6>
+                                                <p class="mb-1">Sauvegarde automatique effectuée avec succès</p>
+                                                <a href="#" class="text-primary small">Télécharger la sauvegarde</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <a href="#" class="btn btn-sm btn-primary-custom">Voir toute l'activité</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modules -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card card-custom h-100">
+                                <div class="card-header card-header-custom">
+                                    <h5 class="mb-0"><i class="fas fa-puzzle-piece me-2"></i> Modules</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4" v-for="module in modules" :key="module.id">
+                                            <div class="d-flex align-items-center p-3 border rounded">
+                                                <div class="flex-shrink-0 me-3">
+                                                    <div class="bg-primary text-white rounded-circle p-3 text-center" style="width: 50px; height: 50px;">
+                                                        <i :class="module.icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-0">{{ module.name }}</h6>
+                                                    <small class="text-muted">{{ module.description }}</small>
+                                                    <div class="mt-2">
+                                                        <a :href="module.link" class="btn btn-sm btn-primary-custom">Ouvrir</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <a href="#" class="btn btn-sm btn-primary-custom">Tous les modules</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Content -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card card-custom">
+                                <div class="card-header card-header-custom">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i> Contenu récent</h5>
+                                        <div>
+                                            <select class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                                <option>Tous les types</option>
+                                                <option>Articles</option>
+                                                <option>Pages</option>
+                                                <option>Médias</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Titre</th>
+                                                    <th>Auteur</th>
+                                                    <th>Type</th>
+                                                    <th>Date</th>
+                                                    <th>Statut</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Nouveautés dans l'IA en 2023</td>
+                                                    <td>
+                                                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=1a73e8&color=fff" class="user-avatar me-2">
+                                                        Admin
+                                                    </td>
+                                                    <td><span class="badge bg-primary">Article</span></td>
+                                                    <td>15 Juin 2023</td>
+                                                    <td><span class="badge bg-success">Publié</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Page d'accueil</td>
+                                                    <td>
+                                                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4285f4&color=fff" class="user-avatar me-2">
+                                                        John Doe
+                                                    </td>
+                                                    <td><span class="badge bg-warning text-dark">Page</span></td>
+                                                    <td>14 Juin 2023</td>
+                                                    <td><span class="badge bg-info">Brouillon</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Les bases de l'Islam</td>
+                                                    <td>
+                                                        <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=34a853&color=fff" class="user-avatar me-2">
+                                                        Jane Smith
+                                                    </td>
+                                                    <td><span class="badge bg-primary">Article</span></td>
+                                                    <td>13 Juin 2023</td>
+                                                    <td><span class="badge bg-success">Publié</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Galerie photos</td>
+                                                    <td>
+                                                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=1a73e8&color=fff" class="user-avatar me-2">
+                                                        Admin
+                                                    </td>
+                                                    <td><span class="badge bg-info">Média</span></td>
+                                                    <td>12 Juin 2023</td>
+                                                    <td><span class="badge bg-success">Publié</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Tutoriel PgAdmin</td>
+                                                    <td>
+                                                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4285f4&color=fff" class="user-avatar me-2">
+                                                        John Doe
+                                                    </td>
+                                                    <td><span class="badge bg-primary">Article</span></td>
+                                                    <td>10 Juin 2023</td>
+                                                    <td><span class="badge bg-secondary">Archivé</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination justify-content-center mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#">Suivant</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <img src="https://via.placeholder.com/40x40" class="me-2" alt="Logo">
+                            <span class="fw-bold">AS Admin Portal</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="me-3">v2.3.1</span>
+                        <a href="#" class="text-muted me-3"><i class="fas fa-question-circle"></i> Aide</a>
+                        <a href="#" class="text-muted"><i class="fas fa-cog"></i> Paramètres</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                modules: [
+                    {
+                        id: 1,
+                        name: 'Islam',
+                        description: 'Gestion des contenus islamiques',
+                        icon: 'fas fa-mosque',
+                        link: '#'
+                    },
+                    {
+                        id: 2,
+                        name: 'Informations',
+                        description: 'Actualités et informations',
+                        icon: 'fas fa-info-circle',
+                        link: '#'
+                    },
+                    {
+                        id: 3,
+                        name: 'Radio/TV',
+                        description: 'Médias en streaming',
+                        icon: 'fas fa-tv',
+                        link: '#'
+                    },
+                    {
+                        id: 4,
+                        name: 'Développement',
+                        description: 'Outils pour développeurs',
+                        icon: 'fas fa-code',
+                        link: '#'
+                    },
+                    {
+                        id: 5,
+                        name: 'Technologie',
+                        description: 'Articles technologiques',
+                        icon: 'fas fa-microchip',
+                        link: '#'
+                    },
+                    {
+                        id: 6,
+                        name: 'IA',
+                        description: 'Intelligence Artificielle',
+                        icon: 'fas fa-robot',
+                        link: '#'
+                    },
+                    {
+                        id: 7,
+                        name: 'Hostingers',
+                        description: 'Gestion des serveurs',
+                        icon: 'fas fa-server',
+                        link: '#'
+                    },
+                    {
+                        id: 8,
+                        name: 'PgAdmin',
+                        description: 'Administration de base de données',
+                        icon: 'fas fa-database',
+                        link: '#'
+                    }
+                ]
+            }
+        });
+
+        // jQuery for additional functionality
+        $(document).ready(function() {
+            // Sidebar toggle for mobile
+            $('.navbar-toggler').click(function() {
+                $('.sidebar').toggleClass('show');
+            });
+            
+            // Tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+            
+            // Active nav link
+            $('.nav-link').click(function() {
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+        });
+    </script>
+</body>
+</html>
