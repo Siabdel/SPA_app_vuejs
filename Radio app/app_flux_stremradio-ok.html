@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radios Marocaines | Écoute en Direct</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #1e3a8a;
+      --secondary-color: #f0f9ff;
+      --accent-color: #f59e0b;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f5f7fa, #e4e7eb);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-bottom: 50px;
+    }
+    
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: linear-gradient(to right, var(--primary-color), #2c5282);
+      color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      transform: rotate(30deg);
+    }
+    
+    .radio-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      height: 100%;
+      position: relative;
+    }
+    
+    .radio-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .radio-logo {
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--secondary-color);
+      padding: 10px;
+    }
+    
+    .radio-logo img {
+      max-height: 80px;
+      max-width: 100%;
+    }
+    
+    .radio-info {
+      padding: 15px;
+    }
+    
+    .player-container {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 20px;
+      z-index: 100;
+    }
+    
+    .progress-container {
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 3px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: var(--accent-color);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .search-container {
+      margin-bottom: 25px;
+    }
+    
+    .category-btn {
+      background-color: var(--secondary-color);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      margin: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .category-btn:hover, .category-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+    
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    .now-playing {
+      background: linear-gradient(to right, #fff7ed, #ffedd5);
+      border-left: 4px solid var(--accent-color);
+      animation: pulse 2s infinite;
+    }
+    
+    .test-result {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+    
+    .test-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    
+    .test-failure {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    
+    .audio-visualizer {
+      height: 40px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 2px;
+      margin: 10px 0;
+    }
+    
+    .visual-bar {
+      width: 4px;
+      background-color: var(--accent-color);
+      border-radius: 2px;
+    }
+    
+    .radio-title {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+    
+    @media (max-width: 768px) {
+      .player-container {
+        position: relative;
+        margin-top: 20px;
+      }
+      
+      .header h1 {
+        font-size: 1.8rem;
+      }
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      min-width: 250px;
+    }
+    
+    .fade-enter-active, .fade-leave-active {
+      transition: opacity 0.5s;
+    }
+    .fade-enter, .fade-leave-to {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+      <!-- Header -->
+      <div class="header text-center mb-4">
+        <h1 class="display-4 mb-3 animate__animated animate__fadeInDown">
+          <i class="fas fa-radio me-2"></i>Radios Marocaines
+        </h1>
+        <p class="lead animate__animated animate__fadeInUp">Écoutez en direct les meilleures radios du Maroc</p>
+      </div>
+      
+      <!-- Player -->
+      <div class="player-container mb-4">
+        <div v-if="currentRadio">
+          <h3 class="d-flex align-items-center">
+            <i class="fas fa-music me-2 text-primary"></i>
+            {{ currentRadio.name }}
+          </h3>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <small class="text-muted">{{ currentRadio.genre }}</small>
+            <span class="badge bg-success">
+              <i class="fas fa-circle me-1"></i>En direct
+            </span>
+          </div>
+          
+          <!-- Audio Visualizer -->
+          <div class="audio-visualizer">
+            <div v-for="(bar, index) in visualBars" :key="index" 
+                 class="visual-bar" 
+                 :style="{ height: bar + 'px' }"
+                 :class="{ active: bar > 5 }"></div>
+          </div>
+          
+          <div class="d-flex justify-content-center align-items-center mb-3">
+            <button class="btn btn-lg btn-outline-secondary me-2" @click="skipBackward">
+              <i class="fas fa-step-backward"></i>
+            </button>
+            <button class="btn btn-lg btn-primary me-2" @click="togglePlay">
+              <i class="fas" :class="{'fa-play': !isPlaying, 'fa-pause': isPlaying}"></i>
+            </button>
+            <button class="btn btn-lg btn-outline-secondary" @click="skipForward">
+              <i class="fas fa-step-forward"></i>
+            </button>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="volume-control">
+              <i class="fas fa-volume-down"></i>
+              <input type="range" class="form-range" min="0" max="1" step="0.01" v-model="volume">
+              <i class="fas fa-volume-up"></i>
+            </div>
+            <div class="text-end">
+              <button class="btn btn-sm btn-outline-danger" @click="stopRadio">
+                <i class="fas fa-stop me-1"></i>Arrêter
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center py-4">
+          <i class="fas fa-radio fa-3x mb-3 text-muted"></i>
+          <p class="text-muted">Sélectionnez une radio pour commencer</p>
+        </div>
+      </div>
+      
+      <!-- Search and Categories -->
+      <div class="search-container">
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" class="form-control" placeholder="Rechercher une radio..." v-model="searchQuery" @input="searchRadios">
+          <button class="btn btn-primary" @click="searchRadios">
+            <i class="fas fa-search me-1"></i>Rechercher
+          </button>
+        </div>
+        
+        <div class="d-flex flex-wrap justify-content-center mb-3">
+          <button 
+            v-for="category in categories" 
+            :key="category" 
+            class="category-btn"
+            :class="{ active: selectedCategory === category }"
+            @click="selectCategory(category)"
+          >
+            {{ category }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- Radio List -->
+      <div v-if="loading" class="loading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+      
+      <div v-else>
+        <h3 class="mb-3">
+          <i class="fas fa-broadcast-tower me-2"></i>
+          {{ selectedCategory === 'Toutes' ? 'Toutes les radios' : selectedCategory }}
+          <span class="badge bg-secondary">{{ filteredRadios.length }}</span>
+        </h3>
+        
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          <div class="col" v-for="radio in filteredRadios" :key="radio.id">
+            <div 
+              class="radio-card"
+              :class="{ 'now-playing': currentRadio && currentRadio.id === radio.id }"
+            >
+              <div class="test-result" :class="radio.testStatus === 'success' ? 'test-success' : radio.testStatus === 'failure' ? 'test-failure' : ''" v-if="radio.testStatus">
+                {{ radio.testStatus === 'success' ? 'Fonctionne' : 'Erreur' }}
+              </div>
+              <div class="radio-logo">
+                <i class="fas fa-radio fa-3x" :style="{ color: radio.color }"></i>
+              </div>
+              <div class="radio-info">
+                <h5 class="radio-title">{{ radio.name }}</h5>
+                <p class="text-muted mb-1">
+                  <i class="fas fa-tag me-1"></i>{{ radio.genre }}
+                </p>
+                <p class="mb-2">
+                  <i class="fas fa-map-marker-alt me-1"></i>{{ radio.location }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <button 
+                    class="btn btn-sm"
+                    :class="currentRadio && currentRadio.id === radio.id ? 'btn-outline-danger' : 'btn-primary'"
+                    @click="playRadio(radio)"
+                  >
+                    <i class="fas" :class="currentRadio && currentRadio.id === radio.id ? 'fa-stop' : 'fa-play'"></i>
+                    {{ currentRadio && currentRadio.id === radio.id ? 'Arrêter' : 'Écouter' }}
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" @click="testStream(radio)">
+                    <i class="fas fa-wifi me-1"></i>Tester
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Streaming Test Results -->
+      <div class="mt-5" v-if="testResults.length > 0">
+        <h3><i class="fas fa-tasks me-2"></i>Résultats des tests récents</h3>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Radio</th>
+                <th>URL testée</th>
+                <th>Statut</th>
+                <th>Latence</th>
+                <th>Heure</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(result, index) in testResults" :key="index">
+                <td>{{ result.radio }}</td>
+                <td class="text-truncate" style="max-width: 200px;">{{ result.url }}</td>
+                <td>
+                  <span :class="result.status === 'Succès' ? 'text-success' : 'text-danger'">
+                    <i class="fas" :class="result.status === 'Succès' ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                    {{ result.status }}
+                  </span>
+                </td>
+                <td>{{ result.latency }} ms</td>
+                <td>{{ result.time }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Audio Player (Hidden) -->
+    <audio ref="audioPlayer" :src="audioSource" @timeupdate="updateProgress" @ended="stopRadio" @play="onAudioPlay" @pause="onAudioPause"></audio>
+    
+    <!-- Toast Notification -->
+    <transition name="fade">
+      <div v-if="toast.show" class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i :class="toast.icon" class="me-2"></i> {{ toast.message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" @click="toast.show = false"></button>
+        </div>
+      </div>
+    </transition>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        radios: [],
+        currentRadio: null,
+        isPlaying: false,
+        progress: 0,
+        volume: 0.7,
+        audioSource: '',
+        searchQuery: '',
+        selectedCategory: 'Toutes',
+        categories: ['Toutes', 'Généraliste', 'Musique', 'Actualités', 'Culture', 'Sport', 'Religieuse'],
+        loading: true,
+        testResults: [],
+        visualBars: Array(20).fill(2),
+        toast: {
+          show: false,
+          message: '',
+          icon: ''
+        }
+      },
+      computed: {
+        filteredRadios() {
+          let filtered = this.radios;
+          
+          // Apply category filter
+          if (this.selectedCategory !== 'Toutes') {
+            filtered = filtered.filter(radio => radio.genre.includes(this.selectedCategory));
+          }
+          
+          // Apply search query
+          if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filtered = filtered.filter(radio => 
+              radio.name.toLowerCase().includes(query) || 
+              radio.genre.toLowerCase().includes(query) ||
+              radio.location.toLowerCase().includes(query)
+            );
+          }
+          
+          return filtered;
+        }
+      },
+      mounted() {
+        this.loadRadios();
+        
+        // Visualizer animation
+        setInterval(() => {
+          if (this.isPlaying) {
+            this.visualBars = this.visualBars.map(() => 
+              Math.floor(Math.random() * 20) + 2
+            );
+          } else {
+            // Reset bars when not playing
+            if (this.visualBars.some(bar => bar > 2)) {
+              this.visualBars = this.visualBars.map(bar => Math.max(2, bar - 0.5));
+            }
+          }
+        }, 100);
+      },
+      watch: {
+        volume(newVolume) {
+          if (this.$refs.audioPlayer) {
+            this.$refs.audioPlayer.volume = newVolume;
+          }
+        }
+      },
+      methods: {
+        loadRadios() {
+          // Simulate API call with Axios
+          this.loading = true;
+          setTimeout(() => {
+            this.radios = [
+                { id: 1, name: 'Aswat', genre: 'Généraliste', location: 'Maroc', url: 'https://broadcast.ice.infomaniak.ch/aswat-high.mp3', color: '#e63946', testStatus: '' },
+                { id: 2, name: 'Medi1 Radio', genre: 'Généraliste, Actualités', location: 'Casablanca', url: 'https://streaming1.medi1tv.com/radio/radio_mag.stream_aac/playlist.m3u8', color: '#457b9d', testStatus: '' },
+                { id: 3, name: 'Hit Radio Mgharba', genre: 'Hits marocains', location: 'Maroc', url: 'https://mgharba.ice.infomaniak.ch/mgharba-128.mp3', color: '#f4a261', testStatus: '' },
+                { id: 4, name: 'Chada FM', genre: 'Généraliste', location: 'Maroc', url: 'https://chada.ma/', color: '#2a9d8f', testStatus: '' },
+                { id: 5, name: 'Radio Coran', genre: 'Religieuse', location: 'Maroc', url: 'https://radio-coran.net/', color: '#9d4edd', testStatus: '' },
+                { id: 6, name: 'Radio 2M', genre: 'Généraliste', location: 'Maroc', url: 'http://www.radio2m.ma/', color: '#264653', testStatus: '' },
+                { id: 7, name: 'Radio Amazighia', genre: 'Culturelle', location: 'Maroc', url: 'https://cdnamd-hls-globecast.akamaized.net/live/ramdisk/radio_amazigh/hls_snrt_radio/index.m3u8', color: '#ffb703', testStatus: '' },
+                { id: 8, name: 'Medina FM', genre: 'Généraliste', location: 'Maroc', url: 'https://medinafm.ice.infomaniak.ch/medinafm-64.mp3', color: '#06d6a0', testStatus: '' },
+                { id: 9, name: 'Marrakech Plus', genre: 'Locale', location: 'Marrakech', url: 'https://cast5.my-control-panel.com/proxy/marrakec/stream', color: '#f72585', testStatus: '' },
+                { id: 10, name: 'Atlantic Radio', genre: 'Généraliste', location: 'Casablanca', url: 'https://atlantic-sonic.nindohost.net:9300/stream/1/', color: '#b5179e', testStatus: '' },
+                { id: 11, name: 'Radio Mars', genre: 'Sport', location: 'Maroc', url: 'https://radiomars.ice.infomaniak.ch/radiomars-128.mp3', color: '#ff006e', testStatus: '' },
+                { id: 12, name: 'MFM Radio', genre: 'Généraliste', location: 'Maroc', url: 'https://a5.asurahosting.com:7980/radio.mp3', color: '#219ebc', testStatus: '' },
+                { id: 13, name: 'Radio Soleil', genre: 'Généraliste', location: 'Maroc', url: 'https://radiosoleil.ice.infomaniak.ch/radiosoleil-128.mp3', color: '#e76f51', testStatus: '' },
+                { id: 14, name: 'Radio Tanger Med', genre: 'Locale, Portuaire', location: 'Tanger', url: 'https://radiotangermed-22.ice.infomaniak.ch/radiotangermed-22-128.mp3', color: '#00b4d8', testStatus: '' },
+                { id: 15, name: 'Oxygene FM', genre: 'Généraliste', location: 'Maroc', url: 'https://radiocampus.ice.infomaniak.ch/radiocampus-128.mp3', color: '#aacc00', testStatus: '' },
+                { id: 16, name: 'NRJ Maroc', genre: 'Hits, Pop', location: 'Maroc', url: 'https://icecast.nrjmaroc.com/stream', color: '#ffbe0b', testStatus: '' },
+                { id: 17, name: 'Cap Radio', genre: 'Généraliste', location: 'Nord Maroc', url: 'https://listen.radioking.com/radio/710810/stream/776366', color: '#3a86ff', testStatus: '' },
+                { id: 18, name: 'Radio Manarat', genre: 'Culturelle, Éducative', location: 'Maroc', url: 'https://listen.radioking.com/radio/252934/stream/297385', color: '#fb5607', testStatus: '' },
+                { id: 19, name: 'Radio Yabiladi', genre: 'Maghrébine', location: 'Maroc', url: 'https://radio.yabiladi.com:8002/stream/1/', color: '#8338ec', testStatus: '' },
+                { id: 20, name: '4U Classic Rock', genre: 'Rock, Classic', location: 'Maroc', url: 'https://str4uice.streamakaci.com/4uclassicrock.mp3', color: '#43aa8b', testStatus: '' },
+                { id: 21, name: 'Radio Star Maroc FM', genre: 'Généraliste', location: 'Maroc', url: 'https://a2.asurahosting.com:6100/stream/1/', color: '#ff006e', testStatus: '' }
+            ] ;
+
+            this.loading = false;
+          }, 1500);
+        },
+        playRadio(radio) {
+          // Stop current radio if playing the same
+          if (this.currentRadio && this.currentRadio.id === radio.id && this.isPlaying) {
+            this.stopRadio();
+            return;
+          }
+          
+          // Set the new radio
+          this.currentRadio = radio;
+          this.audioSource = radio.url;
+          
+          // Play the audio
+          this.$nextTick(() => {
+            const audioPlayer = this.$refs.audioPlayer;
+            audioPlayer.volume = this.volume;
+            
+            audioPlayer.play().then(() => {
+              this.isPlaying = true;
+              this.showToast(`Vous écoutez maintenant ${radio.name}`, 'fas fa-play-circle', 'success');
+            }).catch(error => {
+              console.error('Erreur de lecture:', error);
+              this.showToast(`Impossible de lire ${radio.name}`, 'fas fa-exclamation-triangle', 'danger');
+              this.stopRadio();
+            });
+          });
+        },
+        togglePlay() {
+          const audioPlayer = this.$refs.audioPlayer;
+          if (!this.currentRadio) return;
+          
+          if (this.isPlaying) {
+            audioPlayer.pause();
+          } else {
+            audioPlayer.play().catch(error => {
+              console.error('Erreur de reprise:', error);
+              this.showToast(`Erreur de reprise de la lecture`, 'fas fa-exclamation-triangle', 'danger');
+            });
+          }
+        },
+        stopRadio() {
+          const audioPlayer = this.$refs.audioPlayer;
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+          this.isPlaying = false;
+          this.currentRadio = null;
+          this.audioSource = '';
+        },
+        skipBackward() {
+          const audioPlayer = this.$refs.audioPlayer;
+          audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
+          this.showToast('Recul de 10 secondes', 'fas fa-backward');
+        },
+        skipForward() {
+          const audioPlayer = this.$refs.audioPlayer;
+          audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 30);
+          this.showToast('Avance de 30 secondes', 'fas fa-forward');
+        },
+        onAudioPlay() {
+          this.isPlaying = true;
+        },
+        onAudioPause() {
+          this.isPlaying = false;
+        },
+        updateProgress() {
+          const audioPlayer = this.$refs.audioPlayer;
+          if (audioPlayer.duration) {
+            this.progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+          }
+        },
+        selectCategory(category) {
+          this.selectedCategory = category;
+        },
+        searchRadios() {
+          // Search functionality is handled in computed property
+          console.log('Recherche effectuée:', this.searchQuery);
+        },
+        testStream(radio) {
+          this.showToast(`Test du flux audio pour ${radio.name}`, 'fas fa-wifi');
+          
+          // Simulate streaming test
+          const testResult = {
+            radio: radio.name,
+            url: radio.url,
+            status: Math.random() > 0.2 ? 'Succès' : 'Échec',
+            latency: Math.floor(Math.random() * 300) + 50,
+            time: new Date().toLocaleTimeString()
+          };
+          
+          // Update radio status
+          radio.testStatus = testResult.status === 'Succès' ? 'success' : 'failure';
+          
+          // Add to test results
+          this.testResults.unshift(testResult);
+          
+          // Keep only last 5 results
+          if (this.testResults.length > 5) {
+            this.testResults.pop();
+          }
+        },
+        showToast(message, icon = 'fas fa-info-circle', type = 'info') {
+          this.toast.message = message;
+          this.toast.icon = icon;
+          this.toast.show = true;
+          
+          // Auto hide after 3 seconds
+          setTimeout(() => {
+            this.toast.show = false;
+          }, 3000);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

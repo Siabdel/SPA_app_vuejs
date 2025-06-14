@@ -1,0 +1,1167 @@
+    </script>
+
+    <style>
+        /* Additional CSS for enhanced interactivity */
+        .service-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .btn.loading {
+            opacity: 0.8;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin-top: -10px;
+            margin-left: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .form-control.is-valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+        }
+
+        .navbar-nav .nav-link.active::after {
+            width: 100%;
+            left: 0;
+        }
+
+        .focused .form-label {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Responsive enhancements */
+        @media (max-width: 576px) {
+            .hero {
+                padding: 0 15px;
+            }
+            
+            .service-card {
+                margin-bottom: 2rem;
+            }
+            
+            .about-stats {
+                margin-top: 2rem;
+            }
+            
+            .stat-item {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Loading animation for the page */
+        body:not(.loaded) {
+            opacity: 0;
+        }
+
+        body.loaded {
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            z-index: 9999;
+            transition: width 0.1s ease;
+        }
+
+        /* Navbar toggler custom */
+        .navbar-toggler {
+            border: none;
+            padding: 4px 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalCraft - Solutions Digitales Sur Mesure</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #f8fafc;
+            --accent-color: #10b981;
+            --dark-color: #1e293b;
+            --text-color: #475569;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-custom.scrolled {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-color) !important;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            background-color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: slideInUp 1s ease 0.3s forwards;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: slideInUp 1s ease 0.5s forwards;
+        }
+
+        .btn-primary-custom {
+            background: var(--accent-color);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: slideInUp 1s ease 0.7s forwards;
+        }
+
+        .btn-primary-custom:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Services Section */
+        .services {
+            padding: 100px 0;
+            background: var(--secondary-color);
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            height: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* About Section */
+        .about {
+            padding: 100px 0;
+        }
+
+        .about-stats {
+            background: var(--primary-color);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Technologies Section */
+        .technologies {
+            padding: 100px 0;
+            background: var(--secondary-color);
+        }
+
+        .tech-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .tech-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 0;
+            background: var(--dark-color);
+            color: white;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body id="app">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-code"></i> DigitalCraft
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">À propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#technologies">Technologies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1>Solutions Digitales<br>Sur Mesure</h1>
+                    <p>Nous développons des solutions web innovantes : E-commerce, CRM, ERP, CMS et plateformes immobilières pour propulser votre business vers le succès.</p>
+                    <div>
+                        <button class="btn btn-primary-custom btn-lg me-3" @click="scrollToContact">Démarrer un projet</button>
+                        <button class="btn btn-outline-light btn-lg" @click="scrollToServices">Nos services</button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="fas fa-laptop-code" style="font-size: 15rem; color: rgba(255,255,255,0.1);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="section-title fade-in">Nos Services</h2>
+                    <p class="section-subtitle fade-in">Des solutions digitales complètes pour transformer votre entreprise</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <h4>E-commerce</h4>
+                        <p>Plateformes de vente en ligne sur mesure avec gestion des stocks, paiements sécurisés et tableaux de bord analytics.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="fas fa-check text-success me-2"></i>Boutiques responsives</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Paiements sécurisés</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Gestion des stocks</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4>CRM & ERP</h4>
+                        <p>Systèmes de gestion client et planification des ressources pour optimiser vos processus métier.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="fas fa-check text-success me-2"></i>Gestion des leads</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Automatisation</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Reporting avancé</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h4>CMS Personnalisés</h4>
+                        <p>Systèmes de gestion de contenu adaptés à vos besoins spécifiques avec interfaces intuitives.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="fas fa-check text-success me-2"></i>Interface intuitive</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Multi-utilisateurs</li>
+                            <li><i class="fas fa-check text-success me-2"></i>SEO optimisé</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h4>Solutions Immobilières</h4>
+                        <p>Plateformes immobilières complètes avec gestion des biens, visites virtuelles et outils de prospection.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="fas fa-check text-success me-2"></i>Catalogue de biens</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Visites virtuelles</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Gestion locative</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <h4>Gestion de Stock</h4>
+                        <p>Solutions avancées de gestion des stocks avec traçabilité, alertes et synchronisation multi-canaux.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="fas fa-check text-success me-2"></i>Traçabilité complète</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Alertes automatiques</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Multi-entrepôts</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h4>Applications Mobiles</h4>
+                        <p>Applications natives et web progressives pour étendre votre présence sur tous les appareils.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="fas fa-check text-success me-2"></i>iOS & Android</li>
+                            <li><i class="fas fa-check text-success me-2"></i>PWA</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Synchronisation cloud</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 fade-in">
+                    <h2 class="section-title text-start">Pourquoi choisir DigitalCraft ?</h2>
+                    <p class="mb-4">Nous sommes une équipe passionnée de développeurs et de consultants digitaux, spécialisés dans la création de solutions web sur mesure pour les entreprises B2B.</p>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-rocket text-primary me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">Innovation</h5>
+                                    <p class="small mb-0">Technologies de pointe</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-shield-alt text-primary me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">Sécurité</h5>
+                                    <p class="small mb-0">Développement sécurisé</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-headset text-primary me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">Support</h5>
+                                    <p class="small mb-0">Accompagnement 24/7</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-chart-line text-primary me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">Performance</h5>
+                                    <p class="small mb-0">Solutions optimisées</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 fade-in">
+                    <div class="about-stats">
+                        <div class="row text-center">
+                            <div class="col-6 col-md-3 stat-item">
+                                <span class="stat-number" data-count="150">0</span>
+                                <span class="stat-label">Projets réalisés</span>
+                            </div>
+                            <div class="col-6 col-md-3 stat-item">
+                                <span class="stat-number" data-count="98">0</span>
+                                <span class="stat-label">% Satisfaction</span>
+                            </div>
+                            <div class="col-6 col-md-3 stat-item">
+                                <span class="stat-number" data-count="5">0</span>
+                                <span class="stat-label">Années d'expérience</span>
+                            </div>
+                            <div class="col-6 col-md-3 stat-item">
+                                <span class="stat-number" data-count="24">0</span>
+                                <span class="stat-label">Support 24/7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technologies Section -->
+    <section id="technologies" class="technologies">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="section-title fade-in">Technologies & Frameworks</h2>
+                    <p class="section-subtitle fade-in">Nous utilisons les technologies les plus performantes du marché</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 fade-in">
+                    <div class="tech-item">
+                        <div class="tech-icon">
+                            <i class="fab fa-python"></i>
+                        </div>
+                        <h6>Python</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 fade-in">
+                    <div class="tech-item">
+                        <div class="tech-icon">
+                            <i class="fab fa-js"></i>
+                        </div>
+                        <h6>JavaScript</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 fade-in">
+                    <div class="tech-item">
+                        <div class="tech-icon">
+                            <i class="fab fa-react"></i>
+                        </div>
+                        <h6>React</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 fade-in">
+                    <div class="tech-item">
+                        <div class="tech-icon">
+                            <i class="fab fa-vuejs"></i>
+                        </div>
+                        <h6>Vue.js</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 fade-in">
+                    <div class="tech-item">
+                        <div class="tech-icon">
+                            <i class="fab fa-node-js"></i>
+                        </div>
+                        <h6>Node.js</h6>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 fade-in">
+                    <div class="tech-item">
+                        <div class="tech-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h6>Django</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="section-title text-white fade-in">Démarrons votre projet</h2>
+                    <p class="section-subtitle text-white fade-in">Contactez-nous pour discuter de vos besoins et obtenir un devis gratuit</p>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8 fade-in">
+                    <div class="contact-form">
+                        <form @submit.prevent="submitForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Nom complet *</label>
+                                    <input type="text" class="form-control" id="name" v-model="form.name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" v-model="form.email" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="company" class="form-label">Entreprise</label>
+                                    <input type="text" class="form-control" id="company" v-model="form.company">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="service" class="form-label">Service demandé</label>
+                                    <select class="form-control" id="service" v-model="form.service">
+                                        <option value="">Sélectionner un service</option>
+                                        <option value="ecommerce">E-commerce</option>
+                                        <option value="crm">CRM/ERP</option>
+                                        <option value="cms">CMS</option>
+                                        <option value="immobilier">Solution immobilière</option>
+                                        <option value="stock">Gestion de stock</option>
+                                        <option value="mobile">Application mobile</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message *</label>
+                                <textarea class="form-control" id="message" rows="5" v-model="form.message" required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary-custom btn-lg" :disabled="isSubmitting">
+                                    <span v-if="isSubmitting">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...
+                                    </span>
+                                    <span v-else>
+                                        <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p>&copy; 2025 DigitalCraft. Tous droits réservés. | Développement web professionnel</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
+
+    <script>
+        // Attendre que Vue.js soit chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si Vue est disponible
+            if (typeof Vue !== 'undefined') {
+                const { createApp } = Vue;
+                
+                createApp({
+                    data() {
+                        return {
+                            form: {
+                                name: '',
+                                email: '',
+                                company: '',
+                                service: '',
+                                message: ''
+                            },
+                            isSubmitting: false
+                        }
+                    },
+                    methods: {
+                        scrollToContact() {
+                            const contactElement = document.getElementById('contact');
+                            if (contactElement) {
+                                contactElement.scrollIntoView({ 
+                                    behavior: 'smooth' 
+                                });
+                            }
+                        },
+                        scrollToServices() {
+                            const servicesElement = document.getElementById('services');
+                            if (servicesElement) {
+                                servicesElement.scrollIntoView({ 
+                                    behavior: 'smooth' 
+                                });
+                            }
+                        },
+                        async submitForm(event) {
+                            event.preventDefault();
+                            this.isSubmitting = true;
+                            
+                            try {
+                                // Simulation d'envoi de formulaire
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                
+                                alert('Merci ! Votre message a été envoyé. Nous vous recontacterons rapidement.');
+                                
+                                // Reset form
+                                this.form = {
+                                    name: '',
+                                    email: '',
+                                    company: '',
+                                    service: '',
+                                    message: ''
+                                };
+                            } catch (error) {
+                                console.error('Erreur lors de l\'envoi du formulaire:', error);
+                                alert('Une erreur est survenue. Veuillez réessayer.');
+                            } finally {
+                                this.isSubmitting = false;
+                            }
+                        }
+                    },
+                    mounted() {
+                        console.log('Vue.js application montée avec succès');
+                    }
+                }).mount('#app');
+            } else {
+                console.error('Vue.js n\'est pas chargé');
+            }
+        });
+
+        // jQuery functionality
+        $(document).ready(function() {
+            console.log('jQuery initialisé - Version:', $.fn.jquery);
+            
+            // Vérifier que tous les éléments existent avant de les utiliser
+            const $navbar = $('.navbar-custom');
+            const $navLinks = $('.nav-link');
+            const $fadeInElements = $('.fade-in');
+            const $statNumbers = $('.stat-number');
+            const $serviceCards = $('.service-card');
+            const $techItems = $('.tech-item');
+            
+            // Navbar scroll effect
+            $(window).scroll(function() {
+                if ($(window).scrollTop() > 50) {
+                    $navbar.addClass('scrolled');
+                } else {
+                    $navbar.removeClass('scrolled');
+                }
+            });
+
+            // Smooth scrolling for navigation links
+            $navLinks.on('click', function(e) {
+                const href = $(this).attr('href');
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const target = $(href);
+                    if (target.length) {
+                        $('html, body').animate({
+                            scrollTop: target.offset().top - 70
+                        }, 1000);
+                    }
+                }
+            });
+
+            // Intersection Observer for fade-in animations
+            if ('IntersectionObserver' in window) {
+                const observerOptions = {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                };
+
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, observerOptions);
+
+                // Observe all fade-in elements
+                $fadeInElements.each(function() {
+                    observer.observe(this);
+                });
+            }
+
+            // Counter animation for statistics
+            $statNumbers.each(function() {
+                const $this = $(this);
+                const countTo = parseInt($this.attr('data-count')) || 0;
+                
+                if ('IntersectionObserver' in window) {
+                    const counterObserver = new IntersectionObserver(function(entries) {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                $({ countNum: 0 }).animate({
+                                    countNum: countTo
+                                }, {
+                                    duration: 2000,
+                                    easing: 'swing',
+                                    step: function() {
+                                        $this.text(Math.floor(this.countNum));
+                                    },
+                                    complete: function() {
+                                        $this.text(countTo);
+                                    }
+                                });
+                                counterObserver.unobserve(entry.target);
+                            }
+                        });
+                    });
+                    
+                    counterObserver.observe(this);
+                }
+            });
+
+            // Service cards hover effect
+            $serviceCards.hover(
+                function() {
+                    $(this).find('.service-icon').css('transform', 'scale(1.1)');
+                },
+                function() {
+                    $(this).find('.service-icon').css('transform', 'scale(1)');
+                }
+            );
+
+            // Tech items animation delay
+            $techItems.each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+            });
+
+            // Form validation enhancement
+            $('form').on('submit', function(e) {
+                const $form = $(this);
+                let isValid = true;
+                
+                $form.find('input[required], textarea[required]').each(function() {
+                    const $field = $(this);
+                    const value = $field.val();
+                    
+                    if (!value || !value.trim()) {
+                        $field.addClass('is-invalid').removeClass('is-valid');
+                        isValid = false;
+                    } else {
+                        $field.removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+                
+                // Email validation
+                const $emailField = $('#email');
+                if ($emailField.length) {
+                    const email = $emailField.val();
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (email && !emailRegex.test(email)) {
+                        $emailField.addClass('is-invalid').removeClass('is-valid');
+                        isValid = false;
+                    } else if (email) {
+                        $emailField.removeClass('is-invalid').addClass('is-valid');
+                    }
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    console.warn('Formulaire invalide - validation échouée');
+                }
+            });
+
+            // Add floating animation to hero icons
+            function animateHeroIcon() {
+                const $heroIcon = $('.hero .fas');
+                if ($heroIcon.length) {
+                    $heroIcon.css({
+                        'transform': 'translateY(-10px)',
+                        'transition': 'transform 1s ease-in-out'
+                    });
+                    setTimeout(function() {
+                        $heroIcon.css('transform', 'translateY(0px)');
+                    }, 1000);
+                }
+            }
+            
+            // Démarrer l'animation après un délai
+            setTimeout(animateHeroIcon, 2000);
+            setInterval(animateHeroIcon, 4000);
+
+            // Mobile menu close on link click
+            $('.navbar-nav .nav-link').on('click', function() {
+                const $navbarCollapse = $('.navbar-collapse');
+                if ($navbarCollapse.hasClass('show')) {
+                    $navbarCollapse.collapse('hide');
+                }
+            });
+
+            // Add loading animation to buttons
+            $('.btn').on('click', function(e) {
+                const $btn = $(this);
+                if (!$btn.hasClass('no-loading') && !$btn.prop('disabled')) {
+                    $btn.addClass('loading');
+                    setTimeout(function() {
+                        $btn.removeClass('loading');
+                    }, 1000);
+                }
+            });
+
+            // Scroll to top functionality
+            function addScrollToTop() {
+                if ($('#scrollToTop').length === 0) {
+                    const scrollButton = $('<button>', {
+                        id: 'scrollToTop',
+                        class: 'btn btn-primary',
+                        style: 'position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: none; border-radius: 50%; width: 50px; height: 50px;',
+                        html: '<i class="fas fa-arrow-up"></i>'
+                    });
+                    
+                    $('body').append(scrollButton);
+                    
+                    $('#scrollToTop').on('click', function() {
+                        $('html, body').animate({ scrollTop: 0 }, 800);
+                        return false;
+                    });
+                }
+            }
+            
+            addScrollToTop();
+
+            // Show/hide scroll to top button
+            $(window).scroll(function() {
+                const $scrollBtn = $('#scrollToTop');
+                if ($(this).scrollTop() > 500) {
+                    $scrollBtn.fadeIn();
+                } else {
+                    $scrollBtn.fadeOut();
+                }
+            });
+
+            // Enhanced navbar active link highlighting
+            $(window).scroll(function() {
+                const scrollPos = $(window).scrollTop() + 100;
+                
+                $navLinks.each(function() {
+                    const $currLink = $(this);
+                    const href = $currLink.attr('href');
+                    
+                    if (href && href.startsWith('#')) {
+                        const $refElement = $(href);
+                        if ($refElement.length) {
+                            const elementTop = $refElement.offset().top;
+                            const elementBottom = elementTop + $refElement.outerHeight();
+                            
+                            if (scrollPos >= elementTop && scrollPos < elementBottom) {
+                                $navLinks.removeClass('active');
+                                $currLink.addClass('active');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Initialize tooltips if they exist
+            const $tooltips = $('[data-bs-toggle="tooltip"]');
+            if ($tooltips.length && typeof bootstrap !== 'undefined') {
+                $tooltips.each(function() {
+                    new bootstrap.Tooltip(this);
+                });
+            }
+
+            // Add form field focus effects
+            $('.form-control').on('focus', function() {
+                $(this).closest('.mb-3').addClass('focused');
+            }).on('blur', function() {
+                if (!$(this).val()) {
+                    $(this).closest('.mb-3').removeClass('focused');
+                }
+            });
+
+            // Performance optimization: Debounce scroll events
+            let scrollTimeout;
+            $(window).on('scroll', function() {
+                if (scrollTimeout) {
+                    clearTimeout(scrollTimeout);
+                }
+                scrollTimeout = setTimeout(function() {
+                    // Scroll operations already handled above
+                }, 10);
+            });
+
+            console.log('Toutes les fonctionnalités jQuery initialisées avec succès');
+        });
+
+        // Vanilla JavaScript pour fonctionnalités additionnelles
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM entièrement chargé');
+            
+            // Add loading class to body when page loads
+            document.body.classList.add('loaded');
+            
+            // Scroll progress indicator
+            const scrollProgress = document.getElementById('scrollProgress');
+            if (scrollProgress) {
+                window.addEventListener('scroll', function() {
+                    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+                    scrollProgress.style.width = scrolled + '%';
+                });
+            }
+            
+            // Service worker registration (pour PWA)
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    // Ne pas enregistrer de service worker pour éviter les erreurs
+                    console.log('Service Worker non configuré - optionnel pour cette démo');
+                });
+            }
+            
+            // Add meta theme color for mobile browsers
+            if (!document.querySelector('meta[name="theme-color"]')) {
+                const metaThemeColor = document.createElement('meta');
+                metaThemeColor.name = 'theme-color';
+                metaThemeColor.content = '#2563eb';
+                document.head.appendChild(metaThemeColor);
+            }
+            
+            console.log('Initialisation JavaScript terminée avec succès');
+        });
+    </script>
+</body>
+</html>

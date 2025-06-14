@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution Code-Barres & QR Professionnelle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease forwards;
+        }
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .observer-target {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-qrcode text-2xl text-orange-400"></i>
+                <h1 class="text-xl font-bold">QR<span class="text-orange-400">Pro</span></h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#home" class="hover:text-orange-400 transition">Accueil</a>
+                <a href="#features" class="hover:text-orange-400 transition">Fonctionnalités</a>
+                <a href="#packs" class="hover:text-orange-400 transition">Packs</a>
+                <a href="#contact" class="hover:text-orange-400 transition">Contact</a>
+            </nav>
+            <button class="md:hidden text-white focus:outline-none" id="mobile-menu-button">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden bg-blue-800" id="mobile-menu">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#home" class="py-2 hover:text-orange-400 transition">Accueil</a>
+                <a href="#features" class="py-2 hover:text-orange-400 transition">Fonctionnalités</a>
+                <a href="#packs" class="py-2 hover:text-orange-400 transition">Packs</a>
+                <a href="#contact" class="py-2 hover:text-orange-400 transition">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0 observer-target">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4 fade-in">Gérez, scannez, imprimez : <span class="text-orange-400">votre solution clé en main</span></h1>
+                    <p class="text-xl mb-8 fade-in stagger-1">Une solution complète pour stock, billetterie, caisse ou traçabilité</p>
+                    <button class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 fade-in stagger-2">
+                        Demander une démo <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                <div class="md:w-1/2 flex justify-center observer-target">
+                    <img src="https://cdn.pixabay.com/photo/2017/07/02/02/16/barcode-2463360_1280.png" alt="QR Code et code-barres" class="w-full max-w-md fade-in stagger-3 rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-blue-900 mb-16 observer-target fade-in">Pourquoi choisir notre solution ?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition observer-target fade-in stagger-1">
+                    <div class="text-4xl text-orange-500 mb-4">
+                        <i class="fas fa-stopwatch"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-blue-900">Gain de temps</h3>
+                    <p class="text-gray-600">Automatisez vos processus de gestion d'inventaire et gagnez plusieurs heures par semaine.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition observer-target fade-in stagger-2">
+                    <div class="text-4xl text-orange-500 mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-blue-900">Suivi en temps réel</h3>
+                    <p class="text-gray-600">Accédez à vos données de stock en temps réel depuis n'importe où, sur tous vos appareils.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition observer-target fade-in stagger-3">
+                    <div class="text-4xl text-orange-500 mb-4">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-blue-900">Zéro papier</h3>
+                    <p class="text-gray-600">Réduisez votre impact environnemental en digitalisant vos processus d'inventaire.</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition observer-target fade-in stagger-4">
+                    <div class="text-4xl text-orange-500 mb-4">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-blue-900">Personnalisable</h3>
+                    <p class="text-gray-600">Adaptez la solution à vos besoins spécifiques avec nos modules complémentaires.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Packs Section -->
+    <section id="packs" class="py-20 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-blue-900 mb-4 observer-target fade-in">Nos Packs Professionnels</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto observer-target fade-in">Choisissez la solution qui correspond à vos besoins. Tous nos packs incluent une formation et un support dédié.</p>
+            
+            <div class="overflow-x-auto bg-white rounded-lg shadow-md observer-target fade-in">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-blue-900 text-white">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Pack</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Matériel inclus</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Prix HT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Pack Starter -->
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-lg font-bold text-blue-900">Starter</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-800">Solution d'entrée de gamme idéale pour petites structures</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <ul class="list-disc list-inside text-gray-600">
+                                    <li>1 Lecteur codes-barres USB</li>
+                                    <li>Logiciel de base</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-orange-500 font-semibold">299€</td>
+                        </tr>
+                        
+                        <!-- Pack Pro -->
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-lg font-bold text-blue-900">Pro</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-800">Solution complète pour boutiques et entrepôts</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <ul class="list-disc list-inside text-gray-600">
+                                    <li>2 Lecteurs codes-barres Bluetooth</li>
+                                    <li>Imprimante étiquettes</li>
+                                    <li>Logiciel avancé</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-orange-500 font-semibold">899€</td>
+                        </tr>
+                        
+                        <!-- Pack Mobile -->
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-lg font-bold text-blue-900">Mobile</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-800">Solution nomade avec terminaux tactiles</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <ul class="list-disc list-inside text-gray-600">
+                                    <li>2 Terminaux Android avec scanner intégré</li>
+                                    <li>Logiciel mobile</li>
+                                    <li>Station de recharge</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-orange-500 font-semibold">1 499€</td>
+                        </tr>
+                        
+                        <!-- Pack Événement -->
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-lg font-bold text-blue-900">Événement</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-800">Solution clé en main pour billetterie et contrôle d'accès</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <ul class="list-disc list-inside text-gray-600">
+                                    <li>10 Lecteurs QR codes portatifs</li>
+                                    <li>Tablette de contrôle</li>
+                                    <li>Logiciel événementiel</li>
+                                    <li>Support 24/7</li>
+                                </ul>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-orange-500 font-semibold">2 999€</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-8 text-center bg-orange-50 p-4 rounded-lg border-l-4 border-orange
+</body>
+</html>

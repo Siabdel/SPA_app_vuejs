@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketFlow | Ticketing Management & Personalization</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fafafa;
+        }
+        
+        .ticket-animation {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            transform: rotate(12deg);
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .ticket-preview {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .ticket-preview:hover {
+            transform: perspective(1000px) rotateY(10deg) rotateX(5deg) translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .pricing-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(1.03);
+        }
+        
+        .customization-ui {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .editor-preview {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .testimonial-card {
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            background: white;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+                    <i class="fas fa-ticket-alt text-white text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold text-purple-800">TicketFlow</span>
+            </div>
+            
+            <div class="hidden md:flex space-x-10">
+                <a href="#features" class="text-gray-700 hover:text-purple-600 font-medium">Features</a>
+                <a href="#personalization" class="text-gray-700 hover:text-purple-600 font-medium">Personalization</a>
+                <a href="#pricing" class="text-gray-700 hover:text-purple-600 font-medium">Pricing</a>
+                <a href="#testimonials" class="text-gray-700 hover:text-purple-600 font-medium">Testimonials</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="hidden md:block text-gray-700 hover:text-purple-600 font-medium">Log in</button>
+                <button class="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition duration-300">Get Started</button>
+            </div>
+            
+            <button class="md:hidden text-gray-700">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 mb-12 md:mb-0 relative">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight mb-6">
+                Transform Your Event Ticketing Experience
+            </h1>
+            <p class="text-gray-600 text-lg mb-8 max-w-lg">
+                Create, customize, and manage your event tickets with our powerful platform. From small gatherings to large festivals, we've got you covered.
+            </p>
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
+                <button class="px-8 py-4 bg-purple-600 text-white rounded-lg font-semibold text-lg hover:bg-purple-700 transition duration-300">
+                    Start Free Trial
+                </button>
+                <button class="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold text-lg hover:bg-gray-50 transition duration-300">
+                    See a Demo
+                </button>
+            </div>
+        </div>
+        
+        <div class="md:w-1/2 relative">
+            <div class="customization-ui p-8 rounded-2xl shadow-xl">
+                <div class="editor-preview bg-white rounded-xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="font-bold text-lg">VIP Access</h3>
+                            <p class="text-gray-600 text-sm">Tech Conference 2023</p>
+                        </div>
+                        <div class="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-crown text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between py-4 border-t border-b border-gray-200 mb-6">
+                        <div>
+                            <p class="text-xs text-gray-500">Date</p>
+                            <p class="font-medium">Nov 15-16, 2023</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Location</p>
+                            <p class="font-medium">Paris Expo</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="bg-gray-200 rounded-full h-2.5 mb-2">
+                            <div class="bg-purple-600 h-2.5 rounded-full" style="width: 45%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Only 55 tickets left</span>
+                            <span class="font-bold">$129</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-gray-500">Ticket #</p>
+                            <p class="font-mono">TC23-VIP-0584</p>
+                        </div>
+                        <div class="bg-gray-200 p-2 rounded">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=TC23-VIP-0584" width="50" height="50" alt="QR Code">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full"></div>
+            <div class="absolute -bottom-8 -left-6 w-16 h-16 bg-purple-400 rounded-full"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 gradient-bg">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Powerful Ticketing Features</h2>
+                <p class="text-gray-600">
+                    All the tools you need to create, sell, and manage your event tickets
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <!-- Feature Card 1 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 transition duration-300">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-cogs text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Easy Ticket Management</h3>
+                    <p class="text-gray-600 mb-4">
+                        Create multiple ticket types, set pricing tiers, and manage capacity with an intuitive dashboard.
+                    </p>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Unlimited ticket types
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Time-based pricing
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Inventory tracking
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature Card 2 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 transition duration-300">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Attendee Management</h3>
+                    <p class="text-gray-600 mb-4">
+                        Collect attendee information, check in guests easily, and manage access control.
+                    </p>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Custom registration forms
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            QR code scanning
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Real-time attendance
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature Card 3 -->
+                <div class="feature-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 transition duration-300">
+                    <div class="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-pink-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Analytics & Reporting</h3>
+                    <p class="text-gray-600 mb-4">
+                        Get actionable insights on ticket sales, attendance patterns, and revenue performance.
+                    </p>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Real-time sales tracking
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Attendee demographics
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Exportable reports
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticket Personalization Section -->
+    <section id="personalization" class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Ticket Customization</h2>
+                <p class="text-gray-600">
+                    Design tickets that match your brand and create a unique experience for attendees
+                </p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-10 items-center">
+                <div class="md:w-1/2">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-palette text-green-600"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Brand Your Tickets</h4>
+                            <p class="text-gray-600 text-sm">
+                                Add your logo, choose colors that match your brand, and create consistent designs.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-images text-blue-600"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Dynamic Content</h4>
+                            <p class="text-gray-600 text-sm">
+                                Include attendee names, photos, seat numbers, and custom messages.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-qrcode text-purple-600"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Smart QR Codes</h4>
+                            <p class="text-gray-600 text-sm">
+                                Unique QR codes for verification with custom styling options.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-mobile-alt text-yellow-600"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Mobile-Optimized</h4>
+                            <p class="text-gray-600 text-sm">
+                                Tickets look great on any device and add to Apple Wallet automatically.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2 relative">
+                    <div class="ticket-preview bg-gradient-to-br from-indigo-50 to-purple-50 p-8 rounded-2xl shadow-xl border border-indigo-100">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <div class="flex items-center mb-2">
+                                    <div class="w-8 h-8 bg-indigo-600 rounded-full mr-3"></div>
+                                    <span class="font-bold text-indigo-600">MusicFest 2023</span>
+                                </div>
+                                <h3 class="text-xl font-bold mb-1">Golden Experience Pass</h3>
+                                <p class="text-sm text-gray-600">Access all areas + backstage</p>
+                            </div>
+                            <div class="bg-indigo-500 text-white px-4 py-1 rounded-lg font-bold">VIP</div>
+                        </div>
+                        
+                        <div class="flex justify-between mb-6">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-alt text-gray-500 mr-2"></i>
+                                <span>Oct 28-29, 2023</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
+                                <span>Riverfront Arena</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6 flex items-center">
+                            <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 mr-4" />
+                            <div>
+                                <p class="font-bold">John Carter</p>
+                                <p class="text-sm text-gray-500">john@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-xs text-gray-500">Ticket #</p>
+                                <p class="font-mono">MF23-GEP-0985</p>
+                            </div>
+                            <div class="bg-white p-1 rounded">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=MF23-GEP-0985" width="60" height="60" alt="QR Code">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -top-5 -right-5 w-10 h-10 bg-yellow-400 rounded-full"></div>
+                    <div class="absolute -bottom-5 -left-5 w-12 h-12 bg-purple-400 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-purple-600 to-indigo-700">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Event?</h2>
+            <p class="text-purple-100 max-w-2xl mx-auto text-xl mb-10">
+                Join thousands of event organizers using our platform to sell tickets and create memorable experiences.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <button class="px-8 py-4 bg-white text-purple-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition duration-300">
+                    Start Free Trial
+                </button>
+                <button class="px-8 py-4 border-2 border-white text-white rounded-lg font-bold text-lg hover:bg-purple-700 transition duration-300">
+                    Request a Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Simple, Transparent Pricing</h2>
+                <p class="text-gray-600">
+                    Only pay when you sell tickets. No hidden fees or setup costs.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Pricing Card 1 -->
+                <div class="pricing-card bg-white p-8 rounded-xl shadow-md border border-purple-100 hover:border-purple-200 transition duration-300">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Starter</h3>
+                        <p class="text-gray-600">Perfect for small events</p>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <p class="text-4xl font-bold text-purple-600">3%</p>
+                        <p class="text-gray-600">+ $0.99 per ticket</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Up to 500 tickets
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Basic ticket personalization
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Email support
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full py-3 rounded-lg bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition">
+                        Get Started
+                    </button>
+                </div>
+                
+                <!-- Popular Pricing Card -->
+                <div class="pricing-card bg-gradient-to-br from-purple-600 to-indigo-700 p-8 rounded-xl shadow-xl transform scale-105 relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-purple-900 px-4 py-1 rounded-full font-bold text-sm">
+                        MOST POPULAR
+                    </div>
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-white mb-2">Professional</h3>
+                        <p class="text-purple-100">For growing events</p>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <p class="text-4xl font-bold text-white">2.5%</p>
+                        <p class="text-purple-200">+ $0.79 per ticket</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8 text-purple-50">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i>
+                            Up to 5,000 tickets
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i>
+                            Advanced personalization
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i>
+                            Early payment options
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i>
+                            Priority support
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full py-3 rounded-lg bg-white text-purple-600 font-semibold hover:bg-gray-100 transition">
+                        Get Started
+                    </button>
+                </div>
+                
+                <!-- Pricing Card 3 -->
+                <div class="pricing-card bg-white p-8 rounded-xl shadow-md border border-purple-100 hover:border-purple-200 transition duration-300">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Enterprise</h3>
+                        <p class="text-gray-600">For large events & festivals</p>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <p class="text-4xl font-bold text-purple-600">1.8%</p>
+                        <p class="text-gray-600">+ $0.50 per ticket</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Unlimited tickets
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Full customization
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Dedicated account manager
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            Custom payment options
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full py-3 rounded-lg bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Trusted by Event Professionals</h2>
+                <p class="text-gray-600">
+                    See how organizers are transforming their events with our platform
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                        <div>
+                            <h4 class="font-bold">Sarah Johnson</h4>
+                            <p class="text-sm text-gray-500">Event Director, Tech Connect</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic mb-6">
+                        "TicketFlow transformed how we manage our conference tickets. The personalization options allowed us to create VIP experiences that attendees raved about!"
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                        <div>
+                            <h4 class="font-bold">Michael Torres</h4>
+                            <p class="text-sm text-gray-500">Festival Organizer</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic mb-6">
+                        "The QR code check-in system saved us hours during our 5-day festival. The ability to customize tickets with attendee photos made a huge difference."
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                        <div>
+                            <h4 class="font-bold">Jennifer Lee</h4>
+                            <p class="text-sm text-gray-500">Concert Promoter</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic mb-6">
+                        "After switching to TicketFlow, we cut our ticketing management time in half. The reporting tools give us insights we never had before."
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div>
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+                            <i class="fas fa-ticket-alt text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold ml-3">TicketFlow</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Powering unforgettable event experiences with intuitive ticketing solutions.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">Solutions</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Conferences</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Music Festivals</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Sports Events</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Workshops</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Nonprofits</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">Resources</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Guides</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">API Status</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">Subscribe to Newsletter</h4>
+                    <p class="text-gray-400 mb-4">
+                        Get tips and insights on event management delivered to your inbox
+                    </p>
+                    <div class="flex mb-4">
+                        <input type="email" placeholder="Your email address" class="px-4 py-2 rounded-l-lg w-full text-gray-700">
+                        <button class="bg-purple-600 hover:bg-purple-700 px-4 rounded-r-lg">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500">
+                        We care about your data. Read our <a href="#" class="text-purple-400 hover:underline">Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 text-sm mb-4 md:mb-0">
+                    © 2023 TicketFlow. All rights reserved.
+                </p>
+                <div class="flex space-x-6 text-gray-500 text-sm">
+                    <a href="#" class="hover:text-white">Privacy Policy</a>
+                    <a href="#" class="hover:text-white">Terms of Service</a>
+                    <a href="#" class="hover:text-white">Cookies Settings</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple animation observer
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make testimonials interactive on hover
+            const testimonials = document.querySelectorAll('.testimonial-card');
+            testimonials.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'none';
+                });
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

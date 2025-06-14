@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent IA - Achreet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .product-image {
+            transition: transform 0.3s ease;
+        }
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="#" class="text-white text-2xl font-bold italic">Achreet</a>
+                    <span class="ml-1 text-xs text-yellow-300">.fr</span>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="hidden md:flex flex-1 mx-4">
+                    <div class="relative w-full max-w-xl">
+                        <input type="text" placeholder="Rechercher sur Achreet" 
+                            class="w-full py-2 px-4 rounded-l-md focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 py-2 px-4 rounded-r-md transition duration-300">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <div class="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg hidden">
+                            <div class="py-1">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tous les départements</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Livres</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">High-Tech</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-white hover:text-yellow-300 transition">
+                        <div class="text-xs">Bonjour, identifiez-vous</div>
+                        <div class="font-semibold text-sm">Compte et listes</div>
+                    </a>
+                    <a href="#" class="text-white hover:text-yellow-300 transition">
+                        <div class="text-xs">Retours</div>
+                        <div class="font-semibold text-sm">& Commandes</div>
+                    </a>
+                    <a href="#" class="flex items-center text-white hover:text-yellow-300 transition relative">
+                        <i class="fas fa-shopping-cart text-2xl"></i>
+                        <span class="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        <span class="ml-1 font-semibold hidden md:inline">Panier</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Search -->
+            <div class="mt-3 md:hidden">
+                <div class="relative">
+                    <input type="text" placeholder="Rechercher..." 
+                        class="w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    <button class="absolute right-0 top-0 h-full px-3 text-blue-800">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="hidden md:flex items-center justify-between mt-3 text-white text-sm">
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-yellow-300 transition flex items-center">
+                        <i class="fas fa-bars mr-1"></i>
+                        Tout
+                    </a>
+                    <a href="#" class="hover:text-yellow-300 transition">Meilleures Ventes</a>
+                    <a href="#" class="hover:text-yellow-300 transition">Nouveautés</a>
+                    <a href="#" class="hover:text-yellow-300 transition">Prime</a>
+                    <a href="#" class="hover:text-yellow-300 transition">Livres</a>
+                    <a href="#" class="hover:text-yellow-300 transition">High-Tech</a>
+                </div>
+                <div>
+                    <a href="#" class="text-sm font-semibold hover:text-yellow-300 transition">Découvrez Achreet Business</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumbs -->
+    <div class="bg-gray-200 py-2 px-4 text-sm">
+        <div class="container mx-auto">
+            <span class="text-blue-600 hover:underline cursor-pointer">Livres</span>
+            <span class="mx-1">></span>
+            <span class="text-blue-600 hover:underline cursor-pointer">Informatique et Internet</span>
+            <span class="mx-1">></span>
+            <span class="text-gray-700">Intelligence Artificielle</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Product Images -->
+            <div class="lg:w-2/5">
+                <div class="bg-white p-4 rounded-lg shadow-md sticky top-20">
+                    <div class="mb-4 overflow-hidden">
+                        <img src="https://m.media-amazon.com/images/I/71c1LRS+9bL._SY425_.jpg" 
+                            alt="Agent IA - Révolutionnez avec l'Intelligence Artificielle" 
+                            class="w-full h-auto mx-auto product-image cursor-zoom-in">
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <img src="https://m.media-amazon.com/images/I/71c1LRS+9bL._SY425_.jpg" 
+                            alt="Vue 1" class="border border-gray-300 rounded cursor-pointer h-20 object-cover hover:border-yellow-400">
+                        <img src="https://m.media-amazon.com/images/I/71xZ6Y--9ML._SY425_.jpg" 
+                            alt="Vue 2" class="border border-gray-300 rounded cursor-pointer h-20 object-cover hover:border-yellow-400">
+                        <img src="https://m.media-amazon.com/images/I/71xZ6Y--9ML._SY425_.jpg" 
+                            alt="Vue 3" class="border border-gray-300 rounded cursor-pointer h-20 object-cover hover:border-yellow-400">
+                        <img src="https://m.media-amazon.com/images/I/71xZ6Y--9ML._SY425_.jpg" 
+                            alt="Vue 4" class="border border-gray-300 rounded cursor-pointer h-20 object-cover hover:border-yellow-400">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="lg:w-3/5">
+                <div class="bg-white p-6 rounded-lg shadow-md animate-fadeIn">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Agent IA - Révolutionnez avec l'Intelligence Artificielle: Stratégies et outils pour les entreprises</h1>
+                    <div class="flex items-center mb-2">
+                        <a href="#" class="text-blue-600 hover:underline text-sm">Visitez la boutique Révolution IA</a>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <a href="#customer-reviews" class="text-blue-600 hover:underline ml-2 text-sm">136 évaluations</a>
+                        <span class="mx-2">|</span>
+                        <a href="#" class="text-blue-600 hover:underline text-sm">35 questions posées</a>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mb-4">
+                        <div class="text-2xl font-bold text-red-600">19,90 €</div>
+                        <div class="text-sm text-gray-600">TVA incluse (le cas échéant), plus frais de livraison</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="text-gray-600">Format : </span>
+                        <span class="font-medium">Broché</span>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="text-sm"><span class="font-semibold">Économisez 5%</span> avec le programme Économisez et Recyclez</div>
+                        <div class="flex items-center mt-1">
+                            <input type="checkbox" id="save-recycle" class="mr-2">
+                            <label for="save-recycle" class="text-sm">Choisissez des articles Eligible Economy pour obtenir cette offre</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="font-bold mb-2">À propos de cet article</h3>
+                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                            <li>Découvrez comment l'IA peut révolutionner votre entreprise</li>
+                            <li>Stratégies pratiques et outils modernes</li>
+                            <li>Cas d'utilisation réels et exemples concrets</li>
+                            <li>Guide complet pour les débutants et les experts</li>
+                            <li>Écrit par des experts du domaine</li>
+                        </ul>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mb-6">
+                        <div class="text-lg font-semibold mb-2">Options d'achat et de livraison</div>
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <div class="font-semibold">Livraison GRATUITE</div>
+                                    <div class="text-sm text-gray-600">Livraison <span class="font-semibold">mercredi, 12 juin</span></div>
+                                    <div class="text-sm text-gray-600">Commandez dans les <span class="text-green-600">8 h 6 min</span></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="delivery" id="fast-delivery" class="mr-2" checked>
+                                    <label for="fast-delivery" class="font-semibold">19,90 €</label>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-sm text-gray-600">Livraison <span class="font-semibold">vendredi, 14 juin</span></div>
+                                    <div class="text-sm text-gray-600">Economy Delivery from France</div>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="delivery" id="economy-delivery" class="mr-2">
+                                    <label for="economy-delivery" class="font-semibold">17,90 €</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-4 rounded-lg transition duration-300 w-full sm:w-auto">
+                            Ajouter au panier
+                        </button>
+                        <button class="bg-orange-400 hover:bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 w-full sm:w-auto">
+                            Acheter maintenant
+                        </button>
+                    </div>
+
+                    <div class="mt-4 flex items-center text-sm">
+                        <i class="fas fa-lock text-gray-500 mr-2"></i>
+                        <span class="text-gray-600">Transaction sécurisée</span>
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="bg-white p-6 rounded-lg shadow-md mt-6 animate-fadeIn">
+                    <h2 class="text-xl font-semibold mb-4">Caractéristiques du produit</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p><span class="font-semibold">Éditeur :</span> Révolution IA Éditions (12 août 2023)</p>
+                            <p><span class="font-semibold">Langue :</span> Français</p>
+                            <p><span class="font-semibold">Broché :</span> 320 pages</p>
+                        </div>
+                        <div>
+                            <p><span class="font-semibold">ISBN-10 :</span> 1234567890</p>
+                            <p><span class="font-semibold">ISBN-13 :</span> 978-1234567890</p>
+                            <p><span class="font-semibold">Poids de l'article :</span> 540 g</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Reviews -->
+                <div id="customer-reviews" class="bg-white p-6 rounded-lg shadow-md mt-6 animate-fadeIn">
+                    <h2 class="text-xl font-semibold mb-4">Commentaires clients</h2>
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="font-semibold">4,3 sur 5</span>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-4">136 évaluations globales</div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>5 étoiles</span>
+                            <span>65%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-yellow-400 h-2 rounded-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>4 étoiles</span>
+                            <span>22%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-yellow-400 h-2 rounded-full" style="width: 22%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>3 étoiles</span>
+                            <span>8%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-yellow-400 h-2 rounded-full" style="width: 8%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>2 étoiles</span>
+                            <span>3%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-yellow-400 h-2 rounded-full" style="width: 3%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>1 étoile</span>
+                            <span>2%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-yellow-400 h-2 rounded-full" style="width: 2%"></div>
+                        </div>
+                    </div>
+
+                    <button class="bg-blue-100 text-blue-600 hover:bg-blue-200 font-semibold py-2 px-4 rounded-lg transition duration-300 text-sm">
+                        <i class="fas fa-comment-alt mr-2"></i>Écrire un commentaire
+                    </button>
+                </div>
+
+                <!-- More Info -->
+                <div class="bg-white p-6 rounded-lg shadow-md mt-6 animate-fadeIn">
+                    <h2 class="text-xl font-semibold mb-4">Plus d'informations</h2>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <h3 class="font-semibold mb-1">Pourquoi choisir ce livre ?</h3>
+                            <p>Ce guide complet vous offre une approche pratique pour intégrer l'IA dans votre entreprise, avec des cas concrets et des stratégies éprouvées.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-1">Contenu du livre</h3>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>Introduction aux concepts fondamentaux de l'IA</li>
+                                <li>Applications pratiques pour les entreprises</li>
+                                <li>Études de cas réels</li>
+                                <li>Guide des outils modernes</li>
+                                <li>Stratégies pour l'avenir</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Frequently Bought Together -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Fréquemment achetés ensemble</h2>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item1" class="mr-3 h-5 w-5" checked>
+                        <div class="flex items-center space-x-2">
+                            <img src="https://m.media-amazon.com/images/I/71c1LRS+9bL._SY425_.jpg" alt="Livre Agent IA" class="h-16 w-auto">
+                            <span class="text-sm">Agent IA - Révolutionnez avec l'Intelligence Artificielle</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item2" class="mr-3 h-5 w-5" checked>
+                        <div class="flex items-center space-x-2">
+                            <img src="https://m.media-amazon.com/images/I/514Ok4K5qTL._SY425_.jpg" alt="Livre IA avancée" class="h-16 w-auto">
+                            <span class="text-sm">L'IA pour les Nuls - Édition Expert</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="item3" class="mr-3 h-5 w-5" checked>
+                        <div class="flex items-center space-x-2">
+                            <img src="https://m.media-amazon.com/images/I/71z6z6sTwLL._SY425_.jpg" alt="Cahier d'exercices" class="h-16 w-auto">
+                            <span class="text-sm">Cahier d'exercices pratiques d'IA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6">
+                <div class="text-lg font-semibold">Prix total : <span class="text-red-600">54,70 €</span></div>
+                <button class="mt-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-6 rounded-lg transition duration-300">
+                    Ajouter les 3 au panier
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Products -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Produits fréquemment achetés ensemble</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer">
+                <img src="https://m.media-amazon.com/images/I/51Jcdd+Wv5L._SY425_.jpg" alt="Livres IA" class="w-full h-48 object-cover mb-4">
+                <h3 class="font-semibold text-lg mb-2 line-clamp-2">L'intelligence artificielle pour les débutants</h3>
+                <div class="flex text-yellow-400 mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+                <div class="text-red-600 font-bold">17,90 €</div>
+                <div class="text-xs text-gray-500">Livraison GRATUITE</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer">
+                <img src="https://m.media-amazon.com/images/I/51+IEbED7AL._SY425_.jpg" alt="Livres IA" class="w-full h-48 object-cover mb-4">
+                <h3 class="font-semibold text-lg mb-2 line-clamp-2">Machine Learning: Guide complet</h3>
+                <div class="flex text-yellow-400 mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                </div>
+                <div class="text-red-600 font-bold">24,90 €</div>
+                <div class="text-xs text-gray-500">Livraison GRATUITE</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer">
+                <img src="https://m.media-amazon.com/images/I/41q9fdX+IVL._SY425_.jpg" alt="Livres IA" class="w-full h-48 object-cover mb-4">
+                <h3 class="font-semibold text-lg mb-2 line-clamp-2">Python pour l'intelligence artificielle</h3>
+                <div class="flex text-yellow-400 mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="text-red-600 font-bold">22,50 €</div>
+                <div class="text-xs text-gray-500">Livraison GRATUITE</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 cursor-pointer">
+                <img src="https://m.media-amazon.com/images/I/51XMHv5xodL._SY425_.jpg" alt="Livres IA" class="w-full h-48 object-cover mb-4">
+                <h3 class="font-semibold text-lg mb-2 line-clamp-2">L'éthique de l'intelligence artificielle</h3>
+                <div class="flex text-yellow-400 mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <i class="far fa-star"></i>
+                </div>
+                <div class="text-red-600 font-bold">18,30 €</div>
+                <div class="text-xs text-gray-500">Livraison GRATUITE</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold mb-4">Achreet</h3>
+                    <p class="text-gray-400">Votre destination pour les livres et technologies de pointe.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="font-semibold mb-3">À propos d'Achreet</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="#" class="hover:text-white transition">Carrières</a></li>
+                            <li><a href="#" class="hover:text-white transition">Actualités</a></li>
+                            <li><a href="#" class="hover:text-white transition">Investisseurs</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3">Moyens de paiement</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="#" class="hover:text-white transition">Cartes bancaires</a></li>
+                            <li><a href="#" class="hover:text-white transition">Paiement en 4 fois</a></li>
+                            <li><a href="#" class="hover:text-white transition">Chèques cadeaux</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3">Besoin d'aide ?</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="#" class="hover:text-white transition">Voir ou suivre vos commandes</a></li>
+                            <li><a href="#" class="hover:text-white transition">Tarifs et options de livraison</a></li>
+                            <li><a href="#" class="hover:text-white transition">Nous contacter</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-gray-700 my-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex space-x-4 mb-4 md:mb-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+                <div class="text-xs text-gray-400">
+                    © 2023-2024 Achreet.fr ou ses filiales. Tous droits réservés.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple animation for product images
+        document.querySelectorAll('.product-image').forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+            });
+            img.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Mobile menu toggle could be added here
+        // For a complete e-commerce site, you would add cart functionality, etc.
+    </script>
+</body>
+</html>
