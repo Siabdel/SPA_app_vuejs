@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Street - Vénissieux Paul Bert</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .menu-item:hover .menu-img {
+            transform: scale(1.05);
+        }
+        .menu-img {
+            transition: transform 0.3s ease;
+        }
+        .parallax {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-100">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/logo-chicken-street.png" alt="Chicken Street Logo" class="h-12">
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-red-600 font-semibold hover:text-red-800 transition">Accueil</a>
+                    <a href="#menu" class="text-gray-700 hover:text-red-600 transition">Menu</a>
+                    <a href="#galerie" class="text-gray-700 hover:text-red-600 transition">Galerie</a>
+                    <a href="#contact" class="text-gray-700 hover:text-red-600 transition">Contact</a>
+                </nav>
+                <div class="md:hidden">
+                    <button @click="toggleMenu" class="text-gray-700 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <transition name="fade">
+                <div v-if="isMenuOpen" class="md:hidden bg-white py-4 px-4 shadow-lg">
+                    <div class="flex flex-col space-y-3">
+                        <a href="#" class="text-red-600 font-semibold hover:text-red-800 transition">Accueil</a>
+                        <a href="#menu" class="text-gray-700 hover:text-red-600 transition">Menu</a>
+                        <a href="#galerie" class="text-gray-700 hover:text-red-600 transition">Galerie</a>
+                        <a href="#contact" class="text-gray-700 hover:text-red-600 transition">Contact</a>
+                    </div>
+                </div>
+            </transition>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="relative h-96 bg-gray-900 flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 bg-black opacity-50"></div>
+            <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/venissieux-paul-bert.jpg" alt="Restaurant Chicken Street" class="absolute w-full h-full object-cover">
+            <div class="relative z-10 text-center px-4">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Chicken Street</h1>
+                <h2 class="text-2xl md:text-3xl font-semibold text-red-400 mb-6">Vénissieux Paul Bert</h2>
+                <a href="#menu" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block">
+                    Voir le menu
+                </a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Notre restaurant</h2>
+                        <p class="text-gray-600 mb-4">
+                            Bienvenue chez Chicken Street Vénissieux Paul Bert, le temple du poulet croustillant et des burgers gourmands. 
+                            Nous vous proposons une cuisine savoureuse et généreuse dans une ambiance conviviale.
+                        </p>
+                        <p class="text-gray-600 mb-6">
+                            Nos produits sont frais et préparés sur place avec passion par notre équipe. Découvrez notre carte variée 
+                            alliant tradition et modernité.
+                        </p>
+                        <div class="flex space-x-4">
+                            <div class="bg-red-100 p-4 rounded-lg">
+                                <i class="fas fa-utensils text-red-600 text-2xl mb-2"></i>
+                                <h3 class="font-semibold text-gray-800">Cuisine maison</h3>
+                            </div>
+                            <div class="bg-red-100 p-4 rounded-lg">
+                                <i class="fas fa-leaf text-red-600 text-2xl mb-2"></i>
+                                <h3 class="font-semibold text-gray-800">Produits frais</h3>
+                            </div>
+                            <div class="bg-red-100 p-4 rounded-lg">
+                                <i class="fas fa-heart text-red-600 text-2xl mb-2"></i>
+                                <h3 class="font-semibold text-gray-800">Préparé avec amour</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="grid grid-cols-2 gap-4">
+                            <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/interieur-chicken-street.jpg" alt="Intérieur restaurant" class="rounded-lg shadow-md h-48 w-full object-cover">
+                            <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/plat-chicken-street.jpg" alt="Plat Chicken Street" class="rounded-lg shadow-md h-48 w-full object-cover">
+                            <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/burger-chicken-street.jpg" alt="Burger Chicken Street" class="rounded-lg shadow-md h-48 w-full object-cover">
+                            <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/dessert-chicken-street.jpg" alt="Dessert Chicken Street" class="rounded-lg shadow-md h-48 w-full object-cover">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu Section -->
+        <section id="menu" class="py-16 bg-gray-100">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Notre Menu</h2>
+                
+                <!-- Menu Categories -->
+                <div class="flex justify-center mb-8">
+                    <div class="inline-flex rounded-md shadow-sm">
+                        <button 
+                            v-for="(category, index) in menuCategories" 
+                            :key="index"
+                            @click="activeCategory = index"
+                            :class="{'bg-red-600 text-white': activeCategory === index, 'bg-white text-gray-700 hover:bg-gray-50': activeCategory !== index}"
+                            class="px-4 py-2 text-sm font-medium border border-gray-300 first:rounded-l-lg last:rounded-r-lg focus:z-10 focus:outline-none transition"
+                        >
+                            {{ category.name }}
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Menu Items -->
+                <transition-group name="fade" tag="div" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div 
+                        v-for="item in filteredMenuItems" 
+                        :key="item.id"
+                        class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+                    >
+                        <div class="h-48 overflow-hidden">
+                            <img :src="item.image" :alt="item.name" class="menu-img w-full h-full object-cover">
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-xl font-semibold text-gray-800">{{ item.name }}</h3>
+                                <span class="text-red-600 font-bold">{{ item.price }} €</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">{{ item.description }}</p>
+                            <button 
+                                @click="addToCart(item)"
+                                class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition"
+                            >
+                                Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </transition-group>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="galerie" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Galerie Photos</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div 
+                        v-for="(image, index) in galleryImages" 
+                        :key="index"
+                        class="overflow-hidden rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+                        @click="openLightbox(index)"
+                    >
+                        <img :src="image" alt="Gallery image" class="w-full h-48 object-cover hover:scale-105 transition">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lightbox -->
+            <transition name="fade">
+                <div 
+                    v-if="lightboxOpen" 
+                    class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+                    @click.self="closeLightbox"
+                >
+                    <div class="relative max-w-4xl w-full">
+                        <button 
+                            @click="closeLightbox"
+                            class="absolute -top-10 right-0 text-white text-3xl focus:outline-none"
+                        >
+                            &times;
+                        </button>
+                        <img :src="currentLightboxImage" alt="Lightbox image" class="w-full max-h-screen object-contain">
+                        <div class="flex justify-between mt-4">
+                            <button 
+                                @click="prevImage"
+                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+                            >
+                                Précédent
+                            </button>
+                            <button 
+                                @click="nextImage"
+                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+                            >
+                                Suivant
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 bg-gray-100">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Nous contacter</h2>
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="md:w-1/2 bg-white p-8 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Informations</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-map-marker-alt text-red-600 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Adresse</h4>
+                                    <p class="text-gray-600">123 Avenue Paul Bert, 69200 Vénissieux</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-phone-alt text-red-600 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Téléphone</h4>
+                                    <p class="text-gray-600">04 78 12 34 56</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-envelope text-red-600 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Email</h4>
+                                    <p class="text-gray-600">venissieux@chickenstreet.fr</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-clock text-red-600 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Horaires</h4>
+                                    <p class="text-gray-600">Lundi - Dimanche: 11h00 - 22h00</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-800 mb-2">Suivez-nous</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-red-600 hover:text-red-800 text-2xl"><i class="fab fa-facebook"></i></a>
+                                <a href="#" class="text-red-600 hover:text-red-800 text-2xl"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="text-red-600 hover:text-red-800 text-2xl"><i class="fab fa-tripadvisor"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 bg-white p-8 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Envoyez-nous un message</h3>
+                        <form @submit.prevent="submitContactForm" class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-gray-700 mb-1">Nom</label>
+                                <input 
+                                    type="text" 
+                                    id="name" 
+                                    v-model="contactForm.name"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label for="email" class="block text-gray-700 mb-1">Email</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    v-model="contactForm.email"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-gray-700 mb-1">Téléphone</label>
+                                <input 
+                                    type="tel" 
+                                    id="phone" 
+                                    v-model="contactForm.phone"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                                >
+                            </div>
+                            <div>
+                                <label for="message" class="block text-gray-700 mb-1">Message</label>
+                                <textarea 
+                                    id="message" 
+                                    rows="4"
+                                    v-model="contactForm.message"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                                    required
+                                ></textarea>
+                            </div>
+                            <button 
+                                type="submit"
+                                class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+                            >
+                                Envoyer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <div class="h-96 w-full">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2783.34728471533!2d4.88531531556638!3d45.7640519791056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f4ea9e3a1e5e9d%3A0x5b1c5f1e5b1c5f1e!2sChicken%20Street%20V%C3%A9nissieux%20Paul%20Bert!5e0!3m2!1sfr!2sfr!4v1620000000000!5m2!1sfr!2sfr" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy"
+            ></iframe>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-8">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between">
+                    <div class="mb-6 md:mb-0">
+                        <img src="https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/logo-chicken-street-white.png" alt="Chicken Street Logo" class="h-12 mb-4">
+                        <p class="text-gray-400">
+                            Chicken Street Vénissieux Paul Bert - Le goût du poulet comme vous l'aimez.
+                        </p>
+                    </div>
+                    <div class="mb-6 md:mb-0">
+                        <h3 class="text-lg font-semibold mb-4">Liens utiles</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Mentions légales</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Politique de confidentialité</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">CGV</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Newsletter</h3>
+                        <p class="text-gray-400 mb-4">Abonnez-vous pour recevoir nos offres spéciales</p>
+                        <form @submit.prevent="subscribeNewsletter" class="flex">
+                            <input 
+                                type="email" 
+                                v-model="newsletterEmail"
+                                placeholder="Votre email" 
+                                class="px-4 py-2 rounded-l focus:outline-none text-gray-800 w-full"
+                                required
+                            >
+                            <button 
+                                type="submit"
+                                class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-r transition"
+                            >
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400">
+                    <p>&copy; 2023 Chicken Street Vénissieux Paul Bert. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Shopping Cart -->
+        <transition name="fade">
+            <div 
+                v-if="cart.length > 0"
+                class="fixed bottom-6 right-6 bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-pointer z-50"
+                @click="toggleCart"
+            >
+                <div class="relative">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span class="absolute -top-2 -right-2 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                        {{ cartTotalItems }}
+                    </span>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Cart Sidebar -->
+        <transition name="fade">
+            <div 
+                v-if="isCartOpen"
+                class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end"
+                @click.self="toggleCart"
+            >
+                <div class="bg-white w-full max-w-md h-full overflow-y-auto">
+                    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-xl font-bold">Votre panier ({{ cartTotalItems }})</h3>
+                        <button @click="toggleCart" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-4" v-if="cart.length > 0">
+                        <div 
+                            v-for="(item, index) in cart" 
+                            :key="index"
+                            class="flex justify-between items-center border-b border-gray-100 pb-4"
+                        >
+                            <div class="flex items-center">
+                                <img :src="item.image" :alt="item.name" class="w-16 h-16 object-cover rounded">
+                                <div class="ml-3">
+                                    <h4 class="font-medium">{{ item.name }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ item.price }} €</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <button 
+                                    @click="decreaseQuantity(index)"
+                                    class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
+                                >
+                                    -
+                                </button>
+                                <span class="mx-2">{{ item.quantity }}</span>
+                                <button 
+                                    @click="increaseQuantity(index)"
+                                    class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
+                                >
+                                    +
+                                </button>
+                                <button 
+                                    @click="removeFromCart(index)"
+                                    class="ml-4 text-red-600 hover:text-red-800"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="p-4 text-center text-gray-500">
+                        Votre panier est vide
+                    </div>
+                    <div class="p-4 border-t border-gray-200" v-if="cart.length > 0">
+                        <div class="flex justify-between mb-4">
+                            <span class="font-semibold">Total</span>
+                            <span class="font-bold">{{ cartTotalPrice }} €</span>
+                        </div>
+                        <button 
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition"
+                        >
+                            Commander
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+        
+        createApp({
+            setup() {
+                // Menu state
+                const isMenuOpen = ref(false);
+                const toggleMenu = () => {
+                    isMenuOpen.value = !isMenuOpen.value;
+                };
+                
+                // Cart state
+                const cart = ref([]);
+                const isCartOpen = ref(false);
+                const toggleCart = () => {
+                    isCartOpen.value = !isCartOpen.value;
+                };
+                
+                // Lightbox state
+                const lightboxOpen = ref(false);
+                const currentLightboxIndex = ref(0);
+                const openLightbox = (index) => {
+                    currentLightboxIndex.value = index;
+                    lightboxOpen.value = true;
+                };
+                const closeLightbox = () => {
+                    lightboxOpen.value = false;
+                };
+                const nextImage = () => {
+                    currentLightboxIndex.value = (currentLightboxIndex.value + 1) % galleryImages.value.length;
+                };
+                const prevImage = () => {
+                    currentLightboxIndex.value = (currentLightboxIndex.value - 1 + galleryImages.value.length) % galleryImages.value.length;
+                };
+                const currentLightboxImage = computed(() => {
+                    return galleryImages.value[currentLightboxIndex.value];
+                });
+                
+                // Contact form
+                const contactForm = ref({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                });
+                const submitContactForm = () => {
+                    alert('Message envoyé avec succès!');
+                    contactForm.value = { name: '', email: '', phone: '', message: '' };
+                };
+                
+                // Newsletter
+                const newsletterEmail = ref('');
+                const subscribeNewsletter = () => {
+                    alert(`Merci pour votre inscription avec l'email: ${newsletterEmail.value}`);
+                    newsletterEmail.value = '';
+                };
+                
+                // Menu categories
+                const menuCategories = ref([
+                    { id: 1, name: 'Tous' },
+                    { id: 2, name: 'Burgers' },
+                    { id: 3, name: 'Poulets' },
+                    { id: 4, name: 'Desserts' },
+                    { id: 5, name: 'Boissons' }
+                ]);
+                const activeCategory = ref(0);
+                
+                // Menu items
+                const menuItems = ref([
+                    {
+                        id: 1,
+                        name: 'Burger Chicken',
+                        description: 'Pain brioché, filet de poulet pané, cheddar, salade, tomate, sauce maison',
+                        price: 8.90,
+                        category: 'Burgers',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/burger-chicken-street.jpg'
+                    },
+                    {
+                        id: 2,
+                        name: 'Burger Cheese',
+                        description: 'Pain brioché, double filet de poulet pané, double cheddar, salade, tomate, sauce maison',
+                        price: 10.90,
+                        category: 'Burgers',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/burger-cheese-street.jpg'
+                    },
+                    {
+                        id: 3,
+                        name: 'Bucket 8 Wings',
+                        description: '8 ailes de poulet croustillantes avec sauce au choix',
+                        price: 9.90,
+                        category: 'Poulets',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/wings-chicken-street.jpg'
+                    },
+                    {
+                        id: 4,
+                        name: 'Bucket 16 Wings',
+                        description: '16 ailes de poulet croustillantes avec sauce au choix',
+                        price: 15.90,
+                        category: 'Poulets',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/wings-chicken-street.jpg'
+                    },
+                    {
+                        id: 5,
+                        name: 'Tenders 6 Pièces',
+                        description: '6 tenders de poulet croustillants avec sauce au choix',
+                        price: 7.90,
+                        category: 'Poulets',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/tenders-chicken-street.jpg'
+                    },
+                    {
+                        id: 6,
+                        name: 'Cookie',
+                        description: 'Cookie moelleux aux pépites de chocolat',
+                        price: 3.50,
+                        category: 'Desserts',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/dessert-chicken-street.jpg'
+                    },
+                    {
+                        id: 7,
+                        name: 'Brownie',
+                        description: 'Brownie fondant au chocolat',
+                        price: 4.00,
+                        category: 'Desserts',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/brownie-chicken-street.jpg'
+                    },
+                    {
+                        id: 8,
+                        name: 'Soda 33cl',
+                        description: 'Coca-Cola, Fanta, Sprite, Ice Tea',
+                        price: 2.50,
+                        category: 'Boissons',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/soda-chicken-street.jpg'
+                    },
+                    {
+                        id: 9,
+                        name: 'Eau 50cl',
+                        description: 'Eau minérale plate ou gazeuse',
+                        price: 1.90,
+                        category: 'Boissons',
+                        image: 'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/eau-chicken-street.jpg'
+                    }
+                ]);
+                
+                // Filter menu items by category
+                const filteredMenuItems = computed(() => {
+                    if (activeCategory.value === 0) {
+                        return menuItems.value;
+                    }
+                    const categoryName = menuCategories.value[activeCategory.value].name;
+                    return menuItems.value.filter(item => item.category === categoryName);
+                });
+                
+                // Gallery images
+                const galleryImages = ref([
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/interieur-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/plat-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/burger-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/dessert-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/salle-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/equipe-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/terrasse-chicken-street.jpg',
+                    'https://restaurants.chickenstreet.fr/wp-content/uploads/2020/10/panier-chicken-street.jpg'
+                ]);
+                
+                // Cart functions
+                const addToCart = (item) => {
+                    const existingItem = cart.value.find(cartItem => cartItem.id === item.id);
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.value.push({ ...item, quantity: 1 });
+                    }
+                    isCartOpen.value = true;
+                };
+                
+                const removeFromCart = (index) => {
+                    cart.value.splice(index, 1);
+                };
+                
+                const increaseQuantity = (index) => {
+                    cart.value[index].quantity += 1;
+                };
+                
+                const decreaseQuantity = (index) => {
+                    if (cart.value[index].quantity > 1) {
+                        cart.value[index].quantity -= 1;
+                    } else {
+                        removeFromCart(index);
+                    }
+                };
+                
+                // Cart totals
+                const cartTotalItems = computed(() => {
+                    return cart.value.reduce((total, item) => total + item.quantity, 0);
+                });
+                
+                const cartTotalPrice = computed(() => {
+                    return cart.value.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+                });
+                
+                return {
+                    isMenuOpen,
+                    toggleMenu,
+                    cart,
+                    isCartOpen,
+                    toggleCart,
+                    lightboxOpen,
+                    currentLightboxIndex,
+                    openLightbox,
+                    closeLightbox,
+                    nextImage,
+                    prevImage,
+                    currentLightboxImage,
+                    contactForm,
+                    submitContactForm,
+                    newsletterEmail,
+                    subscribeNewsletter,
+                    menuCategories,
+                    activeCategory,
+                    menuItems,
+                    filteredMenuItems,
+                    galleryImages,
+                    addToCart,
+                    removeFromCart,
+                    increaseQuantity,
+                    decreaseQuantity,
+                    cartTotalItems,
+                    cartTotalPrice
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

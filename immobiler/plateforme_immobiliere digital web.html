@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digitad - Expertises</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <style>
+        .hero-bg {
+            background-image: url('https://digitad.ca/wp-content/uploads/2022/12/bg-expertises.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .service-card:hover .service-icon {
+            transform: translateY(-5px);
+        }
+        .nav-link::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #FF6B00;
+            transition: width .3s;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .active-nav::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="logo">
+                    <a href="#">
+                        <img src="https://digitad.ca/wp-content/uploads/2022/12/logo-digitad.svg" alt="Digitad" class="h-10">
+                    </a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <button @click="toggleMenu" class="md:hidden text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="nav-link text-gray-700 hover:text-orange-500 font-medium">Accueil</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-orange-500 font-medium active-nav">Expertises</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-orange-500 font-medium">Réalisations</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-orange-500 font-medium">À propos</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-orange-500 font-medium">Blog</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-orange-500 font-medium">Contact</a>
+                </nav>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div v-show="menuOpen" class="md:hidden bg-white py-4 px-4 shadow-lg">
+                <a href="#" class="block py-2 text-gray-700 hover:text-orange-500 font-medium">Accueil</a>
+                <a href="#" class="block py-2 text-gray-700 hover:text-orange-500 font-medium">Expertises</a>
+                <a href="#" class="block py-2 text-gray-700 hover:text-orange-500 font-medium">Réalisations</a>
+                <a href="#" class="block py-2 text-gray-700 hover:text-orange-500 font-medium">À propos</a>
+                <a href="#" class="block py-2 text-gray-700 hover:text-orange-500 font-medium">Blog</a>
+                <a href="#" class="block py-2 text-gray-700 hover:text-orange-500 font-medium">Contact</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-bg text-white py-20 md:py-32">
+            <div class="container mx-auto px-4">
+                <div class="max-w-3xl">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">Nos expertises</h1>
+                    <p class="text-lg md:text-xl mb-8">Nous accompagnons les entreprises dans leur transformation digitale avec des solutions sur mesure et innovantes.</p>
+                    <a href="#" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block">Contactez-nous</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Nos domaines d'expertise</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Découvrez comment nous pouvons vous aider à atteindre vos objectifs grâce à nos compétences pointues.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Service 1 -->
+                    <div class="service-card bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                        <div class="service-icon text-orange-500 mb-6 text-5xl transition duration-300">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Développement Web</h3>
+                        <p class="text-gray-600 mb-4">Des sites web performants, sécurisés et optimisés pour le référencement et l'expérience utilisateur.</p>
+                        <a href="#" class="text-orange-500 font-medium inline-flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <!-- Service 2 -->
+                    <div class="service-card bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                        <div class="service-icon text-orange-500 mb-6 text-5xl transition duration-300">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Applications Mobiles</h3>
+                        <p class="text-gray-600 mb-4">Applications natives et hybrides conçues pour offrir la meilleure expérience sur iOS et Android.</p>
+                        <a href="#" class="text-orange-500 font-medium inline-flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <!-- Service 3 -->
+                    <div class="service-card bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                        <div class="service-icon text-orange-500 mb-6 text-5xl transition duration-300">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">E-commerce</h3>
+                        <p class="text-gray-600 mb-4">Plateformes e-commerce performantes avec des solutions de paiement sécurisées et une gestion simplifiée.</p>
+                        <a href="#" class="text-orange-500 font-medium inline-flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <!-- Service 4 -->
+                    <div class="service-card bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                        <div class="service-icon text-orange-500 mb-6 text-5xl transition duration-300">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Marketing Digital</h3>
+                        <p class="text-gray-600 mb-4">Stratégies digitales sur mesure pour accroître votre visibilité et générer des leads qualifiés.</p>
+                        <a href="#" class="text-orange-500 font-medium inline-flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <!-- Service 5 -->
+                    <div class="service-card bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                        <div class="service-icon text-orange-500 mb-6 text-5xl transition duration-300">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">SEO & Référencement</h3>
+                        <p class="text-gray-600 mb-4">Optimisation technique et contenu pour améliorer votre positionnement dans les résultats de recherche.</p>
+                        <a href="#" class="text-orange-500 font-medium inline-flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <!-- Service 6 -->
+                    <div class="service-card bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                        <div class="service-icon text-orange-500 mb-6 text-5xl transition duration-300">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Solutions Cloud</h3>
+                        <p class="text-gray-600 mb-4">Migration, déploiement et gestion d'infrastructures cloud pour une flexibilité et scalabilité optimales.</p>
+                        <a href="#" class="text-orange-500 font-medium inline-flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Notre processus</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Une méthodologie éprouvée pour garantir le succès de vos projets digitaux.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="text-center">
+                        <div class="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-orange-500 text-2xl font-bold">1</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Analyse</h3>
+                        <p class="text-gray-600">Compréhension de vos besoins et objectifs</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-orange-500 text-2xl font-bold">2</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Conception</h3>
+                        <p class="text-gray-600">Élaboration de la solution technique</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-orange-500 text-2xl font-bold">3</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Développement</h3>
+                        <p class="text-gray-600">Implémentation des fonctionnalités</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-orange-500 text-2xl font-bold">4</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Livraison</h3>
+                        <p class="text-gray-600">Mise en production et formation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Ce que disent nos clients</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Découvrez les retours de nos clients satisfaits.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <div class="text-orange-500 text-2xl mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-6">"Digitad a su comprendre nos besoins et nous proposer une solution parfaitement adaptée. Leur équipe est réactive et professionnelle."</p>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/women/43.jpg" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Marie Dupont</h4>
+                                <p class="text-gray-500 text-sm">CEO, Entreprise XYZ</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <div class="text-orange-500 text-2xl mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-6">"Notre application mobile développée par Digitad a dépassé nos attentes. Les performances sont excellentes et l'expérience utilisateur impeccable."</p>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Jean Martin</h4>
+                                <p class="text-gray-500 text-sm">Directeur Technique, ABC Corp</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <div class="text-orange-500 text-2xl mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-6">"Le site e-commerce qu'ils ont développé pour nous a permis d'augmenter nos ventes de 40% en 3 mois. Un travail remarquable!"</p>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Sophie Leroy</h4>
+                                <p class="text-gray-500 text-sm">Responsable Marketing, Boutique en ligne</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-16 bg-orange-500 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">Prêt à transformer votre entreprise?</h2>
+                <p class="text-xl mb-8 max-w-2xl mx-auto">Discutons de votre projet et voyons comment nous pouvons vous aider à atteindre vos objectifs.</p>
+                <a href="#" class="bg-white text-orange-500 hover:bg-gray-100 font-bold py-3 px-8 rounded-full transition duration-300 inline-block">Contactez-nous</a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <img src="https://digitad.ca/wp-content/uploads/2022/12/logo-digitad-white.svg" alt="Digitad" class="h-10 mb-4">
+                        <p class="text-gray-400">Agence digitale spécialisée dans le développement web, mobile et le marketing digital.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Services</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Développement Web</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Applications Mobiles</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">E-commerce</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Marketing Digital</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">SEO</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Liens utiles</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">À propos</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Réalisations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Politique de confidentialité</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Contact</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li class="flex items-center"><i class="fas fa-map-marker-alt mr-3"></i> 123 Rue Digitale, Montréal, QC</li>
+                            <li class="flex items-center"><i class="fas fa-phone mr-3"></i> (514) 123-4567</li>
+                            <li class="flex items-center"><i class="fas fa-envelope mr-3"></i> info@digitad.ca</li>
+                        </ul>
+                        <div class="flex space-x-4 mt-4">
+                            <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                    <p>&copy; 2023 Digitad. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    menuOpen: false
+                }
+            },
+            methods: {
+                toggleMenu() {
+                    this.menuOpen = !this.menuOpen;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

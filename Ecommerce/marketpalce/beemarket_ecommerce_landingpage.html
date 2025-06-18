@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beemarket - Agence Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #FF9A3C 0%, #FF5E62 100%);
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .nav-link.active {
+            border-bottom: 3px solid #FF5E62;
+            color: #FF5E62 !important;
+        }
+        .testimonial-card {
+            transition: all 0.3s ease;
+        }
+        .testimonial-card:hover {
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="https://via.placeholder.com/180x60?text=Beemarket" alt="Beemarket Logo" class="h-12">
+                </div>
+                <button @click="toggleMobileMenu" class="md:hidden text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'home' }" @click="setActiveNav('home')">Accueil</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'services' }" @click="setActiveNav('services')">Services</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'portfolio' }" @click="setActiveNav('portfolio')">Portfolio</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'about' }" @click="setActiveNav('about')">À propos</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'contact' }" @click="setActiveNav('contact')">Contact</a>
+                </nav>
+                <div class="hidden md:block">
+                    <a href="#" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition duration-300">Devis gratuit</a>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div v-show="mobileMenuOpen" class="md:hidden bg-white py-4 px-4 shadow-lg">
+                <div class="flex flex-col space-y-4">
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'home' }" @click="setActiveNav('home')">Accueil</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'services' }" @click="setActiveNav('services')">Services</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'portfolio' }" @click="setActiveNav('portfolio')">Portfolio</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'about' }" @click="setActiveNav('about')">À propos</a>
+                    <a href="#" class="nav-link" :class="{ 'active': activeNav === 'contact' }" @click="setActiveNav('contact')">Contact</a>
+                    <a href="#" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium text-center transition duration-300">Devis gratuit</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-gradient text-white py-20">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-10 md:mb-0">
+                        <h1 class="text-4xl md:text-5xl font-bold mb-6">Votre agence spécialisée en marketplaces</h1>
+                        <p class="text-xl mb-8">Boostez vos ventes sur Amazon, Walmart, eBay et plus encore avec notre expertise en gestion de marketplaces.</p>
+                        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                            <a href="#" class="bg-white text-orange-500 hover:bg-gray-100 px-8 py-3 rounded-full font-bold text-center transition duration-300">Nos services</a>
+                            <a href="#" class="border-2 border-white text-white hover:bg-white hover:text-orange-500 px-8 py-3 rounded-full font-bold text-center transition duration-300">Contactez-nous</a>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <img src="https://via.placeholder.com/600x400?text=Marketplace+Illustration" alt="Marketplace Illustration" class="rounded-lg shadow-xl">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust Badges -->
+        <section class="bg-gray-50 py-8">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    <img src="https://via.placeholder.com/120x60?text=Amazon" alt="Amazon" class="h-10 opacity-70 hover:opacity-100 transition">
+                    <img src="https://via.placeholder.com/120x60?text=Walmart" alt="Walmart" class="h-10 opacity-70 hover:opacity-100 transition">
+                    <img src="https://via.placeholder.com/120x60?text=eBay" alt="eBay" class="h-10 opacity-70 hover:opacity-100 transition">
+                    <img src="https://via.placeholder.com/120x60?text=Shopify" alt="Shopify" class="h-10 opacity-70 hover:opacity-100 transition">
+                    <img src="https://via.placeholder.com/120x60?text=Etsy" alt="Etsy" class="h-10 opacity-70 hover:opacity-100 transition">
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Nos services marketplace</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">Nous offrons une gamme complète de services pour maximiser votre présence et vos ventes sur les principales plateformes.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="service-card bg-white rounded-xl shadow-md p-8 transition duration-300">
+                        <div class="text-orange-500 mb-4">
+                            <i class="fas fa-store text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Configuration de boutique</h3>
+                        <p class="text-gray-600">Nous créons et optimisons votre boutique sur les principales marketplaces pour une présence professionnelle dès le départ.</p>
+                    </div>
+                    
+                    <div class="service-card bg-white rounded-xl shadow-md p-8 transition duration-300">
+                        <div class="text-orange-500 mb-4">
+                            <i class="fas fa-chart-line text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Optimisation des annonces</h3>
+                        <p class="text-gray-600">Améliorez votre classement et vos conversions avec nos optimisations de titres, descriptions et images.</p>
+                    </div>
+                    
+                    <div class="service-card bg-white rounded-xl shadow-md p-8 transition duration-300">
+                        <div class="text-orange-500 mb-4">
+                            <i class="fas fa-ad text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Publicité payante</h3>
+                        <p class="text-gray-600">Campagnes publicitaires ciblées sur Amazon Ads, Walmart Connect et autres plateformes pour maximiser votre ROI.</p>
+                    </div>
+                    
+                    <div class="service-card bg-white rounded-xl shadow-md p-8 transition duration-300">
+                        <div class="text-orange-500 mb-4">
+                            <i class="fas fa-search text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Recherche de mots-clés</h3>
+                        <p class="text-gray-600">Identification des termes les plus pertinents et rentables pour votre niche afin d'augmenter votre visibilité.</p>
+                    </div>
+                    
+                    <div class="service-card bg-white rounded-xl shadow-md p-8 transition duration-300">
+                        <div class="text-orange-500 mb-4">
+                            <i class="fas fa-images text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Contenu visuel premium</h3>
+                        <p class="text-gray-600">Création d'images et vidéos professionnelles qui mettent en valeur vos produits et augmentent vos conversions.</p>
+                    </div>
+                    
+                    <div class="service-card bg-white rounded-xl shadow-md p-8 transition duration-300">
+                        <div class="text-orange-500 mb-4">
+                            <i class="fas fa-headset text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Gestion complète</h3>
+                        <p class="text-gray-600">Nous prenons en charge l'ensemble de vos opérations marketplace pour vous permettre de vous concentrer sur votre activité.</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <a href="#" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition duration-300">Voir tous nos services</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us -->
+        <section class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col lg:flex-row items-center">
+                    <div class="lg:w-1/2 mb-12 lg:mb-0 lg:pr-12">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-6">Pourquoi choisir Beemarket ?</h2>
+                        <p class="text-xl text-gray-600 mb-8">Notre expertise en marketplaces nous permet d'offrir des solutions sur mesure pour chaque étape de votre parcours de vente en ligne.</p>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="bg-orange-100 p-3 rounded-full mr-4">
+                                    <i class="fas fa-check-circle text-orange-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">Expertise certifiée</h3>
+                                    <p class="text-gray-600">Nos spécialistes sont certifiés par les principales plateformes et suivent les dernières tendances.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-orange-100 p-3 rounded-full mr-4">
+                                    <i class="fas fa-chart-pie text-orange-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">Approche data-driven</h3>
+                                    <p class="text-gray-600">Nous basons nos décisions sur des données concrètes pour maximiser vos résultats.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-orange-100 p-3 rounded-full mr-4">
+                                    <i class="fas fa-hand-holding-usd text-orange-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1">Transparence des coûts</h3>
+                                    <p class="text-gray-600">Pas de frais cachés. Nos tarifs sont clairs et adaptés à votre budget.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/2">
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <img src="https://via.placeholder.com/600x400?text=Team+Working" alt="Team Working" class="w-full">
+                            <div class="p-8">
+                                <h3 class="text-2xl font-bold mb-4">Notre engagement envers vous</h3>
+                                <p class="text-gray-600 mb-6">Chez Beemarket, nous considérons chaque client comme un partenaire. Votre succès est notre priorité absolue, et nous mettons tout en œuvre pour vous aider à atteindre vos objectifs sur les marketplaces.</p>
+                                <a href="#" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition duration-300">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Ce que nos clients disent</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">Découvrez les témoignages de nos clients satisfaits par nos services marketplace.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="testimonial-card bg-gray-50 rounded-xl p-8 hover:shadow-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="text-orange-500 mr-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 mb-6">"Beemarket a transformé notre présence sur Amazon. Nos ventes ont augmenté de 300% en seulement 3 mois grâce à leur expertise en optimisation d'annonces."</p>
+                        <div class="flex items-center">
+                            <img src="https://via.placeholder.com/50?text=J.D." alt="Client" class="rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Jean Dupont</h4>
+                                <p class="text-gray-600 text-sm">PDG, Maison Dupont</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-card bg-gray-50 rounded-xl p-8 hover:shadow-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="text-orange-500 mr-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 mb-6">"La gestion complète de notre boutique Walmart par Beemarket nous a permis de nous concentrer sur la production tout en voyant nos ventes augmenter chaque mois."</p>
+                        <div class="flex items-center">
+                            <img src="https://via.placeholder.com/50?text=M.L." alt="Client" class="rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Marie Lambert</h4>
+                                <p class="text-gray-600 text-sm">Fondatrice, Artisanat Lambert</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-card bg-gray-50 rounded-xl p-8 hover:shadow-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="text-orange-500 mr-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 mb-6">"Leur approche data-driven pour nos campagnes publicitaires sur eBay a réduit notre CAC de 40% tout en augmentant notre volume de ventes. Impressionnant !"</p>
+                        <div class="flex items-center">
+                            <img src="https://via.placeholder.com/50?text=P.T." alt="Client" class="rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Pierre Tremblay</h4>
+                                <p class="text-gray-600 text-sm">Directeur Marketing, TechSolutions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-20 bg-orange-500 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">Prêt à booster vos ventes sur les marketplaces ?</h2>
+                <p class="text-xl mb-8 max-w-2xl mx-auto">Contactez-nous dès aujourd'hui pour une consultation gratuite et découvrez comment nous pouvons vous aider à atteindre vos objectifs.</p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#" class="bg-white text-orange-500 hover:bg-gray-100 px-8 py-3 rounded-full font-bold transition duration-300">Obtenir un devis</a>
+                    <a href="#" class="border-2 border-white hover:bg-white hover:text-orange-500 px-8 py-3 rounded-full font-bold transition duration-300">Nous contacter</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white pt-16 pb-8">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                    <div>
+                        <img src="https://via.placeholder.com/180x60?text=Beemarket" alt="Beemarket Logo" class="h-10 mb-4">
+                        <p class="text-gray-400 mb-4">L'agence spécialiste des marketplaces pour booster vos ventes en ligne.</p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Services</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Configuration de boutique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Optimisation des annonces</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Publicité payante</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Recherche de mots-clés</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Gestion complète</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Liens utiles</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Carrières</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Politique de confidentialité</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Conditions d'utilisation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Contact</h3>
+                        <ul class="space-y-3 text-gray-400">
+                            <li class="flex items-start">
+                                <i class="fas fa-map-marker-alt mt-1 mr-3 text-orange-500"></i>
+                                <span>123 Rue Commerce, Montréal, QC H3B 2G5</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-phone-alt mr-3 text-orange-500"></i>
+                                <span>(514) 123-4567</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-envelope mr-3 text-orange-500"></i>
+                                <span>info@beemarket.ca</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-800 pt-8 text-center text-gray-500">
+                    <p>&copy; 2023 Beemarket. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                mobileMenuOpen: false,
+                activeNav: 'home'
+            },
+            methods: {
+                toggleMobileMenu() {
+                    this.mobileMenuOpen = !this.mobileMenuOpen;
+                },
+                setActiveNav(navItem) {
+                    this.activeNav = navItem;
+                    this.mobileMenuOpen = false;
+                }
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        $(document).ready(function(){
+            $('a[href*="#"]').on('click', function(e) {
+                e.preventDefault();
+                
+                $('html, body').animate(
+                    {
+                        scrollTop: $($(this).attr('href')).offset().top,
+                    },
+                    500,
+                    'linear'
+                );
+            });
+        });
+    </script>
+</body>
+</html>
+

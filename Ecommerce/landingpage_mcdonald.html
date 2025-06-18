@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's France - Hamburgers, Menus, Salades, Petit-déjeuner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom CSS for animations and specific elements */
+        .slide-fade-enter-active {
+            transition: all 0.3s ease-out;
+        }
+        .slide-fade-leave-active {
+            transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+        }
+        .slide-fade-enter-from,
+        .slide-fade-leave-to {
+            transform: translateX(20px);
+            opacity: 0;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
+            opacity: 1;
+        }
+        
+        .hero-slide {
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .menu-item:hover .menu-item-content {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .menu-item-content {
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        .overlay {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .overlay.open {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="font-sans bg-white text-gray-800">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <!-- Top Bar -->
+            <div class="flex justify-between items-center py-3 border-b">
+                <div class="flex items-center space-x-4">
+                    <button id="mobile-menu-button" class="md:hidden text-gray-700">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                    <a href="#" class="text-red-600 font-bold text-xl">McDonald's</a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <div class="dropdown relative">
+                        <button class="flex items-center space-x-1 text-gray-700 hover:text-red-600">
+                            <span>Notre carte</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-10">
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Nos burgers</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Nos menus</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Petit-déjeuner</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Desserts & Boissons</a>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown relative">
+                        <button class="flex items-center space-x-1 text-gray-700 hover:text-red-600">
+                            <span>Nos services</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="dropdown-menu absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-10">
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">McDrive</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Click & Collect</a>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Livraison</a>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="text-gray-700 hover:text-red-600">Actualités</a>
+                    <a href="#" class="text-gray-700 hover:text-red-600">À propos</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-700 hover:text-red-600">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    <a href="#" class="hidden md:block bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700">
+                        Commander
+                    </a>
+                    <a href="#" class="text-gray-700 hover:text-red-600">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 p-4">
+                <div class="flex justify-between items-center mb-6">
+                    <a href="#" class="text-red-600 font-bold text-xl">McDonald's</a>
+                    <button id="mobile-menu-close" class="text-gray-700">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                
+                <nav class="space-y-4">
+                    <div>
+                        <button class="flex items-center justify-between w-full text-gray-700 py-2">
+                            <span>Notre carte</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="pl-4 mt-2 space-y-2 hidden">
+                            <a href="#" class="block py-1 text-gray-700">Nos burgers</a>
+                            <a href="#" class="block py-1 text-gray-700">Nos menus</a>
+                            <a href="#" class="block py-1 text-gray-700">Petit-déjeuner</a>
+                            <a href="#" class="block py-1 text-gray-700">Desserts & Boissons</a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button class="flex items-center justify-between w-full text-gray-700 py-2">
+                            <span>Nos services</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="pl-4 mt-2 space-y-2 hidden">
+                            <a href="#" class="block py-1 text-gray-700">McDrive</a>
+                            <a href="#" class="block py-1 text-gray-700">Click & Collect</a>
+                            <a href="#" class="block py-1 text-gray-700">Livraison</a>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="block text-gray-700 py-2">Actualités</a>
+                    <a href="#" class="block text-gray-700 py-2">À propos</a>
+                    
+                    <div class="pt-4 border-t">
+                        <a href="#" class="block bg-red-600 text-white text-center px-4 py-2 rounded-full mb-2">Commander</a>
+                        <a href="#" class="block text-gray-700 py-2 flex items-center">
+                            <i class="fas fa-user mr-2"></i> Mon compte
+                        </a>
+                    </div>
+                </nav>
+            </div>
+            
+            <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+        </div>
+    </header>
+
+    <!-- Hero Slider -->
+    <section class="relative overflow-hidden">
+        <div id="hero-slider" class="relative h-96 md:h-[500px]">
+            <!-- Slides will be injected here by JavaScript -->
+        </div>
+        
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+            <!-- Slider indicators will be injected here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Quick Links -->
+    <section class="bg-gray-100 py-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="#" class="bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-red-600 text-3xl mb-2">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3 class="font-bold">McDrive</h3>
+                    <p class="text-sm text-gray-600">Commandez en ligne</p>
+                </a>
+                
+                <a href="#" class="bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-red-600 text-3xl mb-2">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3 class="font-bold">Click & Collect</h3>
+                    <p class="text-sm text-gray-600">Retrait en restaurant</p>
+                </a>
+                
+                <a href="#" class="bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-red-600 text-3xl mb-2">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <h3 class="font-bold">Livraison</h3>
+                    <p class="text-sm text-gray-600">À domicile</p>
+                </a>
+                
+                <a href="#" class="bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="text-red-600 text-3xl mb-2">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="font-bold">Trouver un restaurant</h3>
+                    <p class="text-sm text-gray-600">Près de chez vous</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Highlights -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">Nos nouveautés</h2>
+            
+            <div id="menu-highlights" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Menu items will be injected here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Promo Banner -->
+    <section class="bg-red-600 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">L'application McDonald's</h2>
+            <p class="text-xl mb-6 max-w-2xl mx-auto">Commandez, payez et profitez d'offres exclusives avec notre application !</p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="bg-black text-white px-6 py-3 rounded-full flex items-center">
+                    <i class="fab fa-apple text-2xl mr-2"></i>
+                    <div class="text-left">
+                        <div class="text-xs">Télécharger sur</div>
+                        <div class="font-bold">App Store</div>
+                    </div>
+                </a>
+                <a href="#" class="bg-black text-white px-6 py-3 rounded-full flex items-center">
+                    <i class="fab fa-google-play text-2xl mr-2"></i>
+                    <div class="text-left">
+                        <div class="text-xs">Disponible sur</div>
+                        <div class="font-bold">Google Play</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">Actualités McDonald's</h2>
+            
+            <div id="news-section" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- News items will be injected here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="font-bold text-lg mb-4">McDonald's</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Histoire</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Nos engagements</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Recrutement</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Franchise</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Services</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">McDrive</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Click & Collect</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Livraison</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Carte cadeau</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Informations</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Nous contacter</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Presse</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Accessibilité</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Suivez-nous</h3>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <p class="text-gray-400">Téléchargez l'application</p>
+                    <div class="flex space-x-2 mt-2">
+                        <a href="#" class="bg-black p-1 rounded"><i class="fab fa-apple"></i></a>
+                        <a href="#" class="bg-black p-1 rounded"><i class="fab fa-google-play"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex space-x-4 mb-4 md:mb-0">
+                        <a href="#" class="text-gray-400 hover:text-white text-sm">Mentions légales</a>
+                        <a href="#" class="text-gray-400 hover:text-white text-sm">Politique de confidentialité</a>
+                        <a href="#" class="text-gray-400 hover:text-white text-sm">Préférences cookies</a>
+                    </div>
+                    <div class="text-gray-400 text-sm">
+                        © 2023 McDonald's France. Tous droits réservés.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JSON Data -->
+    <script>
+        const data = {
+            heroSlides: [
+                {
+                    id: 1,
+                    title: "Nouveau : Le Grand Cheese XL",
+                    description: "Découvrez notre nouveau burger avec 2 steaks hachés 100% pur bœuf et 4 tranches de fromage fondu.",
+                    image: "https://via.placeholder.com/1200x500/FF0000/FFFFFF?text=Grand+Cheese+XL",
+                    ctaText: "Découvrir",
+                    ctaLink: "#"
+                },
+                {
+                    id: 2,
+                    title: "Menu McDo à 5€",
+                    description: "Profitez de notre offre spéciale : un menu au choix à seulement 5€.",
+                    image: "https://via.placeholder.com/1200x500/000000/FFFFFF?text=Menu+5€",
+                    ctaText: "Commander",
+                    ctaLink: "#"
+                },
+                {
+                    id: 3,
+                    title: "Nouveaux desserts",
+                    description: "Découvrez nos nouveaux desserts pour terminer votre repas en douceur.",
+                    image: "https://via.placeholder.com/1200x500/FFFFFF/000000?text=Nouveaux+Desserts",
+                    ctaText: "Voir la carte",
+                    ctaLink: "#"
+                }
+            ],
+            menuItems: [
+                {
+                    id: 1,
+                    name: "Grand Cheese XL",
+                    description: "2 steaks hachés 100% pur bœuf, 4 tranches de fromage fondu, oignons, cornichons, ketchup, moutarde.",
+                    price: "6.50€",
+                    image: "https://via.placeholder.com/400x300/EEEEEE/555555?text=Grand+Cheese+XL",
+                    isNew: true
+                },
+                {
+                    id: 2,
+                    name: "McChicken",
+                    description: "Un délicieux filet de poulet pané, croquant à l'extérieur et tendre à l'intérieur.",
+                    price: "5.20€",
+                    image: "https://via.placeholder.com/400x300/EEEEEE/555555?text=McChicken",
+                    isNew: false
+                },
+                {
+                    id: 3,
+                    name: "Big Mac",
+                    description: "Le célèbre burger avec sa sauce spéciale, laitue, fromage, cornichons, oignons.",
+                    price: "5.90€",
+                    image: "https://via.placeholder.com/400x300/EEEEEE/555555?text=Big+Mac",
+                    isNew: false
+                },
+                {
+                    id: 4,
+                    name: "Royal Cheese",
+                    description: "Un steak haché 100% pur bœuf, une tranche de fromage fondu, de la moutarde et du ketchup.",
+                    price: "5.40€",
+                    image: "https://via.placeholder.com/400x300/EEEEEE/555555?text=Royal+Cheese",
+                    isNew: false
+                },
+                {
+                    id: 5,
+                    name: "McWrap Poulet Caesar",
+                    description: "Tendre filet de poulet, sauce Caesar, parmesan et salade, le tout enveloppé dans une galette.",
+                    price: "6.20€",
+                    image: "https://via.placeholder.com/400x300/EEEEEE/555555?text=McWrap",
+                    isNew: true
+                },
+                {
+                    id: 6,
+                    name: "Salade César",
+                    description: "Salade fraîche, filets de poulet grillés, parmesan et croûtons, accompagnée de sauce Caesar.",
+                    price: "7.10€",
+                    image: "https://via.placeholder.com/400x300/EEEEEE/555555?text=Salade+César",
+                    isNew: false
+                }
+            ],
+            newsItems: [
+                {
+                    id: 1,
+                    title: "McDonald's s'engage pour l'environnement",
+                    description: "Découvrez nos nouvelles initiatives pour réduire notre impact environnemental.",
+                    date: "15 juin 2023",
+                    image: "https://via.placeholder.com/600x400/EEEEEE/555555?text=Environnement"
+                },
+                {
+                    id: 2,
+                    title: "Nouveau recrutement en France",
+                    description: "McDonald's recrute 5000 collaborateurs dans toute la France. Postulez dès maintenant !",
+                    date: "2 juin 2023",
+                    image: "https://via.placeholder.com/600x400/EEEEEE/555555?text=Recrutement"
+                },
+                {
+                    id: 3,
+                    title: "Ouverture d'un nouveau restaurant",
+                    description: "Venez découvrir notre nouveau restaurant à Paris, avec un tout nouveau concept.",
+                    date: "25 mai 2023",
+                    image: "https://via.placeholder.com/600x400/EEEEEE/555555?text=Nouveau+Restaurant"
+                }
+            ]
+        };
+
+        // Initialize the page with data
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('overlay');
+            
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.add('open');
+                overlay.classList.add('open');
+            });
+            
+            mobileMenuClose.addEventListener('click', function() {
+                mobileMenu.classList.remove('open');
+                overlay.classList.remove('open');
+            });
+            
+            overlay.addEventListener('click', function() {
+                mobileMenu.classList.remove('open');
+                overlay.classList.remove('open');
+            });
+            
+            // Initialize hero slider
+            const heroSlider = document.getElementById('hero-slider');
+            const sliderIndicators = document.querySelector('.absolute.bottom-4');
+            
+            data.heroSlides.forEach((slide, index) => {
+                // Add slide
+                const slideElement = document.createElement('div');
+                slideElement.className = `hero-slide absolute inset-0 bg-cover bg-center ${index === 0 ? 'opacity-100' : 'opacity-0'}`;
+                slideElement.style.backgroundImage = `url('${slide.image}')`;
+                slideElement.dataset.id = slide.id;
+                
+                const slideContent = document.createElement('div');
+                slideContent.className = 'absolute inset-0 bg-black bg-opacity-30 flex items-center';
+                
+                const contentContainer = document.createElement('div');
+                contentContainer.className = 'container mx-auto px-4 text-white';
+                
+                const title = document.createElement('h2');
+                title.className = 'text-4xl md:text-6xl font-bold mb-4';
+                title.textContent = slide.title;
+                
+                const description = document.createElement('p');
+                description.className = 'text-xl md:text-2xl mb-6 max-w-2xl';
+                description.textContent = slide.description;
+                
+                const cta = document.createElement('a');
+                cta.className = 'inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold';
+                cta.href = slide.ctaLink;
+                cta.textContent = slide.ctaText;
+                
+                contentContainer.appendChild(title);
+                contentContainer.appendChild(description);
+                contentContainer.appendChild(cta);
+                slideContent.appendChild(contentContainer);
+                slideElement.appendChild(slideContent);
+                heroSlider.appendChild(slideElement);
+                
+                // Add indicator
+                const indicator = document.createElement('button');
+                indicator.className = `w-3 h-3 rounded-full ${index === 0 ? 'bg-white' : 'bg-white bg-opacity-50'}`;
+                indicator.dataset.slideId = slide.id;
+                sliderIndicators.appendChild(indicator);
+            });
+            
+            // Hero slider functionality
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.hero-slide');
+            const indicators = document.querySelectorAll('.absolute.bottom-4 button');
+            
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.style.opacity = i === index ? '1' : '0';
+                });
+                
+                indicators.forEach((indicator, i) => {
+                    indicator.className = i === index ? 'w-3 h-3 rounded-full bg-white' : 'w-3 h-3 rounded-full bg-white bg-opacity-50';
+                });
+                
+                currentSlide = index;
+            }
+            
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    showSlide(index);
+                });
+            });
+            
+            setInterval(() => {
+                const nextSlide = (currentSlide + 1) % slides.length;
+                showSlide(nextSlide);
+            }, 5000);
+            
+            // Initialize menu highlights
+            const menuHighlights = document.getElementById('menu-highlights');
+            
+            data.menuItems.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                
+                const menuItemContent = document.createElement('div');
+                menuItemContent.className = 'menu-item-content bg-white rounded-lg overflow-hidden shadow-md h-full';
+                
+                const image = document.createElement('div');
+                image.className = 'h-48 bg-cover bg-center';
+                image.style.backgroundImage = `url('${item.image}')`;
+                
+                const content = document.createElement('div');
+                content.className = 'p-6';
+                
+                const titleContainer = document.createElement('div');
+                titleContainer.className = 'flex justify-between items-start mb-2';
+                
+                const title = document.createElement('h3');
+                title.className = 'text-xl font-bold';
+                title.textContent = item.name;
+                
+                const price = document.createElement('span');
+                price.className = 'text-red-600 font-bold';
+                price.textContent = item.price;
+                
+                titleContainer.appendChild(title);
+                titleContainer.appendChild(price);
+                
+                const description = document.createElement('p');
+                description.className = 'text-gray-600 mb-4';
+                description.textContent = item.description;
+                
+                const cta = document.createElement('a');
+                cta.className = 'inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-bold';
+                cta.href = '#';
+                cta.textContent = 'Ajouter au panier';
+                
+                if (item.isNew) {
+                    const badge = document.createElement('span');
+                    badge.className = 'bg-green-500 text-white text-xs px-2 py-1 rounded-full absolute top-4 right-4';
+                    badge.textContent = 'Nouveau';
+                    menuItemContent.appendChild(badge);
+                }
+                
+                content.appendChild(titleContainer);
+                content.appendChild(description);
+                content.appendChild(cta);
+                
+                menuItemContent.appendChild(image);
+                menuItemContent.appendChild(content);
+                menuItem.appendChild(menuItemContent);
+                menuHighlights.appendChild(menuItem);
+            });
+            
+            // Initialize news section
+            const newsSection = document.getElementById('news-section');
+            
+            data.newsItems.forEach(item => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow';
+                
+                const image = document.createElement('div');
+                image.className = 'h-48 bg-cover bg-center';
+                image.style.backgroundImage = `url('${item.image}')`;
+                
+                const content = document.createElement('div');
+                content.className = 'p-6';
+                
+                const date = document.createElement('p');
+                date.className = 'text-gray-500 text-sm mb-2';
+                date.textContent = item.date;
+                
+                const title = document.createElement('h3');
+                title.className = 'text-xl font-bold mb-2';
+                title.textContent = item.title;
+                
+                const description = document.createElement('p');
+                description.className = 'text-gray-600 mb-4';
+                description.textContent = item.description;
+                
+                const cta = document.createElement('a');
+                cta.className = 'text-red-600 font-bold hover:underline';
+                cta.href = '#';
+                cta.textContent = 'Lire la suite';
+                
+                content.appendChild(date);
+                content.appendChild(title);
+                content.appendChild(description);
+                content.appendChild(cta);
+                
+                newsItem.appendChild(image);
+                newsItem.appendChild(content);
+                newsSection.appendChild(newsItem);
+            });
+            
+            // Mobile menu accordion
+            const mobileMenuItems = document.querySelectorAll('#mobile-menu nav > div');
+            
+            mobileMenuItems.forEach(item => {
+                const button = item.querySelector('button');
+                const content = item.querySelector('div');
+                
+                button.addEventListener('click', () => {
+                    const isExpanded = content.classList.contains('hidden');
+                    
+                    // Close all other items
+                    mobileMenuItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.querySelector('div').classList.add('hidden');
+                        }
+                    });
+                    
+                    // Toggle current item
+                    if (isExpanded) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
