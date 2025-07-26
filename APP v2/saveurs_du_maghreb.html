@@ -1,0 +1,423 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Marocain - Saveurs du Maghreb</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f2;
+        }
+        
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1517638851330-7119e27386a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .dish-card:hover .dish-img {
+            transform: scale(1.05);
+        }
+        
+        .dish-img {
+            transition: transform 0.3s ease;
+        }
+        
+        .spice-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .reservation-form {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-utensils text-3xl text-amber-600 mr-2"></i>
+                <h1 class="title-font text-2xl font-bold text-gray-800">Saveurs du Maghreb</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#accueil" class="text-gray-800 hover:text-amber-600 transition">Accueil</a>
+                <a href="#menu" class="text-gray-800 hover:text-amber-600 transition">Menu</a>
+                <a href="#a-propos" class="text-gray-800 hover:text-amber-600 transition">À propos</a>
+                <a href="#reservation" class="text-gray-800 hover:text-amber-600 transition">Réservation</a>
+                <a href="#contact" class="text-gray-800 hover:text-amber-600 transition">Contact</a>
+            </nav>
+            <button class="md:hidden text-gray-800 text-2xl" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden bg-white w-full px-4 py-2 shadow-md" id="mobile-menu">
+            <a href="#accueil" class="block py-2 text-gray-800 hover:text-amber-600 transition">Accueil</a>
+            <a href="#menu" class="block py-2 text-gray-800 hover:text-amber-600 transition">Menu</a>
+            <a href="#a-propos" class="block py-2 text-gray-800 hover:text-amber-600 transition">À propos</a>
+            <a href="#reservation" class="block py-2 text-gray-800 hover:text-amber-600 transition">Réservation</a>
+            <a href="#contact" class="block py-2 text-gray-800 hover:text-amber-600 transition">Contact</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="accueil" class="hero min-h-screen flex items-center justify-center text-center text-white">
+        <div class="container mx-auto px-4">
+            <h1 class="title-font text-4xl md:text-6xl font-bold mb-6">Découvrez les Saveurs Authentiques du Maroc</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">Une expérience culinaire inoubliable avec nos plats traditionnels préparés avec passion et des ingrédients frais.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#menu" class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-full font-medium transition duration-300">Voir le Menu</a>
+                <a href="#reservation" class="bg-transparent border-2 border-white hover:bg-white hover:text-gray-800 text-white px-8 py-3 rounded-full font-medium transition duration-300">Réserver une table</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Spices Animation -->
+    <div class="relative overflow-hidden h-20 bg-amber-50">
+        <div class="absolute inset-0 flex items-center justify-between px-4">
+            <i class="fas fa-pepper-hot text-3xl text-red-500 spice-icon" style="animation-delay: 0s;"></i>
+            <i class="fas fa-mortar-pestle text-3xl text-amber-600 spice-icon" style="animation-delay: 0.5s;"></i>
+            <i class="fas fa-leaf text-3xl text-green-600 spice-icon" style="animation-delay: 1s;"></i>
+            <i class="fas fa-seedling text-3xl text-lime-600 spice-icon" style="animation-delay: 1.5s;"></i>
+            <i class="fas fa-wine-bottle text-3xl text-purple-600 spice-icon" style="animation-delay: 2s;"></i>
+        </div>
+    </div>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="title-font text-3xl md:text-4xl font-bold text-gray-800 mb-4">Notre Menu Marocain</h2>
+                <div class="w-24 h-1 bg-amber-600 mx-auto mb-4"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Découvrez notre sélection de plats traditionnels préparés avec des recettes authentiques et des ingrédients frais.</p>
+            </div>
+            
+            <!-- Menu Categories -->
+            <div class="flex flex-wrap justify-center mb-8">
+                <button class="menu-category active px-4 py-2 mx-2 mb-2 bg-amber-600 text-white rounded-full" data-category="entrees">Entrées</button>
+                <button class="menu-category px-4 py-2 mx-2 mb-2 bg-gray-200 text-gray-800 hover:bg-amber-500 hover:text-white rounded-full" data-category="plats">Plats Principaux</button>
+                <button class="menu-category px-4 py-2 mx-2 mb-2 bg-gray-200 text-gray-800 hover:bg-amber-500 hover:text-white rounded-full" data-category="desserts">Desserts</button>
+                <button class="menu-category px-4 py-2 mx-2 mb-2 bg-gray-200 text-gray-800 hover:bg-amber-500 hover:text-white rounded-full" data-category="boissons">Boissons</button>
+            </div>
+            
+            <!-- Menu Items -->
+            <div class="menu-items">
+                <!-- Entrées -->
+                <div class="menu-category-content active" id="entrees">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Dish Card 1 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1071&q=80" alt="Briouates" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Briouates</h3>
+                                    <span class="text-amber-600 font-bold">8€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Feuilles de brick farcies à la viande hachée, aux amandes et aux épices, croustillantes à l'extérieur et fondantes à l'intérieur.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-pepper-hot text-red-500 mr-1"></i>
+                                    <span>Moyennement épicé</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 2 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1603105037880-880ecd182101?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="Zaalouk" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Zaalouk</h3>
+                                    <span class="text-amber-600 font-bold">6€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Caviar d'aubergines grillées à la tomate, ail, cumin et persil, servi avec du pain maison chaud.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-pepper-hot text-yellow-500 mr-1"></i>
+                                    <span>Légèrement épicé</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 3 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Salade Marocaine" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Salade Marocaine</h3>
+                                    <span class="text-amber-600 font-bold">7€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Mélange frais de tomates, concombres, oignons, poivrons et olives, assaisonné de citron, d'huile d'olive et de coriandre.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-pepper-hot text-green-500 mr-1"></i>
+                                    <span>Non épicé</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Plats Principaux -->
+                <div class="menu-category-content hidden" id="plats">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Dish Card 1 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Tagine d'agneau" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Tagine d'agneau</h3>
+                                    <span class="text-amber-600 font-bold">18€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Tendre agneau mijoté avec pruneaux, amandes et miel, parfumé aux épices marocaines, servi dans un tagine traditionnel.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-pepper-hot text-yellow-500 mr-1"></i>
+                                    <span>Légèrement épicé</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 2 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1585231499619-48d6d9414036?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Couscous royal" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Couscous Royal</h3>
+                                    <span class="text-amber-600 font-bold">16€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Semoule légère accompagnée de légumes, agneau, poulet et merguez, avec son bouillon parfumé.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-pepper-hot text-yellow-500 mr-1"></i>
+                                    <span>Légèrement épicé</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 3 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1601050690646-5b858a9e9e1c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Pastilla au poulet" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Pastilla au poulet</h3>
+                                    <span class="text-amber-600 font-bold">15€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Feuilles de brick croustillantes garnies de poulet, amandes, œufs et épices, saupoudrée de sucre glace et cannelle.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-pepper-hot text-green-500 mr-1"></i>
+                                    <span>Non épicé</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Desserts -->
+                <div class="menu-category-content hidden" id="desserts">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Dish Card 1 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1551504737-4e851b7138b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Baklava" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Baklava</h3>
+                                    <span class="text-amber-600 font-bold">7€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Pâtisserie feuilletée aux noix et pistaches, imbibée de sirop de miel, croustillante et fondante à la fois.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-leaf text-green-500 mr-1"></i>
+                                    <span>Végétarien</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 2 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1127&q=80" alt="Corne de gazelle" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Corne de gazelle</h3>
+                                    <span class="text-amber-600 font-bold">6€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Pâtisserie en forme de croissant fourrée à la pâte d'amande parfumée à l'eau de fleur d'oranger.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-leaf text-green-500 mr-1"></i>
+                                    <span>Végétarien</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 3 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1562440499-64c9a111f713?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="Thé à la menthe" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">M'hanncha</h3>
+                                    <span class="text-amber-600 font-bold">8€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">"Serpent" de pâte filo enroulée autour d'une farce à la pâte d'amande, parfumée à la cannelle et à l'eau de fleur d'oranger.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-leaf text-green-500 mr-1"></i>
+                                    <span>Végétarien</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boissons -->
+                <div class="menu-category-content hidden" id="boissons">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Dish Card 1 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1562440499-64c9a111f713?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="Thé à la menthe" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Thé à la menthe</h3>
+                                    <span class="text-amber-600 font-bold">4€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Thé vert Gunpowder infusé avec des feuilles de menthe fraîche et sucré selon la tradition marocaine.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-mug-hot text-amber-400 mr-1"></i>
+                                    <span>Chaud</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 2 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1556679343-cf6d17e09b83?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Jus d'orange" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Jus d'orange pressé</h3>
+                                    <span class="text-amber-600 font-bold">5€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Jus d'orange fraîchement pressé, sans additifs, pour une explosion de vitamines et de fraîcheur.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-glass-whiskey text-orange-400 mr-1"></i>
+                                    <span>Frais</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dish Card 3 -->
+                        <div class="dish-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
+                            <div class="overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80" alt="Vin marocain" class="w-full h-64 object-cover dish-img">
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="title-font text-xl font-bold text-gray-800">Vin marocain</h3>
+                                    <span class="text-amber-600 font-bold">7€</span>
+                                </div>
+                                <p class="text-gray-600 mb-4">Sélection de vins rouges, blancs et rosés des meilleurs domaines viticoles du Maroc.</p>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-wine-glass-alt text-purple-400 mr-1"></i>
+                                    <span>Alcoolisé</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="a-propos" class="py-16 bg-amber-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center">
+                <div class="lg:w-1/2 mb-8 lg:mb-0 lg:pr-12">
+                    <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Notre restaurant" class="w-full rounded-lg shadow-lg">
+                </div>
+                <div class="lg:w-1/2">
+                    <h2 class="title-font text-3xl md:text-4xl font-bold text-gray-800 mb-6">Notre Histoire</h2>
+                    <div class="w-24 h-1 bg-amber-600 mb-6"></div>
+                    <p class="text-gray-600 mb-4">Fondé en 2010 par le chef Mohamed El Fassi, Saveurs du Maghreb est bien plus qu'un restaurant - c'est une passion familiale pour la cuisine marocaine authentique.</p>
+                    <p class="text-gray-600 mb-6">Notre mission est de partager les richesses culinaires du Maroc, en respectant les traditions tout en innovant pour satisfaire les palais contemporains. Tous nos plats sont préparés avec des ingrédients frais et des épices sélectionnées avec soin.</p>
+                    <div class="flex items-center">
+                        <div class="mr-6">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-utensils text-amber-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">Cuisine Traditionnelle</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-leaf text-amber-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">Ingrédients Frais</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-heart text-amber-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">Préparé avec Amour</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-spa text-amber-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">Ambiance Zen</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-award text-amber-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">Récompensé</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-users text-amber-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">Accueil Chaleureux</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation Section -->
+    <section id="reservation" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="title-font text-3xl md:text-4xl font-bold text-gray-800 mb-4">Réservez votre table</h2>
+                <div class="w-24 h-1 bg-amber-600 mx-auto mb-4"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Réservez dès maintenant pour garantir votre place dans notre restaurant. Nous nous ferons un plaisir de vous accueillir.</p>
+            </div>
+            
+            <div class="max-w-3xl mx-auto bg-white rounded-lg overflow-hidden reservation-form">
+                <form id="reservation-form" class="p-8">
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <
+</body>
+</html>

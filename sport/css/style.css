@@ -1,0 +1,149 @@
+body {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+    transition: transform 0.3s;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    position: relative;
+    margin: 0 10px;
+    font-weight: 500;
+}
+
+.nav-link .underline {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s;
+}
+
+.nav-link .underline.active {
+    width: 100%;
+}
+
+.hero-banner {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://www.fifa.com/image/upload/t_l1/fifa-world-cup-2022.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    position: relative;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background-color: #007bff;
+}
+
+.news-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.news-card img {
+    transition: transform 0.5s;
+}
+
+.news-card:hover img {
+    transform: scale(1.05);
+}
+
+.match-item {
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.match-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.vs {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.match-date {
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-align: center;
+}
+
+.social-icons a {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    margin-right: 10px;
+    color: white;
+    transition: all 0.3s;
+}
+
+.social-icons a:hover {
+    background: #007bff;
+    transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-content p {
+        font-size: 1rem;
+    }
+}

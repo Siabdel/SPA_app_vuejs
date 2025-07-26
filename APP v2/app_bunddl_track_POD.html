@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunddl Logistics - Track-POD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .scan-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #3b82f6, transparent);
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .map-container {
+            height: 400px;
+            background-color: #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+        .route-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            border: 2px solid white;
+            position: absolute;
+        }
+        .driver-marker {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            border: 2px solid white;
+            position: absolute;
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-boxes text-2xl"></i>
+                    <h1 class="text-xl font-bold">Bunddl Track-POD</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="showNotifications = !showNotifications" class="relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span v-if="unreadNotifications" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ unreadNotifications }}</span>
+                    </button>
+                    <div class="relative">
+                        <button @click="showUserMenu = !showUserMenu" class="flex items-center space-x-2 focus:outline-none">
+                            <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="User" class="w-8 h-8 rounded-full">
+                            <span class="hidden md:inline">{{ user.name }}</span>
+                        </button>
+                        <div v-if="showUserMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-blue-100">Profile</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-blue-100">Settings</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-blue-100">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Sidebar -->
+                <aside class="lg:col-span-1 bg-white rounded-lg shadow p-4">
+                    <nav>
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg bg-blue-100 text-blue-600">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    <span>Shipments</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    <span>Route Optimization</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-barcode"></i>
+                                    <span>Scan Packages</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-users"></i>
+                                    <span>Customers</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-truck"></i>
+                                    <span>Carriers</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-warehouse"></i>
+                                    <span>Depot Points</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Reports</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <div class="mt-8">
+                        <h3 class="font-semibold text-gray-700 mb-2">Quick Actions</h3>
+                        <button @click="showScanModal = true" class="w-full mb-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
+                            <i class="fas fa-barcode"></i>
+                            <span>Scan Package</span>
+                        </button>
+                        <button @click="showNewShipmentModal = true" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>New Shipment</span>
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-3 space-y-6">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Today's Shipments</p>
+                                    <h3 class="text-2xl font-bold">{{ stats.todayShipments }}</h3>
+                                </div>
+                                <div class="bg-blue-100 p-2 rounded-full">
+                                    <i class="fas fa-box text-blue-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm mt-2"><span :class="stats.shipmentsChange >= 0 ? 'text-green-500' : 'text-red-500'">{{ stats.shipmentsChange }}%</span> from yesterday</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">In Transit</p>
+                                    <h3 class="text-2xl font-bold">{{ stats.inTransit }}</h3>
+                                </div>
+                                <div class="bg-yellow-100 p-2 rounded-full">
+                                    <i class="fas fa-truck text-yellow-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm mt-2">{{ stats.delayed }} delayed shipments</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Delivered Today</p>
+                                    <h3 class="text-2xl font-bold">{{ stats.delivered }}</h3>
+                                </div>
+                                <div class="bg-green-100 p-2 rounded-full">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm mt-2">{{ stats.deliverySuccess }}% success rate</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Active Carriers</p>
+                                    <h3 class="text-2xl font-bold">{{ stats.activeCarriers }}</h3>
+                                </div>
+                                <div class="bg-purple-100 p-2 rounded-full">
+                                    <i class="fas fa-users text-purple-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm mt-2">{{ stats.availableCarriers }} available</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Shipments -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-4 py-3 border-b flex justify-between items-center">
+                            <h3 class="font-semibold text-lg">Recent Shipments</h3>
+                            <button @click="refreshShipments" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking #</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Carrier</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ETA</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="shipment in recentShipments" :key="shipment.id" class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-blue-600">{{ shipment.trackingNumber }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ shipment.customer }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span :class="getStatusClass(shipment.status)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                                {{ shipment.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <img class="h-10 w-10 rounded-full" :src="shipment.carrierLogo" alt="">
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ shipment.carrier }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ shipment.eta }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button @click="viewShipment(shipment.id)" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                                            <button @click="editShipment(shipment.id)" class="text-gray-600 hover:text-gray-900">Edit</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-4 py-3 border-t flex justify-between items-center">
+                            <div class="text-sm text-gray-500">Showing 1 to {{ recentShipments.length }} of {{ stats.totalShipments }} shipments</div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 border rounded-md text-sm font-medium">Previous</button>
+                                <button class="px-3 py-1 border rounded-md text-sm font-medium bg-blue-600 text-white">1</button>
+                                <button class="px-3 py-1 border rounded-md text-sm font-medium">2</button>
+                                <button class="px-3 py-1 border rounded-md text-sm font-medium">Next</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map and Live Tracking -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-lg shadow overflow-hidden">
+                            <div class="px-4 py-3 border-b">
+                                <h3 class="font-semibold text-lg">Live Tracking</h3>
+                            </div>
+                            <div class="map-container relative">
+                                <!-- Simulated map with route and driver markers -->
+                                <div class="route-marker" style="top: 10%; left: 20%;"></div>
+                                <div class="route-marker" style="top: 30%; left: 40%;"></div>
+                                <div class="route-marker" style="top: 50%; left: 60%;"></div>
+                                <div class="route-marker" style="top: 70%; left: 80%;"></div>
+                                <div class="driver-marker" :style="{top: driverPosition.top + '%', left: driverPosition.left + '%'}"></div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center p-4 bg-white bg-opacity-90 rounded-lg shadow">
+                                        <p class="text-gray-600">Map integration would display real-time driver locations</p>
+                                        <button class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg">View Full Map</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="px-4 py-3 border-b">
+                                <h3 class="font-semibold text-lg">Active Carriers</h3>
+                            </div>
+                            <div class="divide-y divide-gray-200">
+                                <div v-for="carrier in activeCarriers" :key="carrier.id" class="p-4">
+                                    <div class="flex items-start space-x-3">
+                                        <img :src="carrier.avatar" class="w-12 h-12 rounded-full" alt="">
+                                        <div class="flex-1">
+                                            <h4 class="font-medium">{{ carrier.name }}</h4>
+                                            <p class="text-sm text-gray-500">{{ carrier.vehicle }} • {{ carrier.currentLocation }}</p>
+                                            <div class="mt-1 flex items-center">
+                                                <span :class="carrier.status === 'On route' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'" class="px-2 py-1 text-xs rounded-full">{{ carrier.status }}</span>
+                                                <span class="ml-2 text-xs text-gray-500">{{ carrier.deliveries }} deliveries today</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Scan Package Modal -->
+        <div v-if="showScanModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="px-6 py-4 border-b flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Scan Package</h3>
+                    <button @click="showScanModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="barcode">
+                            Scan Barcode/QR Code
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg h-48 flex items-center justify-center">
+                            <div v-if="!scanning" class="text-center">
+                                <i class="fas fa-barcode text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Point your scanner at the barcode</p>
+                                <button @click="startCameraScan" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">
+                                    <i class="fas fa-camera mr-2"></i> Use Camera
+                                </button>
+                            </div>
+                            <div v-if="scanning" class="relative w-full h-full">
+                                <div class="scan-animation"></div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <p class="text-white bg-black bg-opacity-50 px-4 py-2 rounded-lg">Scanning...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="manualEntry">
+                            Or enter manually
+                        </label>
+                        <input v-model="manualBarcode" type="text" id="manualEntry" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter tracking number">
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t flex justify-end space-x-3">
+                    <button @click="showScanModal = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button @click="processScan" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-check mr-2"></i> Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Shipment Modal -->
+        <div v-if="showNewShipmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-screen overflow-y-auto">
+                <div class="px-6 py-4 border-b flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">New Shipment</h3>
+                    <button @click="showNewShipmentModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium text-gray-700 mb-4">Sender Information</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="senderName">
+                                        Name
+                                    </label>
+                                    <input v-model="newShipment.sender.name" type="text" id="senderName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="senderAddress">
+                                        Address
+                                    </label>
+                                    <textarea v-model="newShipment.sender.address" id="senderAddress" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2" for="senderPhone">
+                                            Phone
+                                        </label>
+                                        <input v-model="newShipment.sender.phone" type="text" id="senderPhone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2" for="senderEmail">
+                                            Email
+                                        </label>
+                                        <input v-model="newShipment.sender.email" type="email" id="senderEmail" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-700 mb-4">Recipient Information</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="recipientName">
+                                        Name
+                                    </label>
+                                    <input v-model="newShipment.recipient.name" type="text" id="recipientName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="recipientAddress">
+                                        Address
+                                    </label>
+                                    <textarea v-model="newShipment.recipient.address" id="recipientAddress" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2" for="recipientPhone">
+                                            Phone
+                                        </label>
+                                        <input v-model="newShipment.recipient.phone" type="text" id="recipientPhone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2" for="recipientEmail">
+                                            Email
+                                        </label>
+                                        <input v-model="newShipment.recipient.email" type="email" id="recipientEmail" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h4 class="font-medium text-gray-700 mb-4">Shipment Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="packageType">
+                                    Package Type
+                                </label>
+                                <select v-model="newShipment.packageType" id="packageType" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option>Document</option>
+                                    <option>Parcel</option>
+                                    <option>Pallet</option>
+                                    <option>Freight</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="weight">
+                                    Weight (kg)
+                                </label>
+                                <input v-model="newShipment.weight" type="number" id="weight" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="dimensions">
+                                    Dimensions (cm)
+                                </label>
+                                <div class="flex space-x-2">
+                                    <input v-model="newShipment.dimensions.length" type="number" placeholder="L" class="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <input v-model="newShipment.dimensions.width" type="number" placeholder="W" class="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <input v-model="newShipment.dimensions.height" type="number" placeholder="H" class="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="carrier">
+                                    Carrier
+                                </label>
+                                <select v-model="newShipment.carrier" id="carrier" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option v-for="carrier in carriers" :value="carrier.id">{{ carrier.name }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="service">
+                                    Service
+                                </label>
+                                <select v-model="newShipment.service" id="service" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option>Standard</option>
+                                    <option>Express</option>
+                                    <option>Same Day</option>
+                                    <option>Overnight</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="instructions">
+                                Special Instructions
+                            </label>
+                            <textarea v-model="newShipment.instructions" id="instructions" rows="2" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t flex justify-end space-x-3">
+                    <button @click="showNewShipmentModal = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button @click="createShipment" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <i class="fas fa-save mr-2"></i> Create Shipment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div v-if="showNotifications" class="fixed right-4 top-16 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
+            <div class="px-4 py-3 border-b flex justify-between items-center">
+                <h3 class="font-semibold">Notifications</h3>
+                <button @click="markAllAsRead" class="text-blue-600 text-sm">Mark all as read</button>
+            </div>
+            <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                <div v-for="notification in notifications" :key="notification.id" class="p-3 hover:bg-gray-50 cursor-pointer" :class="{'bg-blue-50': !notification.read}">
+                    <div class="flex items-start space-x-3">
+                        <div :class="getNotificationIconClass(notification.type)" class="flex-shrink-0 p-2 rounded-full">
+                            <i :class="getNotificationIcon(notification.type)"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">{{ notification.title }}</p>
+                            <p class="text-xs text-gray-500">{{ notification.message }}</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ notification.time }}</p>
+                        </div>
+                        <div v-if="!notification.read" class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-4 py-2 border-t text-center">
+                <a href="#" class="text-sm text-blue-600">View all notifications</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                user: {
+                    name: 'John Doe',
+                    role: 'Admin'
+                },
+                showUserMenu: false,
+                showNotifications: false,
+                unreadNotifications: 3,
+                showScanModal: false,
+                showNewShipmentModal: false,
+                scanning: false,
+                manualBarcode: '',
+                driverPosition: {
+                    top: 30,
+                    left: 40
+                },
+                stats: {
+                    todayShipments: 42,
+                    shipmentsChange: 5,
+                    inTransit: 18,
+                    delayed: 3,
+                    delivered: 24,
+                    deliverySuccess: 95,
+                    activeCarriers: 8,
+                    availableCarriers: 12,
+                    totalShipments: 1245
+                },
+                recentShipments: [
+                    {
+                        id: 1,
+                        trackingNumber: 'TRK12345678',
+                        customer: 'Acme Corp',
+                        status: 'In Transit',
+                        carrier: 'Fast Delivery',
+                        carrierLogo: 'https://via.placeholder.com/40',
+                        eta: 'Today, 3:00 PM'
+                    },
+                    {
+                        id: 2,
+                        trackingNumber: 'TRK87654321',
+                        customer: 'Globex Inc',
+                        status: 'Delivered',
+                        carrier: 'Quick Ship',
+                        carrierLogo: 'https://via.placeholder.com/40/FF0000',
+                        eta: 'Delivered at 10:30 AM'
+                    },
+                    {
+                        id: 3,
+                        trackingNumber: 'TRK13579246',
+                        customer: 'Initech LLC',
+                        status: 'At Depot',
+                        carrier: 'Global Logistics',
+                        carrierLogo: 'https://via.placeholder.com/40/0000FF',
+                        eta: 'Tomorrow, 9:00 AM'
+                    },
+                    {
+                        id: 4,
+                        trackingNumber: 'TRK24681357',
+                        customer: 'Umbrella Corp',
+                        status: 'Out for Delivery',
+                        carrier: 'Express Couriers',
+                        carrierLogo: 'https://via.placeholder.com/40/00FF00',
+                        eta: 'Today, 1:00 PM'
+                    },
+                    {
+                        id: 5,
+                        trackingNumber: 'TRK98765432',
+                        customer: 'Stark Industries',
+                        status: 'Exception',
+                        carrier: 'Fast Delivery',
+                        carrierLogo: 'https://via.placeholder.com/40',
+                        eta: 'Delayed - Weather'
+                    }
+                ],
+                activeCarriers: [
+                    {
+                        id: 1,
+                        name: 'Michael Scott',
+                        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+                        vehicle: 'Van #DL-1234',
+                        currentLocation: '3 km from depot',
+                        status: 'On route',
+                        deliveries: 5
+                    },
+                    {
+                        id: 2,
+                        name: 'Jim Halpert',
+                        avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+                        vehicle: 'Truck #TR-5678',
+                        currentLocation: 'At customer location',
+                        status: 'Making delivery',
+                        deliveries: 8
+                    },
+                    {
+                        id: 3,
+                        name: 'Pam Beesly',
+                        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+                        vehicle: 'Van #DL-9876',
+                        currentLocation: 'Returning to depot',
+                        status: 'On route',
+                        deliveries: 6
+                    }
+                ],
+                notifications: [
+                    {
+                        id: 1,
+                        title: 'Delivery Exception',
+                        message: 'Package TRK12345678 delayed due to weather conditions',
+                        time: '10 minutes ago',
+                        type: 'warning',
+                        read: false
+                    },
+                    {
+                        id: 2,
+                        title: 'New Shipment',
+                        message: 'New shipment created by John Doe for Acme Corp',
+                        time: '25 minutes ago',
+                        type: 'info',
+                        read: false
+                    },
+                    {
+                        id: 3,
+                        title: 'Delivery Completed',
+                        message: 'Package TRK87654321 successfully delivered',
+                        time: '1 hour ago',
+                        type: 'success',
+                        read: false
+                    },
+                    {
+                        id: 4,
+                        title: 'Carrier Assigned',
+                        message: 'Michael Scott assigned to delivery TRK13579246',
+                        time: '2 hours ago',
+                        type: 'info',
+                        read: true
+                    },
+                    {
+                        id: 5,
+                        title: 'System Update',
+                        message: 'New version of Track-POD available',
+                        time: '5 hours ago',
+                        type: 'system',
+                        read: true
+                    }
+                ],
+                carriers: [
+                    { id: 1, name: 'Fast Delivery' },
+                    { id: 2, name: 'Quick Ship' },
+                    { id: 3, name: 'Global Logistics' },
+                    { id: 4, name: 'Express Couriers' }
+                ],
+                newShipment: {
+                    sender: {
+                        name: '',
+                        address: '',
+                        phone: '',
+                        email: ''
+                    },
+                    recipient: {
+                        name: '',
+                        address: '',
+                        phone: '',
+                        email: ''
+                    },
+                    packageType: 'Parcel',
+                    weight: '',
+                    dimensions: {
+                        length: '',
+                        width: '',
+                        height: ''
+                    },
+                    carrier: 1,
+                    service: 'Standard',
+                    instructions: ''
+                }
+            },
+            mounted() {
+                // Simulate driver movement
+                setInterval(() => {
+                    this.driverPosition.left += 1;
+                    if (this.driverPosition.left > 80) {
+                        this.driverPosition.left = 20;
+                        this.driverPosition.top = Math.random() * 60 + 10;
+                    }
+                }, 300);
+
+                // Close menus when clicking outside
+                $(document).click((event) => {
+                    if (!$(event.target).closest('.relative').length) {
+                        this.showUserMenu = false;
+                    }
+                    if (!$(event.target).closest('.fixed.right-4').length) {
+                        this.showNotifications = false;
+                    }
+                });
+            },
+            methods: {
+                getStatusClass(status) {
+                    switch(status) {
+                        case 'Delivered': return 'bg-green-100 text-green-800';
+                        case 'In Transit': return 'bg-blue-100 text-blue-800';
+                        case 'Out for Delivery': return 'bg-purple-100 text-purple-800';
+                        case 'At Depot': return 'bg-yellow-100 text-yellow-800';
+                        case 'Exception': return 'bg-red-100 text-red-800';
+                        default: return 'bg-gray-100 text-gray-800';
+                    }
+                },
+                getNotificationIcon(type) {
+                    switch(type) {
+                        case 'success': return 'fas fa-check-circle';
+                        case 'warning': return 'fas fa-exclamation-triangle';
+                        case 'error': return 'fas fa-times-circle';
+                        case 'system': return 'fas fa-cog';
+                        default: return 'fas fa-info-circle';
+                    }
+                },
+                getNotificationIconClass(type) {
+                    switch(type) {
+                        case 'success': return 'bg-green-100 text-green-600';
+                        case 'warning': return 'bg-yellow-100 text-yellow-600';
+                        case 'error': return 'bg-red-100 text-red-600';
+                        case 'system': return 'bg-gray-100 text-gray-600';
+                        default: return 'bg-blue-100 text-blue-600';
+                    }
+                },
+                markAllAsRead() {
+                    this.notifications.forEach(notification => notification.read = true);
+                    this.unreadNotifications = 0;
+                },
+                startCameraScan() {
+                    this.scanning = true;
+                    // Simulate scanning
+                    setTimeout(() => {
+                        this.scanning = false;
+                        this.manualBarcode = 'TRK' + Math.floor(10000000 + Math.random() * 90000000);
+                        this.$nextTick(() => {
+                            document.getElementById('manualEntry').focus();
+                        });
+                    }, 2000);
+                },
+                processScan() {
+                    if (this.manualBarcode) {
+                        alert(`Package scanned: ${this.manualBarcode}\nThis would show package details in a real app.`);
+                        this.showScanModal = false;
+                        this.manualBarcode = '';
+                    } else {
+                        alert('Please scan a barcode or enter a tracking number manually');
+                    }
+                },
+                refreshShipments() {
+                    // Simulate API call
+                    this.$set(this.stats, 'todayShipments', this.stats.todayShipments + 1);
+                    this.recentShipments.unshift({
+                        id: Date.now(),
+                        trackingNumber: 'TRK' + Math.floor(10000000 + Math.random() * 90000000),
+                        customer: ['Acme Corp', 'Globex Inc', 'Initech LLC', 'Umbrella Corp', 'Stark Industries'][Math.floor(Math.random() * 5)],
+                        status: ['In Transit', 'Delivered', 'At Depot', 'Out for Delivery', 'Exception'][Math.floor(Math.random() * 5)],
+                        carrier: ['Fast Delivery', 'Quick Ship', 'Global Logistics', 'Express Couriers'][Math.floor(Math.random() * 4)],
+                        carrierLogo: 'https://via.placeholder.com/40',
+                        eta: ['Today, 3:00 PM', 'Tomorrow, 9:00 AM', 'Today, 1:00 PM', 'Delayed - Weather'][Math.floor(Math.random() * 4)]
+                    });
+                },
+                viewShipment(id) {
+                    alert(`Viewing shipment ${id}\nThis would show detailed shipment information in a real app.`);
+                },
+                editShipment(id) {
+                    alert(`Editing shipment ${id}\nThis would open an edit form in a real app.`);
+                },
+                createShipment() {
+                    // Simulate API call
+                    const newTrackingNumber = 'TRK' + Math.floor(10000000 + Math.random() * 90000000);
+                    this.recentShipments.unshift({
+                        id: Date.now(),
+                        trackingNumber: newTrackingNumber,
+                        customer: this.newShipment.recipient.name,
+                        status: 'Processing',
+                        carrier: this.carriers.find(c => c.id === this.newShipment.carrier).name,
+                        carrierLogo: 'https://via.placeholder.com/40',
+                        eta: 'Tomorrow, 10:00 AM'
+                    });
+                    
+                    // Reset form
+                    this.newShipment = {
+                        sender: {
+                            name: '',
+                            address: '',
+                            phone: '',
+                            email: ''
+                        },
+                        recipient: {
+                            name: '',
+                            address: '',
+                            phone: '',
+                            email: ''
+                        },
+                        packageType: 'Parcel',
+                        weight: '',
+                        dimensions: {
+                            length: '',
+                            width: '',
+                            height: ''
+                        },
+                        carrier: 1,
+                        service: 'Standard',
+                        instructions: ''
+                    };
+                    
+                    this.showNewShipmentModal = false;
+                    alert(`New shipment created with tracking number: ${newTrackingNumber}`);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
