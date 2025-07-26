@@ -1,0 +1,759 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Django Digital - Agence Django France</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .navbar {
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 120px 0;
+        }
+        
+        .section-title {
+            position: relative;
+            margin-bottom: 50px;
+            color: var(--primary-color);
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        
+        .expertise-card {
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .expertise-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-info-card {
+            background-color: var(--light-color);
+            border-radius: 10px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-info-card:hover {
+            background-color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-primary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 60px 0 20px;
+        }
+        
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .back-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+        
+        .nav-link {
+            position: relative;
+            font-weight: 500;
+            color: var(--dark-color);
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--secondary-color);
+        }
+        
+        .nav-link.active {
+            color: var(--secondary-color);
+        }
+        
+        .nav-link.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body id="app">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <h2 class="m-0" style="color: var(--secondary-color); font-weight: 700;">MM Django Digital</h2>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home" @click="setActive('home')" :class="{active: activeSection === 'home'}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about" @click="setActive('about')" :class="{active: activeSection === 'about'}">À propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#expertise" @click="setActive('expertise')" :class="{active: activeSection === 'expertise'}">Expertises</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services" @click="setActive('services')" :class="{active: activeSection === 'services'}">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact" @click="setActive('contact')" :class="{active: activeSection === 'contact'}">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Votre agence Django en France</h1>
+                    <p class="lead mb-4">Nous développons des solutions web sur mesure avec Django, le framework Python puissant et flexible.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#contact" class="btn btn-primary btn-lg">Nous contacter</a>
+                        <a href="#services" class="btn btn-outline-light btn-lg">Nos services</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/django-framework.png" alt="Django Framework" class="img-fluid rounded shadow">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5 bg-light">
+        <div class="container py-5">
+            <h2 class="text-center section-title">À propos de nous</h2>
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/team-working.jpg" alt="Notre équipe" class="img-fluid rounded shadow">
+                </div>
+                <div class="col-lg-6">
+                    <h3 class="mb-4">MM Django Digital - L'expertise Django en France</h3>
+                    <p>Fondée en 2015, MM Django Digital est une agence spécialisée dans le développement d'applications web avec Django, le framework Python de référence.</p>
+                    <p>Notre équipe de développeurs expérimentés accompagne les startups, PME et grands groupes dans la réalisation de leurs projets web, du simple site vitrine aux applications métiers complexes.</p>
+                    <p>Nous combinons expertise technique, méthodologies agiles et approche centrée utilisateur pour livrer des solutions robustes, performantes et évolutives.</p>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-check-circle fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">+50 projets</h5>
+                                    <p class="mb-0 text-muted">Réalisés avec succès</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-users fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Équipe expérimentée</h5>
+                                    <p class="mb-0 text-muted">Développeurs certifiés</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-medal fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Expertise reconnue</h5>
+                                    <p class="mb-0 text-muted">Leader Django en France</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-heart fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Satisfaction client</h5>
+                                    <p class="mb-0 text-muted">95% de clients satisfaits</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expertise Section -->
+    <section id="expertise" class="py-5">
+        <div class="container py-5">
+            <h2 class="text-center section-title">Nos Expertises</h2>
+            <p class="text-center mb-5">Nous maîtrisons toutes les facettes du développement Django pour répondre à vos besoins spécifiques.</p>
+            
+            <div class="row">
+                <div class="col-md-6 col-lg-4">
+                    <div class="expertise-card p-4">
+                        <div class="icon mb-4">
+                            <i class="fas fa-laptop-code fa-3x text-primary"></i>
+                        </div>
+                        <h4>Développement sur mesure</h4>
+                        <p>Création d'applications web personnalisées avec Django, adaptées à vos processus métiers et besoins spécifiques.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> Architecture modulaire</li>
+                            <li><i class="fas fa-check text-success me-2"></i> API RESTful</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Intégration continue</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="expertise-card p-4">
+                        <div class="icon mb-4">
+                            <i class="fas fa-mobile-alt fa-3x text-primary"></i>
+                        </div>
+                        <h4>Applications mobiles</h4>
+                        <p>Développement d'applications mobiles hybrides connectées à votre backend Django via des API sécurisées.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> React Native</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Flutter</li>
+                            <li><i class="fas fa-check text-success me-2"></i> PWA</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="expertise-card p-4">
+                        <div class="icon mb-4">
+                            <i class="fas fa-chart-line fa-3x text-primary"></i>
+                        </div>
+                        <h4>Data Science & IA</h4>
+                        <p>Intégration de modèles de machine learning et d'analyse de données dans vos applications Django.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> Pandas, NumPy</li>
+                            <li><i class="fas fa-check text-success me-2"></i> TensorFlow, PyTorch</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Visualisation de données</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="expertise-card p-4">
+                        <div class="icon mb-4">
+                            <i class="fas fa-shopping-cart fa-3x text-primary"></i>
+                        </div>
+                        <h4>E-commerce</h4>
+                        <p>Solutions e-commerce performantes basées sur Django avec intégration des moyens de paiement et logistique.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> Oscar Commerce</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Stripe, PayPal</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Gestion des stocks</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="expertise-card p-4">
+                        <div class="icon mb-4">
+                            <i class="fas fa-database fa-3x text-primary"></i>
+                        </div>
+                        <h4>Bases de données</h4>
+                        <p>Optimisation et gestion des bases de données pour des applications Django performantes et évolutives.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> PostgreSQL</li>
+                            <li><i class="fas fa-check text-success me-2"></i> MySQL</li>
+                            <li><i class="fas fa-check text-success me-2"></i> MongoDB</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="expertise-card p-4">
+                        <div class="icon mb-4">
+                            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                        </div>
+                        <h4>Sécurité</h4>
+                        <p>Audit et renforcement de la sécurité de vos applications Django contre les vulnérabilités courantes.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> OWASP Top 10</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Authentification</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Chiffrement</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-5 bg-light">
+        <div class="container py-5">
+            <h2 class="text-center section-title">Nos Services</h2>
+            <p class="text-center mb-5">Découvrez notre gamme complète de services pour répondre à tous vos besoins en développement web.</p>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card card h-100">
+                        <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/web-development.jpg" class="card-img-top" alt="Développement Web">
+                        <div class="card-body">
+                            <h5 class="card-title">Développement Web</h5>
+                            <p class="card-text">Création d'applications web sur mesure avec Django, de la conception à la mise en production.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Sites vitrines</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Applications métiers</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Portails clients</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="#contact" class="btn btn-outline-primary">Demander un devis</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card card h-100">
+                        <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/api-development.jpg" class="card-img-top" alt="API Development">
+                        <div class="card-body">
+                            <h5 class="card-title">Développement d'API</h5>
+                            <p class="card-text">Conception et implémentation d'API RESTful sécurisées pour connecter vos systèmes.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Django REST Framework</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> GraphQL</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Documentation Swagger</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="#contact" class="btn btn-outline-primary">Demander un devis</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card card h-100">
+                        <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/migration.jpg" class="card-img-top" alt="Migration">
+                        <div class="card-body">
+                            <h5 class="card-title">Migration vers Django</h5>
+                            <p class="card-text">Migration de vos applications existantes vers Django pour plus de performance et de sécurité.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> PHP vers Django</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> .NET vers Django</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Legacy vers Django</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="#contact" class="btn btn-outline-primary">Demander un devis</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card card h-100">
+                        <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/maintenance.jpg" class="card-img-top" alt="Maintenance">
+                        <div class="card-body">
+                            <h5 class="card-title">Maintenance & Support</h5>
+                            <p class="card-text">Services de maintenance évolutive et corrective pour vos applications Django.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Mises à jour</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Corrections de bugs</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Support technique</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="#contact" class="btn btn-outline-primary">Demander un devis</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card card h-100">
+                        <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/consulting.jpg" class="card-img-top" alt="Consulting">
+                        <div class="card-body">
+                            <h5 class="card-title">Consulting Django</h5>
+                            <p class="card-text">Expertise et conseils pour optimiser vos projets Django et former vos équipes.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Audit technique</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Architecture</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Bonnes pratiques</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="#contact" class="btn btn-outline-primary">Demander un devis</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card card h-100">
+                        <img src="https://digitalunicorn.fr/wp-content/uploads/2023/05/hosting.jpg" class="card-img-top" alt="Hébergement">
+                        <div class="card-body">
+                            <h5 class="card-title">Hébergement Django</h5>
+                            <p class="card-text">Solutions d'hébergement optimisées pour les applications Django avec haute disponibilité.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i> AWS, GCP, Azure</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Docker, Kubernetes</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i> Monitoring 24/7</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="#contact" class="btn btn-outline-primary">Demander un devis</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5">
+        <div class="container py-5">
+            <h2 class="text-center section-title">Nous contacter</h2>
+            <p class="text-center mb-5">Vous avez un projet Django ? Parlons-en ! Notre équipe est à votre écoute pour répondre à vos questions.</p>
+            
+            <div class="row">
+                <div class="col-lg-5 mb-5 mb-lg-0">
+                    <div class="contact-info-card">
+                        <h4 class="mb-4">Informations de contact</h4>
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="me-3">
+                                <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Adresse</h5>
+                                <p class="mb-0">15 Rue du Développement, 75015 Paris, France</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="me-3">
+                                <i class="fas fa-phone-alt fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Téléphone</h5>
+                                <p class="mb-0">+33 1 23 45 67 89</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="me-3">
+                                <i class="fas fa-envelope fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Email</h5>
+                                <p class="mb-0">contact@mmdjangodigital.fr</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="me-3">
+                                <i class="fas fa-clock fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Horaires</h5>
+                                <p class="mb-0">Lundi - Vendredi: 9h00 - 18h00</p>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h5 class="mb-3">Suivez-nous</h5>
+                        <div class="d-flex">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow">
+                        <div class="card-body p-5">
+                            <h4 class="mb-4">Envoyez-nous un message</h4>
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="name" class="form-label">Nom complet</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Sujet</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message" rows="5" required></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Envoyer le message</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h3 class="text-white mb-4">MM Django Digital</h3>
+                    <p>Votre agence spécialisée en développement Django en France. Nous transformons vos idées en solutions web performantes.</p>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-white mb-4">Liens rapides</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#home" class="text-white-50">Accueil</a></li>
+                        <li class="mb-2"><a href="#about" class="text-white-50">À propos</a></li>
+                        <li class="mb-2"><a href="#expertise" class="text-white-50">Expertises</a></li>
+                        <li class="mb-2"><a href="#services" class="text-white-50">Services</a></li>
+                        <li class="mb-2"><a href="#contact" class="text-white-50">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-white mb-4">Nos services</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white-50">Développement Web</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Applications mobiles</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">E-commerce</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Consulting</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Hébergement</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="text-white mb-4">Newsletter</h5>
+                    <p class="text-white-50 mb-4">Abonnez-vous à notre newsletter pour recevoir nos actualités et conseils.</p>
+                    <form>
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Votre email" aria-label="Votre email">
+                            <button class="btn btn-primary" type="button">S'abonner</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-white-50">&copy; 2023 MM Django Digital. Tous droits réservés.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-white-50 me-3">Mentions légales</a>
+                    <a href="#" class="text-white-50">Politique de confidentialité</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top"><i class="fas fa-arrow-up"></i></a>
+
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    activeSection: 'home'
+                }
+            },
+            methods: {
+                setActive(section) {
+                    this.activeSection = section;
+                },
+                handleScroll() {
+                    // Update active section based on scroll position
+                    const sections = ['home', 'about', 'expertise', 'services', 'contact'];
+                    const scrollPosition = window.scrollY + 100;
+                    
+                    for (const section of sections) {
+                        const element = document.getElementById(section);
+                        if (element) {
+                            const offsetTop = element.offsetTop;
+                            const offsetHeight = element.offsetHeight;
+                            
+                            if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                                this.activeSection = section;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Navbar scroll effect
+                    const navbar = document.querySelector('.navbar');
+                    if (window.scrollY > 100) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                    
+                    // Back to top button
+                    const backToTop = document.querySelector('.back-to-top');
+                    if (window.scrollY > 300) {
+                        backToTop.classList.add('active');
+                    } else {
+                        backToTop.classList.remove('active');
+                    }
+                }
+            },
+            mounted() {
+                window.addEventListener('scroll', this.handleScroll);
+                this.handleScroll(); // Initialize on load
+                
+                // Smooth scrolling for anchor links
+                $('a[href*="#"]').on('click', function(e) {
+                    e.preventDefault();
+                    
+                    $('html, body').animate(
+                        {
+                            scrollTop: $($(this).attr('href')).offset().top - 70,
+                        },
+                        500,
+                        'linear'
+                    );
+                });
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

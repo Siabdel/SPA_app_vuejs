@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkSpace Pro - Gestion Collaborative</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Vue.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.14/vue.min.js"></script>
+    <!-- Vue Router -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/3.6.5/vue-router.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0073ea;
+            --secondary-color: #6c5ce7;
+            --success-color: #00d084;
+            --warning-color: #fdcb6e;
+            --danger-color: #e17055;
+            --dark-color: #2d3436;
+            --light-color: #f8f9fa;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6f8;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h4 {
+            margin: 0;
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-header h4 {
+            opacity: 0;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .sidebar-menu-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-menu-item:hover,
+        .sidebar-menu-item.router-link-active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar-menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .sidebar-menu-item span {
+            opacity: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
+        /* Header */
+        .top-header {
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            border-radius: 25px;
+            border: 1px solid #e1e8ed;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        /* Project Board */
+        .board-column {
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 400px;
+            padding: 1rem;
+        }
+
+        .board-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .board-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .priority-high { border-left: 4px solid var(--danger-color); }
+        .priority-medium { border-left: 4px solid var(--warning-color); }
+        .priority-low { border-left: 4px solid var(--success-color); }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-working { background-color: #fdcb6e; color: #fff; }
+        .status-done { background-color: #00d084; color: #fff; }
+        .status-stuck { background-color: #e17055; color: #fff; }
+        .status-review { background-color: #6c5ce7; color: #fff; }
+
+        /* Animations */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ===========================================
+        // API SERVICE - services/ApiService.js
+        // ===========================================
+        const API_DATA = {
+            dashboardStats: [
+                { title: 'Projets actifs', value: '12', icon: 'fas fa-project-diagram', color: '#0073ea' },
+                { title: 'Tâches en cours', value: '47', icon: 'fas fa-tasks', color: '#6c5ce7' },
+                { title: 'Clients actifs', value: '23', icon: 'fas fa-users', color: '#00d084' },
+                { title: 'Tickets ouverts', value: '8', icon: 'fas fa-ticket-alt', color: '#fdcb6e' }
+            ],
+            
+            recentActivity: [
+                {
+                    id: 1,
+                    description: 'Nouveau projet "Site E-commerce" créé',
+                    time: 'Il y a 2 heures',
+                    icon: 'fas fa-plus-circle',
+                    color: '#00d084'
+                },
+                {
+                    id: 2,
+                    description: 'Tâche "Design Homepage" marquée comme terminée',
+                    time: 'Il y a 4 heures',
+                    icon: 'fas fa-check-circle',
+                    color: '#0073ea'
+                },
+                {
+                    id: 3,
+                    description: 'Nouveau client "TechCorp" ajouté au CRM',
+                    time: 'Il y a 6 heures',
+                    icon: 'fas fa-user-plus',
+                    color: '#6c5ce7'
+                }
+            ],
+
+            myTasks: [
+                { id: 1, title: 'Révision du design', project: 'Site E-commerce', priority: 'high', completed: false },
+                { id: 2, title: 'Tests utilisateurs', project: 'App Mobile', priority: 'medium', completed: false },
+                { id: 3, title: 'Documentation API', project: 'Backend', priority: 'low', completed: true }
+            ],
+
+            projectColumns: [
+                {
+                    id: 1,
+                    title: 'À faire',
+                    color: '#e17055',
+                    tasks: [
+                        {
+                            id: 1,
+                            title: 'Design Homepage',
+                            description: 'Créer le design de la page d\'accueil',
+                            priority: 'high',
+                            status: 'stuck',
+                            assignee: 'John D.',
+                            dueDate: '2025-08-15'
+                        },
+                        {
+                            id: 2,
+                            title: 'Intégration API',
+                            description: 'Connecter le frontend à l\'API',
+                            priority: 'medium',
+                            status: 'working',
+                            assignee: 'Jane S.',
+                            dueDate: '2025-08-20'
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: 'En cours',
+                    color: '#fdcb6e',
+                    tasks: [
+                        {
+                            id: 3,
+                            title: 'Tests unitaires',
+                            description: 'Écrire les tests pour les composants',
+                            priority: 'medium',
+                            status: 'working',
+                            assignee: 'Mike J.',
+                            dueDate: '2025-08-18'
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: 'En révision',
+                    color: '#6c5ce7',
+                    tasks: [
+                        {
+                            id: 4,
+                            title: 'Documentation',
+                            description: 'Rédiger la documentation technique',
+                            priority: 'low',
+                            status: 'review',
+                            assignee: 'Sarah L.',
+                            dueDate: '2025-08-10'
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: 'Terminé',
+                    color: '#00d084',
+                    tasks: [
+                        {
+                            id: 5,
+                            title: 'Setup projet',
+                            description: 'Configuration initiale du projet',
+                            priority: 'high',
+                            status: 'done',
+                            assignee: 'John D.',
+                            dueDate: '2025-07-25'
+                        }
+                    ]
+                }
+            ],
+
+            crmStats: [
+                { title: 'Prospects', value: '156', icon: 'fas fa-user-plus', color: '#0073ea' },
+                { title: 'Clients', value: '89', icon: 'fas fa-handshake', color: '#00d084' },
+                { title: 'CA mensuel', value: '€45K', icon: 'fas fa-euro-sign', color: '#fdcb6e' },
+                { title: 'Taux conversion', value: '23%', icon: 'fas fa-chart-line', color: '#6c5ce7' }
+            ],
+
+            crmLeads: [
+                {
+                    id: 1,
+                    name: 'Pierre Martin',
+                    email: 'p.martin@email.com',
+                    company: 'TechStart',
+                    value: '€15,000',
+                    status: 'working',
+                    assignee: 'Sophie L.',
+                    avatar: 'https://via.placeholder.com/32/0073ea/ffffff?text=PM'
+                },
+                {
+                    id: 2,
+                    name: 'Marie Dubois',
+                    email: 'm.dubois@entreprise.fr',
+                    company: 'InnovaCorp',
+                    value: '€32,000',
+                    status: 'review',
+                    assignee: 'Thomas R.',
+                    avatar: 'https://via.placeholder.com/32/6c5ce7/ffffff?text=MD'
+                }
+            ],
+
+            itTickets: [
+                {
+                    id: 1,
+                    title: 'Problème connexion serveur',
+                    description: 'Impossible de se connecter au serveur de production',
+                    priority: 'high',
+                    status: 'working',
+                    createdDate: '2025-07-20',
+                    assignee: 'Admin IT'
+                },
+                {
+                    id: 2,
+                    title: 'Demande accès base de données',
+                    description: 'Nouveau développeur nécessite un accès BDD',
+                    priority: 'medium',
+                    status: 'review',
+                    createdDate: '2025-07-22',
+                    assignee: 'DBA Team'
+                }
+            ]
+        };
+
+        const ApiService = {
+            async getDashboardStats() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.dashboardStats }), 300);
+                });
+            },
+            
+            async getRecentActivity() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.recentActivity }), 400);
+                });
+            },
+            
+            async getMyTasks() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.myTasks }), 200);
+                });
+            },
+            
+            async getProjectColumns() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.projectColumns }), 500);
+                });
+            },
+            
+            async getCrmStats() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.crmStats }), 300);
+                });
+            },
+            
+            async getCrmLeads() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.crmLeads }), 400);
+                });
+            },
+            
+            async getItTickets() {
+                return new Promise(resolve => {
+                    setTimeout(() => resolve({ data: API_DATA.itTickets }), 350);
+                });
+            }
+        };
+
+        // ===========================================
+        // COMPONENTS - components/
+        // ===========================================
+
+        // Sidebar Component
+        const SidebarComponent = {
+            template: `
+                <div class="sidebar" :class="{ collapsed: collapsed, show: showMobile }">
+                    <div class="sidebar-header">
+                        <i class="fas fa-rocket fa-2x"></i>
+                        <h4 v-show="!collapsed">WorkSpace Pro</h4>
+                    </div>
+                    
+                    <nav class="sidebar-menu">
+                        <router-link 
+                            v-for="item in menuItems" 
+                            :key="item.id"
+                            :to="item.route"
+                            class="sidebar-menu-item"
+                            @click.native="$emit('menu-click')">
+                            <i :class="item.icon"></i>
+                            <span v-show="!collapsed">{{ item.name }}</span>
+                        </router-link>
+                    </nav>
+                </div>
+            `,
+            props: ['collapsed', 'showMobile'],
+            data() {
+                return {
+                    menuItems: [
+                        { id: 1, name: 'Tableau de bord', icon: 'fas fa-tachometer-alt', route: '/' },
+                        { id: 2, name: 'Projets', icon: 'fas fa-project-diagram', route: '/projects' },
+                        { id: 3, name: 'CRM', icon: 'fas fa-users', route: '/crm' },
+                        { id: 4, name: 'Gestion IT', icon: 'fas fa-cogs', route: '/it' },
+                        { id: 5, name: 'Automatisations', icon: 'fas fa-robot', route: '/automations' },
+                        { id: 6, name: 'Rapports', icon: 'fas fa-chart-bar', route: '/reports' }
+                    ]
+                };
+            }
+        };
+
+        // Header Component
+        const HeaderComponent = {
+            template: `
+                <div class="top-header">
+                    <button class="btn btn-outline-secondary mobile-menu-btn d-md-none" 
+                            @click="$emit('toggle-mobile-sidebar')">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <button class="btn btn-outline-secondary d-none d-md-block" 
+                            @click="$emit('toggle-sidebar')">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Rechercher dans l'espace de travail..." 
+                               :value="searchQuery" @input="$emit('search', $event.target.value)">
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `,
+            props: ['searchQuery']
+        };
+
+        // Dashboard Component
+        const DashboardComponent = {
+            template: `
+                <div class="container-fluid py-4">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="fw-bold mb-3">Tableau de bord</h2>
+                            <p class="text-muted">Vue d'ensemble de vos projets et activités</p>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3" v-for="stat in dashboardStats" :key="stat.title">
+                            <div class="card dashboard-card h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="card-icon me-3" :style="{ backgroundColor: stat.color }">
+                                        <i :class="stat.icon"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">{{ stat.value }}</h5>
+                                        <p class="card-text text-muted small mb-0">{{ stat.title }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity & Tasks -->
+                    <div class="row">
+                        <div class="col-lg-8 mb-4">
+                            <div class="card dashboard-card">
+                                <div class="card-header bg-transparent border-0 py-3">
+                                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Activité récente</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div v-for="activity in recentActivity" :key="activity.id" 
+                                         class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                        <div class="card-icon me-3" style="width: 40px; height: 40px; font-size: 1rem;" 
+                                             :style="{ backgroundColor: activity.color }">
+                                            <i :class="activity.icon"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <p class="mb-1">{{ activity.description }}</p>
+                                            <small class="text-muted">{{ activity.time }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 mb-4">
+                            <div class="card dashboard-card">
+                                <div class="card-header bg-transparent border-0 py-3">
+                                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Mes tâches</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div v-for="task in myTasks" :key="task.id" class="d-flex align-items-center mb-3">
+                                        <input type="checkbox" class="form-check-input me-3" :checked="task.completed">
+                                        <div class="flex-grow-1">
+                                            <p class="mb-1" :class="{ 'text-decoration-line-through text-muted': task.completed }">
+                                                {{ task.title }}
+                                            </p>
+                                            <small class="text-muted">{{ task.project }}</small>
+                                        </div>
+                                        <span class="status-badge" :class="'status-' + task.priority">{{ task.priority }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    dashboardStats: [],
+                    recentActivity: [],
+                    myTasks: []
+                };
+            },
+            async mounted() {
+                await this.loadData();
+            },
+            methods: {
+                async loadData() {
+                    try {
+                        const [statsRes, activityRes, tasksRes] = await Promise.all([
+                            ApiService.getDashboardStats(),
+                            ApiService.getRecentActivity(),
+                            ApiService.getMyTasks()
+                        ]);
+                        
+                        this.dashboardStats = statsRes.data;
+                        this.recentActivity = activityRes.data;
+                        this.myTasks = tasksRes.data;
+                    } catch (error) {
+                        console.error('Erreur lors du chargement du dashboard:', error);
+                    }
+                }
+            }
+        };
+
+        // Projects Component
+        const ProjectsComponent = {
+            template: `
+                <div class="container-fluid py-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2 class="fw-bold mb-3">Gestion de projets</h2>
+                            <p class="text-muted">Organisez et suivez vos projets</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                                <i class="fas fa-plus me-2"></i>Nouveau projet
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Project Board -->
+                    <div class="row">
+                        <div v-for="column in projectColumns" :key="column.id" class="col-lg-3 col-md-6 mb-4">
+                            <div class="board-column">
+                                <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                    <span class="badge me-2" :style="{ backgroundColor: column.color }">{{ column.tasks.length }}</span>
+                                    {{ column.title }}
+                                </h6>
+                                
+                                <div v-for="task in column.tasks" :key="task.id" 
+                                     class="board-item" 
+                                     :class="'priority-' + task.priority"
+                                     @click="openTaskModal(task)">
+                                    <h6 class="mb-2">{{ task.title }}</h6>
+                                    <p class="text-muted small mb-2">{{ task.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="status-badge" :class="'status-' + task.status">{{ task.status }}</span>
+                                        <small class="text-muted">{{ task.assignee }}</small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Échéance: {{ task.dueDate }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Project Modal -->
+                    <div class="modal fade" id="addProjectModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Nouveau Projet</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form>
+                                        <div class="mb-3">
+                                            <label class="form-label">Nom du projet</label>
+                                            <input type="text" class="form-control" v-model="newProject.name">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Description</label>
+                                            <textarea class="form-control" rows="3" v-model="newProject.description"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Responsable</label>
+                                            <select class="form-select" v-model="newProject.assignee">
+                                                <option value="">Sélectionner un responsable</option>
+                                                <option value="John Doe">John Doe</option>
+                                                <option value="Jane Smith">Jane Smith</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Date d'échéance</label>
+                                            <input type="date" class="form-control" v-model="newProject.dueDate">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="button" class="btn btn-primary" @click="addProject">Créer le projet</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    projectColumns: [],
+                    newProject: {
+                        name: '',
+                        description: '',
+                        assignee: '',
+                        dueDate: ''
+                    }
+                };
+            },
+            async mounted() {
+                await this.loadData();
+            },
+            methods: {
+                async loadData() {
+                    try {
+                        const response = await ApiService.getProjectColumns();
+                        this.projectColumns = response.data;
+                    } catch (error) {
+                        console.error('Erreur lors du chargement des projets:', error);
+                    }
+                },
+                openTaskModal(task) {
+                    console.log('Ouverture détail tâche:', task);
+                },
+                addProject() {
+                    if (!this.newProject.name) {
+                        alert('Veuillez saisir un nom de projet');
+                        return;
+                    }
+                    
+                    const newTask = {
+                        id: Date.now(),
+                        title: this.newProject.name,
+                        description: this.newProject.description,
+                        priority: 'medium',
+                        status: 'working',
+                        assignee: this.newProject.assignee.split(' ')[0] + ' ' + this.newProject.assignee.split(' ')[1]?.charAt(0) + '.',
+                        dueDate: this.newProject.dueDate
+                    };
+                    
+                    this.projectColumns[0].tasks.push(newTask);
+                    
+                    this.newProject = {
+                        name: '',
+                        description: '',
+                        assignee: '',
+                        dueDate: ''
+                    };
+                    
+                    $('#addProjectModal').modal('hide');
+                }
+            }
+        };
+
+        // CRM Component
+        const CrmComponent = {
+            template: `
+                <div class="container-fluid py-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2 class="fw-bold mb-3">CRM - Gestion Client</h2>
+                            <p class="text-muted">Gérez vos prospects et clients</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Nouveau prospect
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CRM Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3" v-for="stat in crmStats" :key="stat.title">
+                            <div class="card dashboard-card text-center">
+                                <div class="card-body">
+                                    <div class="card-icon mx-auto mb-3" :style="{ backgroundColor: stat.color }">
+                                        <i :class="stat.icon"></i>
+                                    </div>
+                                    <h4>{{ stat.value }}</h4>
+                                    <p class="text-muted mb-0">{{ stat.title }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CRM Table -->
+                    <div class="card dashboard-card">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Pipeline des ventes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Prospect</th>
+                                            <th>Entreprise</th>
+                                            <th>Valeur</th>
+                                            <th>Statut</th>
+                                            <th>Responsable</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="lead in crmLeads" :key="lead.id">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img :src="lead.avatar" class="rounded-circle me-2" width="32" height="32">
+                                                    <div>
+                                                        <div class="fw-bold">{{ lead.name }}</div>
+                                                        <small class="text-muted">{{ lead.email }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ lead.company }}</td>
+                                            <td class="fw-bold">{{ lead.value }}</td>
+                                            <td><span class="status-badge" :class="'status-' + lead.status">{{ lead.status }}</span></td>
+                                            <td>{{ lead.assignee }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    crmStats: [],
+                    crmLeads: []
+                };
+            },
+            async mounted() {
+                await this.loadData();
+            },
+            methods: {
+                async loadData() {
+                    try {
+                        const [statsRes, leadsRes] = await Promise.all([
+                            ApiService.getCrmStats(),
+                            ApiService.getCrmLeads()
+                        ]);
+                        
+                        this.crmStats = statsRes.data;
+                        this.crmLeads = leadsRes.data;
+                    } catch (error) {
+                        console.error('Erreur lors du chargement du CRM:', error);
+                    }
+                }
+            }
+        };
+
+        // IT Management Component
+        const ItComponent = {
+            template: `
+                <div class="container-fluid py-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h2 class="fw-bold mb-3">Gestion IT</h2>
+                            <p class="text-muted">Tickets, incidents et demandes IT</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Nouveau ticket
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- IT Tickets -->
+                    <div class="card dashboard-card">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Tickets récents</h5>
+                        </div>
+                        <div class="card-body">
+                            <div v-for="ticket in itTickets" :key="ticket.id" class="border rounded p-3 mb-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-1">{{ ticket.title }}</h6>
+                                        <p class="text-muted mb-2">{{ ticket.description }}</p>
+                                        <small class="text-muted">Créé le {{ ticket.createdDate }}</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span class="status-badge" :class="'priority-' + ticket.priority">{{ ticket.priority }}</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span class="status-badge" :class="'status-' + ticket.status">{{ ticket.status }}</span>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <button class="btn btn-sm btn-outline-primary">Voir détails</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    itTickets: []
+                };
+            },
+            async mounted() {
+                await this.loadData();
+            },
+            methods: {
+                async loadData() {
+                    try {
+                        const response = await ApiService.getItTickets();
+                        this.itTickets = response.data;
+                    } catch (error) {
+                        console.error('Erreur lors du chargement des tickets IT:', error);
+                    }
+                }
+            }
+        };
+
+        // Placeholder Components for other routes
+        const AutomationsComponent = {
+            template: `
+                <div class="container-fluid py-4">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="fw-bold mb-3">Automatisations</h2>
+                            <p class="text-muted">Créez des automatisations pour optimiser vos processus</p>
+                        </div>
+                    </div>
+                    <div class="card dashboard-card">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-robot fa-4x text-muted mb-3"></i>
+                            <h4>Module Automatisations</h4>
+                            <p class="text-muted">Cette fonctionnalité sera bientôt disponible</p>
+                            <button class="btn btn-primary">Créer une automatisation</button>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        const ReportsComponent = {
+            template: `
+                <div class="container-fluid py-4">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="fw-bold mb-3">Rapports</h2>
+                            <p class="text-muted">Analysez les performances de vos équipes</p>
+                        </div>
+                    </div>
+                    <div class="card dashboard-card">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                            <h4>Module Rapports</h4>
+                            <p class="text-muted">Générez des rapports détaillés sur vos activités</p>
+                            <button class="btn btn-primary">Générer un rapport</button>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // ===========================================
+        // ROUTES CONFIGURATION - router/routes.js
+        // ===========================================
+        const routes = [
+            { path: '/', component: DashboardComponent, name: 'dashboard' },
+            { path: '/projects', component: ProjectsComponent, name: 'projects' },
+            { path: '/crm', component: CrmComponent, name: 'crm' },
+            { path: '/it', component: ItComponent, name: 'it' },
+            { path: '/automations', component: AutomationsComponent, name: 'automations' },
+            { path: '/reports', component: ReportsComponent, name: 'reports' },
+            { path: '*', redirect: '/' } // Catch all - redirect to dashboard
+        ];
+
+        const router = new VueRouter({
+            routes,
+            mode: 'hash' // Using hash mode for GitHub Pages compatibility
+        });
+
+        // ===========================================
+        // MAIN APP COMPONENT - App.js
+        // ===========================================
+        const App = {
+            template: `
+                <div>
+                    <!-- Sidebar -->
+                    <sidebar-component 
+                        :collapsed="sidebarCollapsed" 
+                        :show-mobile="showMobileSidebar"
+                        @menu-click="showMobileSidebar = false">
+                    </sidebar-component>
+
+                    <!-- Main Content -->
+                    <div class="main-content" :class="{ expanded: sidebarCollapsed }">
+                        <!-- Header -->
+                        <header-component 
+                            :search-query="searchQuery"
+                            @toggle-sidebar="sidebarCollapsed = !sidebarCollapsed"
+                            @toggle-mobile-sidebar="showMobileSidebar = !showMobileSidebar"
+                            @search="searchQuery = $event">
+                        </header-component>
+
+                        <!-- Router View -->
+                        <transition name="fade" mode="out-in">
+                            <router-view :key="$route.fullPath"></router-view>
+                        </transition>
+                    </div>
+                </div>
+            `,
+            components: {
+                'sidebar-component': SidebarComponent,
+                'header-component': HeaderComponent
+            },
+            data() {
+                return {
+                    sidebarCollapsed: false,
+                    showMobileSidebar: false,
+                    searchQuery: ''
+                };
+            },
+            mounted() {
+                this.setupResponsiveHandlers();
+            },
+            methods: {
+                setupResponsiveHandlers() {
+                    // Gestion responsive
+                    $(window).on('resize', () => {
+                        if ($(window).width() > 768) {
+                            this.showMobileSidebar = false;
+                        }
+                    });
+                    
+                    // Fermer le sidebar mobile en cliquant en dehors
+                    $(document).on('click', (e) => {
+                        if (this.showMobileSidebar && !$(e.target).closest('.sidebar, .mobile-menu-btn').length) {
+                            this.showMobileSidebar = false;
+                        }
+                    });
+                },
+                
+                showNotification(message, type = 'info') {
+                    // Système de notification simple
+                    const notification = $(`
+                        <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                    
+                    $('body').append(notification);
+                    
+                    // Auto-fermeture après 3 secondes
+                    setTimeout(() => {
+                        notification.alert('close');
+                    }, 3000);
+                }
+            },
+            watch: {
+                '$route'(to, from) {
+                    // Actions à effectuer lors du changement de route
+                    console.log('Navigation:', from.path, '->', to.path);
+                }
+            }
+        };
+
+        // ===========================================
+        // MAIN.JS - Point d'entrée de l'application
+        // ===========================================
+        new Vue({
+            router,
+            render: h => h(App),
+            mounted() {
+                // Initialisation jQuery pour Bootstrap
+                this.$nextTick(() => {
+                    // Initialiser les tooltips
+                    $('[data-bs-toggle="tooltip"]').tooltip();
+                    
+                    // Animations au scroll
+                    $(window).scroll(function() {
+                        $('.dashboard-card').each(function() {
+                            const elementTop = $(this).offset().top;
+                            const elementBottom = elementTop + $(this).outerHeight();
+                            const viewportTop = $(window).scrollTop();
+                            const viewportBottom = viewportTop + $(window).height();
+                            
+                            if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                                $(this).addClass('animate__animated animate__fadeInUp');
+                            }
+                        });
+                    });
+                });
+            }
+        }).$mount('#app')
+                

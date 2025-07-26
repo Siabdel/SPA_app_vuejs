@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Django Digit 2 - Solutions Digitales</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 0;
+        }
+        
+        .service-card {
+            transition: transform 0.3s ease;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .expertise-item {
+            border-left: 4px solid #0d6efd;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .contact-form {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background-color: #fff !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar.scrolled .nav-link {
+            color: #333 !important;
+        }
+        
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 50px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" :class="{'scrolled': isScrolled}">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <span class="fw-bold">MM Django</span> Digit 2
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#home" @click="activeLink = 'home'">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#about" @click="activeLink = 'about'">À propos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#expertise" @click="activeLink = 'expertise'">Nos Expertises</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#services" @click="activeLink = 'services'">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contact" @click="activeLink = 'contact'">Nous contacter</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section id="home" class="hero-section text-center" v-show="activeLink === 'home'">
+            <div class="container">
+                <h1 class="display-4 fw-bold mb-4">Solutions Digitales sur Mesure</h1>
+                <p class="lead mb-5">Nous transformons vos idées en réalité avec des solutions web innovantes et performantes</p>
+                <a href="#contact" class="btn btn-primary btn-lg px-4 me-2" @click="activeLink = 'contact'">Contactez-nous</a>
+                <a href="#services" class="btn btn-outline-light btn-lg px-4" @click="activeLink = 'services'">Nos Services</a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-5" v-show="activeLink === 'about'">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h2 class="fw-bold mb-4">À propos de MM Django Digit 2</h2>
+                        <p class="lead">Nous sommes une équipe passionnée de développeurs spécialisés dans les solutions web modernes.</p>
+                        <p>Fondée en 2015, notre agence a évolué pour devenir un acteur clé dans le développement d'applications web sur mesure. Notre expertise principale repose sur le framework Django, mais nous maîtrisons également l'écosystème JavaScript moderne.</p>
+                        <p>Notre approche combine rigueur technique et créativité pour offrir à nos clients des solutions qui répondent parfaitement à leurs besoins tout en anticipant les évolutions futures.</p>
+                        <div class="d-flex mt-4">
+                            <div class="me-4">
+                                <h3 class="fw-bold">50+</h3>
+                                <p>Projets réalisés</p>
+                            </div>
+                            <div class="me-4">
+                                <h3 class="fw-bold">15</h3>
+                                <p>Clients satisfaits</p>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold">10</h3>
+                                <p>Experts techniques</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Équipe MM Django" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expertise Section -->
+        <section id="expertise" class="py-5 bg-light" v-show="activeLink === 'expertise'">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Nos Expertises</h2>
+                    <p class="lead">Découvrez nos domaines d'expertise technique</p>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="expertise-item">
+                            <h3><i class="fas fa-code me-2 text-primary"></i> Développement Django</h3>
+                            <p>Nous développons des applications web robustes et évolutives avec Django, le framework Python de référence.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="expertise-item">
+                            <h3><i class="fas fa-mobile-alt me-2 text-primary"></i> Applications React/Vue</h3>
+                            <p>Création d'interfaces utilisateur modernes et réactives avec les frameworks JavaScript les plus populaires.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="expertise-item">
+                            <h3><i class="fas fa-database me-2 text-primary"></i> Bases de données</h3>
+                            <p>Conception et optimisation de schémas de bases de données relationnelles et NoSQL pour des performances optimales.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="expertise-item">
+                            <h3><i class="fas fa-cloud me-2 text-primary"></i> Architecture Cloud</h3>
+                            <p>Déploiement et gestion d'applications sur les plateformes AWS, Google Cloud et Azure.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="expertise-item">
+                            <h3><i class="fas fa-lock me-2 text-primary"></i> Sécurité Web</h3>
+                            <p>Mise en place de mesures de sécurité avancées pour protéger vos applications et données sensibles.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="expertise-item">
+                            <h3><i class="fas fa-chart-line me-2 text-primary"></i> Analyse de données</h3>
+                            <p>Extraction et visualisation de données pour transformer l'information en décisions stratégiques.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="py-5" v-show="activeLink === 'services'">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Nos Services</h2>
+                    <p class="lead">Des solutions complètes pour tous vos besoins digitaux</p>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card service-card h-100">
+                            <div class="card-body text-center">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-4">
+                                    <i class="fas fa-laptop-code text-primary fa-3x"></i>
+                                </div>
+                                <h4 class="card-title">Développement Web</h4>
+                                <p class="card-text">Création d'applications web sur mesure avec les technologies les plus récentes.</p>
+                                <ul class="text-start ps-3">
+                                    <li>Sites vitrines</li>
+                                    <li>Plateformes e-commerce</li>
+                                    <li>Applications métiers</li>
+                                    <li>Portails clients</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card service-card h-100">
+                            <div class="card-body text-center">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-4">
+                                    <i class="fas fa-mobile-alt text-primary fa-3x"></i>
+                                </div>
+                                <h4 class="card-title">Applications Mobiles</h4>
+                                <p class="card-text">Développement d'applications hybrides et natives pour iOS et Android.</p>
+                                <ul class="text-start ps-3">
+                                    <li>Applications React Native</li>
+                                    <li>Applications natives Swift/Kotlin</li>
+                                    <li>Applications PWA</li>
+                                    <li>Intégration avec API</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card service-card h-100">
+                            <div class="card-body text-center">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-4">
+                                    <i class="fas fa-server text-primary fa-3x"></i>
+                                </div>
+                                <h4 class="card-title">Hébergement & DevOps</h4>
+                                <p class="card-text">Solutions d'hébergement performantes et gestion de l'infrastructure.</p>
+                                <ul class="text-start ps-3">
+                                    <li>Déploiement continu</li>
+                                    <li>Automatisation des tests</li>
+                                    <li>Surveillance 24/7</li>
+                                    <li>Scalabilité automatique</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="#contact" class="btn btn-primary btn-lg px-4" @click="activeLink = 'contact'">Demander un devis</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-5 bg-light" v-show="activeLink === 'contact'">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="text-center mb-5">
+                            <h2 class="fw-bold">Nous contacter</h2>
+                            <p class="lead">Prêt à démarrer votre projet? Contactez-nous dès aujourd'hui.</p>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="contact-form">
+                                    <form @submit.prevent="submitForm">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Nom complet</label>
+                                            <input type="text" class="form-control" id="name" v-model="form.name" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" v-model="form.email" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="subject" class="form-label">Sujet</label>
+                                            <input type="text" class="form-control" id="subject" v-model="form.subject" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="message" class="form-label">Message</label>
+                                            <textarea class="form-control" id="message" rows="4" v-model="form.message" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Envoyer le message</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <h4><i class="fas fa-map-marker-alt text-primary me-2"></i> Notre adresse</h4>
+                                    <p>123 Rue du Développement, 75000 Paris, France</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h4><i class="fas fa-phone-alt text-primary me-2"></i> Téléphone</h4>
+                                    <p>+33 1 23 45 67 89</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h4><i class="fas fa-envelope text-primary me-2"></i> Email</h4>
+                                    <p>contact@mmdjango.com</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h4><i class="fas fa-clock text-primary me-2"></i> Heures d'ouverture</h4>
+                                    <p>Lundi - Vendredi: 9h00 - 18h00</p>
+                                    <p>Samedi - Dimanche: Fermé</p>
+                                </div>
+                                <div class="social-links">
+                                    <h4><i class="fas fa-share-alt text-primary me-2"></i> Suivez-nous</h4>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2"><i class="fab fa-github"></i></a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm"><i class="fab fa-instagram"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5 class="mb-4">MM Django Digit 2</h5>
+                        <p>Experts en développement web et solutions digitales sur mesure. Nous transformons vos idées en réalité.</p>
+                    </div>
+                    <div class="col-md-2 mb-4 mb-md-0">
+                        <h5 class="mb-4">Liens rapides</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#home" class="text-white" @click="activeLink = 'home'">Accueil</a></li>
+                            <li class="mb-2"><a href="#about" class="text-white" @click="activeLink = 'about'">À propos</a></li>
+                            <li class="mb-2"><a href="#expertise" class="text-white" @click="activeLink = 'expertise'">Expertises</a></li>
+                            <li class="mb-2"><a href="#services" class="text-white" @click="activeLink = 'services'">Services</a></li>
+                            <li><a href="#contact" class="text-white" @click="activeLink = 'contact'">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3 mb-4 mb-md-0">
+                        <h5 class="mb-4">Nos services</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">Développement Web</li>
+                            <li class="mb-2">Applications Mobiles</li>
+                            <li class="mb-2">Hébergement & DevOps</li>
+                            <li class="mb-2">Consulting Technique</li>
+                            <li>Formation</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="mb-4">Newsletter</h5>
+                        <p>Abonnez-vous à notre newsletter pour recevoir nos dernières actualités.</p>
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Votre email">
+                            <button class="btn btn-primary" type="button">S'abonner</button>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4 bg-light">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; 2023 MM Django Digit 2. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <a href="#" class="text-white me-3">Conditions générales</a>
+                        <a href="#" class="text-white">Politique de confidentialité</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                activeLink: 'home',
+                isScrolled: false,
+                form: {
+                    name: '',
+                    email: '',
+                    subject: '',
+                    message: ''
+                }
+            },
+            methods: {
+                submitForm() {
+                    // Ici vous pourriez ajouter la logique pour envoyer le formulaire
+                    alert('Merci pour votre message, ' + this.form.name + '! Nous vous contacterons bientôt.');
+                    this.form = {
+                        name: '',
+                        email: '',
+                        subject: '',
+                        message: ''
+                    };
+                },
+                handleScroll() {
+                    this.isScrolled = window.scrollY > 50;
+                }
+            },
+            mounted() {
+                window.addEventListener('scroll', this.handleScroll);
+                
+                // Gestion des ancres dans l'URL
+                if (window.location.hash) {
+                    const hash = window.location.hash.substring(1);
+                    if (['home', 'about', 'expertise', 'services', 'contact'].includes(hash)) {
+                        this.activeLink = hash;
+                    }
+                }
+            },
+            beforeDestroy() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
+        });
+        
+        // Smooth scrolling pour les ancres
+        $(document).on('click', 'a[href^="#"]', function(event) {
+            event.preventDefault();
+            $('html, body').animate({
+                scrollTop: $($.attr(this, 'href')).offset().top - 70
+            }, 500);
+        });
+    </script>
+</body>
+</html>
