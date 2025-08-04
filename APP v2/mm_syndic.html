@@ -1,0 +1,1342 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Syndic - Gestion immobilière professionnelle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1473&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+        }
+        .search-box {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .nav-item {
+            margin: 0 10px;
+        }
+        .service-card {
+            transition: transform 0.3s;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .property-card {
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+        .property-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .badge-custom {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .page-header {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="sticky-top bg-white shadow-sm">
+            <div class="container">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="#">
+                            <h1 class="m-0 text-primary">MM SYNDIC</h1>
+                            <small class="text-muted">Gestion immobilière professionnelle</small>
+                        </a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#" @click="currentPage='home'">Accueil</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" @click="currentPage='about'">Qui sommes-nous</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" @click="currentPage='services'">Nos services</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" @click="currentPage='properties'">Nos biens</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" @click="currentPage='contact'">Contact</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Home Page -->
+        <div v-if="currentPage === 'home'">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h1 class="display-4 fw-bold mb-4">Votre gestion immobilière simplifiée</h1>
+                            <p class="lead mb-4">Professionnels de la gestion immobilière depuis plus de 20 ans, nous mettons notre expertise à votre service.</p>
+                            <button class="btn btn-primary btn-lg me-2" @click="currentPage='contact'">Nous contacter</button>
+                            <button class="btn btn-outline-light btn-lg" @click="currentPage='services'">Nos services</button>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="search-box mt-4 mt-lg-0">
+                                <h3 class="mb-4">Rechercher un bien</h3>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" placeholder="Localisation, ville, code postal..." v-model="searchQuery">
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6">
+                                        <select class="form-select" v-model="searchType">
+                                            <option value="">Type de bien</option>
+                                            <option v-for="type in propertyTypes" :value="type">{{ type }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select" v-model="searchBudget">
+                                            <option value="">Budget</option>
+                                            <option v-for="budget in budgets" :value="budget.value">{{ budget.label }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-6">
+                                        <select class="form-select" v-model="searchRooms">
+                                            <option value="">Nombre de pièces</option>
+                                            <option v-for="n in 5" :value="n">{{ n }} pièce(s)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select" v-model="searchSurface">
+                                            <option value="">Surface</option>
+                                            <option v-for="surface in surfaces" :value="surface.value">{{ surface.label }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary w-100" @click="performSearch">Rechercher</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Services Section -->
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Nos services</h2>
+                        <p class="text-muted">Découvrez l'ensemble de nos prestations</p>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4" v-for="service in services" :key="service.id">
+                            <div class="service-card card h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                                        <i :class="service.icon" class="fs-4"></i>
+                                    </div>
+                                    <h5 class="card-title">{{ service.title }}</h5>
+                                    <p class="card-text text-muted">{{ service.description }}</p>
+                                    <a href="#" class="btn btn-link">En savoir plus <i class="fas fa-arrow-right ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Properties -->
+            <section class="py-5">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <div>
+                            <h2 class="fw-bold">Biens en vedette</h2>
+                            <p class="text-muted">Découvrez notre sélection de biens exceptionnels</p>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary" @click="currentPage='properties'">Voir tous les biens</a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" v-for="property in featuredProperties" :key="property.id">
+                            <div class="property-card card h-100">
+                                <div class="position-relative">
+                                    <img :src="property.image" class="card-img-top" alt="Property image">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-primary">{{ property.type }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ property.title }}</h5>
+                                    <p class="card-text text-muted">{{ property.location }}</p>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span><i class="fas fa-ruler-combined text-muted me-1"></i> {{ property.surface }} m²</span>
+                                        <span><i class="fas fa-bed text-muted me-1"></i> {{ property.rooms }} pièces</span>
+                                        <span><i class="fas fa-bath text-muted me-1"></i> {{ property.bathrooms }} sdb</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-primary">{{ property.price }} €</span>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">Voir le bien</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials -->
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Ils nous font confiance</h2>
+                        <p class="text-muted">Découvrez ce que nos clients disent de nous</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" v-for="testimonial in testimonials" :key="testimonial.id">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <div class="d-flex mb-3">
+                                        <div class="flex-shrink-0">
+                                            <img :src="testimonial.avatar" alt="Client" class="rounded-circle" width="50">
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">{{ testimonial.name }}</h6>
+                                            <small class="text-muted">{{ testimonial.position }}</small>
+                                        </div>
+                                    </div>
+                                    <p class="card-text">"{{ testimonial.comment }}"</p>
+                                    <div class="text-warning">
+                                        <i class="fas fa-star" v-for="n in testimonial.rating"></i>
+                                        <i class="far fa-star" v-for="n in (5 - testimonial.rating)"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Call to Action -->
+            <section class="py-5 bg-primary text-white">
+                <div class="container text-center">
+                    <h2 class="fw-bold mb-4">Prêt à trouver votre bien idéal ?</h2>
+                    <p class="mb-4">Notre équipe est à votre disposition pour vous accompagner dans votre projet immobilier.</p>
+                    <button class="btn btn-light btn-lg px-4 me-2" @click="currentPage='contact'">Nous contacter</button>
+                    <button class="btn btn-outline-light btn-lg px-4" @click="currentPage='properties'">Voir nos biens</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- About Page -->
+        <div v-if="currentPage === 'about'">
+            <div class="page-header">
+                <div class="container text-center">
+                    <h1 class="fw-bold">Qui sommes-nous</h1>
+                    <nav aria-label="breadcrumb" class="d-flex justify-content-center">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#" @click="currentPage='home'">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Qui sommes-nous</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <section class="py-5">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Our team" class="img-fluid rounded">
+                        </div>
+                        <div class="col-lg-6">
+                            <h2 class="fw-bold mb-4">Notre histoire</h2>
+                            <p class="lead">Fondé en 1998, MM Syndic est rapidement devenu un acteur majeur dans le secteur de la gestion immobilière en France.</p>
+                            <p>Notre entreprise familiale a su évoluer avec son temps tout en conservant les valeurs qui ont fait son succès : professionnalisme, transparence et engagement envers nos clients.</p>
+                            <p>Aujourd'hui, avec plus de 20 ans d'expérience, nous gérons un portefeuille de plusieurs milliers de biens à travers le pays, accompagnant aussi bien les particuliers que les investisseurs institutionnels.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Notre équipe</h2>
+                        <p class="text-muted">Des professionnels à votre service</p>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4" v-for="member in teamMembers" :key="member.id">
+                            <div class="card border-0 h-100">
+                                <img :src="member.image" class="card-img-top" alt="Team member">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title mb-1">{{ member.name }}</h5>
+                                    <p class="text-muted mb-2">{{ member.position }}</p>
+                                    <p class="card-text">{{ member.bio }}</p>
+                                    <div class="d-flex justify-content-center">
+                                        <a :href="member.social.linkedin" class="text-decoration-none me-2" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                        <a :href="member.social.twitter" class="text-decoration-none" target="_blank"><i class="fab fa-twitter"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-5">
+                <div class="container">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                                        <i class="fas fa-medal fs-4"></i>
+                                    </div>
+                                    <h3 class="fw-bold mb-3">20+</h3>
+                                    <p class="text-muted mb-0">Années d'expérience</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                                        <i class="fas fa-building fs-4"></i>
+                                    </div>
+                                    <h3 class="fw-bold mb-3">5,000+</h3>
+                                    <p class="text-muted mb-0">Biens gérés</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                                        <i class="fas fa-users fs-4"></i>
+                                    </div>
+                                    <h3 class="fw-bold mb-3">98%</h3>
+                                    <p class="text-muted mb-0">Clients satisfaits</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Services Page -->
+        <div v-if="currentPage === 'services'">
+            <div class="page-header">
+                <div class="container text-center">
+                    <h1 class="fw-bold">Nos services</h1>
+                    <nav aria-label="breadcrumb" class="d-flex justify-content-center">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#" @click="currentPage='home'">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Nos services</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <section class="py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-4 mb-4 mb-lg-0">
+                            <div class="sticky-top" style="top: 100px;">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h5 class="card-title mb-4">Nos services</h5>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action border-0" 
+                                               v-for="service in services" 
+                                               :key="service.id"
+                                               @click="scrollToService(service.id)">
+                                                <i :class="service.icon" class="me-2"></i> {{ service.title }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div v-for="service in services" :key="service.id" :id="'service-'+service.id" class="mb-5">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3" style="width: 60px; height: 60px;">
+                                        <i :class="service.icon" class="fs-4"></i>
+                                    </div>
+                                    <h2 class="m-0">{{ service.title }}</h2>
+                                </div>
+                                <p class="lead">{{ service.description }}</p>
+                                <p>{{ service.details }}</p>
+                                
+                                <div class="mt-4" v-if="service.features">
+                                    <h5 class="mb-3">Ce service comprend :</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2" v-for="feature in service.features">
+                                            <i class="fas fa-check text-primary me-2"></i> {{ feature }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mt-4 bg-light p-4 rounded" v-if="service.example">
+                                    <h5 class="mb-3">Exemple concret :</h5>
+                                    <p class="mb-0">{{ service.example }}</p>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <button class="btn btn-primary" @click="currentPage='contact'">Demander un devis</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-5 bg-light">
+                <div class="container text-center">
+                    <h2 class="fw-bold mb-4">Vous avez un projet immobilier ?</h2>
+                    <p class="mb-4">Nos conseillers sont à votre disposition pour étudier votre projet et vous proposer la solution la plus adaptée.</p>
+                    <button class="btn btn-primary btn-lg px-4" @click="currentPage='contact'">Prendre rendez-vous</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Properties Page -->
+        <div v-if="currentPage === 'properties'">
+            <div class="page-header">
+                <div class="container text-center">
+                    <h1 class="fw-bold">Nos biens immobiliers</h1>
+                    <nav aria-label="breadcrumb" class="d-flex justify-content-center">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#" @click="currentPage='home'">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Nos biens</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <section class="py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 col-lg-3 mb-4 mb-md-0">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">Filtrer les résultats</h5>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Localisation</label>
+                                        <input type="text" class="form-control" placeholder="Ville, code postal..." v-model="filterLocation">
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Type de bien</label>
+                                        <select class="form-select" v-model="filterType">
+                                            <option value="">Tous les types</option>
+                                            <option v-for="type in propertyTypes" :value="type">{{ type }}</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Budget</label>
+                                        <div class="d-flex align-items-center">
+                                            <input type="number" class="form-control me-2" placeholder="Min" v-model="filterMinPrice">
+                                            <span class="mx-1">-</span>
+                                            <input type="number" class="form-control ms-2" placeholder="Max" v-model="filterMaxPrice">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Surface (m²)</label>
+                                        <div class="d-flex align-items-center">
+                                            <input type="number" class="form-control me-2" placeholder="Min" v-model="filterMinSurface">
+                                            <span class="mx-1">-</span>
+                                            <input type="number" class="form-control ms-2" placeholder="Max" v-model="filterMaxSurface">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label">Nombre de pièces</label>
+                                        <select class="form-select" v-model="filterRooms">
+                                            <option value="">Toutes</option>
+                                            <option v-for="n in 5" :value="n">{{ n }} pièce(s)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button class="btn btn-primary w-100" @click="applyFilters">Appliquer les filtres</button>
+                                    <button class="btn btn-outline-secondary w-100 mt-2" @click="resetFilters">Réinitialiser</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8 col-lg-9">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h5 class="m-0">Résultats : {{ filteredProperties.length }} biens</h5>
+                                </div>
+                                <div>
+                                    <select class="form-select" v-model="sortBy">
+                                        <option value="price-asc">Prix croissant</option>
+                                        <option value="price-desc">Prix décroissant</option>
+                                        <option value="surface-asc">Surface croissante</option>
+                                        <option value="surface-desc">Surface décroissante</option>
+                                        <option value="date-desc">Plus récent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div v-if="filteredProperties.length > 0">
+                                <div class="row">
+                                    <div class="col-lg-6 mb-4" v-for="property in filteredProperties" :key="property.id">
+                                        <div class="property-card card h-100">
+                                            <div class="row g-0">
+                                                <div class="col-md-5">
+                                                    <img :src="property.image" class="img-fluid rounded-start h-100" style="object-fit: cover;" alt="Property image">
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="card-body">
+                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                            <h5 class="card-title mb-0">{{ property.title }}</h5>
+                                                            <span class="badge bg-primary badge-custom">{{ property.type }}</span>
+                                                        </div>
+                                                        <p class="card-text text-muted small mb-2">
+                                                            <i class="fas fa-map-marker-alt text-primary me-1"></i> {{ property.location }}
+                                                        </p>
+                                                        <div class="d-flex small text-muted mb-3">
+                                                            <span class="me-3"><i class="fas fa-ruler-combined me-1"></i> {{ property.surface }} m²</span>
+                                                            <span class="me-3"><i class="fas fa-bed me-1"></i> {{ property.rooms }} pièces</span>
+                                                            <span><i class="fas fa-bath me-1"></i> {{ property.bathrooms }} sdb</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="fw-bold text-primary">{{ property.price }} €</span>
+                                                            <a href="#" class="btn btn-sm btn-outline-primary">Voir le bien</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <nav aria-label="Page navigation" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" :class="{disabled: currentPageNum === 1}">
+                                            <a class="page-link" href="#" @click.prevent="prevPage">Précédent</a>
+                                        </li>
+                                        <li class="page-item" v-for="page in totalPages" :key="page" :class="{active: currentPageNum === page}">
+                                            <a class="page-link" href="#" @click.prevent="goToPage(page)">{{ page }}</a>
+                                        </li>
+                                        <li class="page-item" :class="{disabled: currentPageNum === totalPages}">
+                                            <a class="page-link" href="#" @click.prevent="nextPage">Suivant</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            
+                            <div v-else class="text-center py-5">
+                                <div class="icon-box bg-light bg-opacity-50 text-muted rounded-circle p-4 mb-3 mx-auto" style="width: 100px; height: 100px;">
+                                    <i class="fas fa-search fs-2"></i>
+                                </div>
+                                <h4 class="mb-3">Aucun bien ne correspond à vos critères</h4>
+                                <p class="text-muted mb-4">Essayez de modifier vos filtres de recherche pour obtenir plus de résultats.</p>
+                                <button class="btn btn-primary" @click="resetFilters">Réinitialiser les filtres</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Contact Page -->
+        <div v-if="currentPage === 'contact'">
+            <div class="page-header">
+                <div class="container text-center">
+                    <h1 class="fw-bold">Contactez-nous</h1>
+                    <nav aria-label="breadcrumb" class="d-flex justify-content-center">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#" @click="currentPage='home'">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Contact</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <section class="py-5">
+                <div class="container">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h3 class="card-title mb-4">Nos coordonnées</h3>
+                                    
+                                    <div class="d-flex mb-4">
+                                        <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 flex-shrink-0">
+                                            <i class="fas fa-map-marker-alt fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">Adresse</h5>
+                                            <p class="mb-0 text-muted">123 Avenue des Champs-Élysées<br>75008 Paris, France</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex mb-4">
+                                        <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 flex-shrink-0">
+                                            <i class="fas fa-phone-alt fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">Téléphone</h5>
+                                            <p class="mb-0 text-muted">+33 1 23 45 67 89</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex mb-4">
+                                        <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 flex-shrink-0">
+                                            <i class="fas fa-envelope fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">Email</h5>
+                                            <p class="mb-0 text-muted">contact@mmsyndic.com</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                        <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 flex-shrink-0">
+                                            <i class="fas fa-clock fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">Horaires d'ouverture</h5>
+                                            <p class="mb-0 text-muted">Lundi - Vendredi : 9h - 18h<br>Samedi : 9h - 13h</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h3 class="card-title mb-4">Envoyez-nous un message</h3>
+                                    <form @submit.prevent="submitContactForm">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="firstName" class="form-label">Prénom</label>
+                                                <input type="text" class="form-control" id="firstName" v-model="contactForm.firstName" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="lastName" class="form-label">Nom</label>
+                                                <input type="text" class="form-control" id="lastName" v-model="contactForm.lastName" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" v-model="contactForm.email" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="phone" class="form-label">Téléphone</label>
+                                                <input type="tel" class="form-control" id="phone" v-model="contactForm.phone">
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="subject" class="form-label">Sujet</label>
+                                                <select class="form-select" id="subject" v-model="contactForm.subject" required>
+                                                    <option value="">Sélectionnez un sujet</option>
+                                                    <option value="information">Demande d'information</option>
+                                                    <option value="appointment">Prise de rendez-vous</option>
+                                                    <option value="quote">Demande de devis</option>
+                                                    <option value="other">Autre demande</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="message" class="form-label">Message</label>
+                                                <textarea class="form-control" id="message" rows="5" v-model="contactForm.message" required></textarea>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="consent" v-model="contactForm.consent" required>
+                                                    <label class="form-check-label" for="consent">
+                                                        J'accepte que mes données personnelles soient utilisées pour traiter ma demande conformément à la politique de confidentialité.
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                                                    <span v-if="isSubmitting">
+                                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Envoi en cours...
+                                                    </span>
+                                                    <span v-else>Envoyer le message</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">Nos agences</h2>
+                        <p class="text-muted">Retrouvez-nous dans nos différentes agences en France</p>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4" v-for="agency in agencies" :key="agency.id">
+                            <div class="card border-0 h-100">
+                                <div class="card-body p-0">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe
+                                            :src="agency.map"
+                                            style="border:0;"
+                                            allowfullscreen=""
+                                            loading="lazy"
+                                            referrerpolicy="no-referrer-when-downgrade">
+                                        </iframe>
+                                    </div>
+                                    <div class="p-4">
+                                        <h5 class="card-title">{{ agency.city }}</h5>
+                                        <p class="card-text text-muted small mb-2">
+                                            <i class="fas fa-map-marker-alt text-primary me-1"></i> {{ agency.address }}
+                                        </p>
+                                        <p class="card-text text-muted small mb-2">
+                                            <i class="fas fa-phone-alt text-primary me-1"></i> {{ agency.phone }}
+                                        </p>
+                                        <p class="card-text text-muted small mb-0">
+                                            <i class="fas fa-envelope text-primary me-1"></i> {{ agency.email }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <h3 class="text-white mb-4">MM SYNDIC</h3>
+                        <p class="text-white-50">Professionnels de la gestion immobilière depuis plus de 20 ans, nous mettons notre expertise à votre service.</p>
+                        <div class="social-icons mt-4">
+                            <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <h5 class="text-white mb-4">Liens rapides</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none" @click="currentPage='home'">Accueil</a></li>
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none" @click="currentPage='about'">Qui sommes-nous</a></li>
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none" @click="currentPage='services'">Nos services</a></li>
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none" @click="currentPage='properties'">Nos biens</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none" @click="currentPage='contact'">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <h5 class="text-white mb-4">Nos services</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Gestion locative</a></li>
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Transaction immobilière</a></li>
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Syndic de copropriété</a></li>
+                            <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Évaluation de biens</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Conseil en investissement</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <h5 class="text-white mb-4">Contact</h5>
+                        <ul class="list-unstyled text-white-50">
+                            <li class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i> 123 Avenue des Champs-Élysées, 75008 Paris</li>
+                            <li class="mb-2"><i class="fas fa-phone-alt me-2 text-primary"></i> +33 1 23 45 67 89</li>
+                            <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> contact@mmsyndic.com</li>
+                            <li><i class="fas fa-clock me-2 text-primary"></i> Lun-Ven: 9h-18h, Sam: 9h-13h</li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="my-4 bg-white-10">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="text-white-50 small mb-0">&copy; 2023 MM Syndic. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <ul class="list-inline small mb-0">
+                            <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Mentions légales</a></li>
+                            <li class="list-inline-item"><span class="text-white-50 mx-1">·</span></li>
+                            <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">Politique de confidentialité</a></li>
+                            <li class="list-inline-item"><span class="text-white-50 mx-1">·</span></li>
+                            <li class="list-inline-item"><a href="#" class="text-white-50 text-decoration-none">CGU</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                // Current page state
+                const currentPage = ref('home');
+                
+                // Search properties
+                const searchQuery = ref('');
+                const searchType = ref('');
+                const searchBudget = ref('');
+                const searchRooms = ref('');
+                const searchSurface = ref('');
+                
+                // Property filters
+                const filterLocation = ref('');
+                const filterType = ref('');
+                const filterMinPrice = ref('');
+                const filterMaxPrice = ref('');
+                const filterMinSurface = ref('');
+                const filterMaxSurface = ref('');
+                const filterRooms = ref('');
+                const sortBy = ref('date-desc');
+                const currentPageNum = ref(1);
+                const itemsPerPage = 6;
+                
+                // Contact form
+                const contactForm = ref({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                    subject: '',
+                    message: '',
+                    consent: false
+                });
+                const isSubmitting = ref(false);
+                
+                // Data
+                const propertyTypes = ref(['Appartement', 'Maison', 'Bureau', 'Local commercial', 'Terrain']);
+                const budgets = ref([
+                    { label: 'Moins de 100 000 €', value: '0-100000' },
+                    { label: '100 000 € - 200 000 €', value: '100000-200000' },
+                    { label: '200 000 € - 500 000 €', value: '200000-500000' },
+                    { label: 'Plus de 500 000 €', value: '500000-' }
+                ]);
+                const surfaces = ref([
+                    { label: 'Moins de 50 m²', value: '0-50' },
+                    { label: '50 m² - 100 m²', value: '50-100' },
+                    { label: '100 m² - 150 m²', value: '100-150' },
+                    { label: 'Plus de 150 m²', value: '150-' }
+                ]);
+                
+                const services = ref([
+                    {
+                        id: 1,
+                        title: 'Gestion locative',
+                        icon: 'fas fa-home',
+                        description: 'Gestion complète de votre bien locatif avec notre expertise professionnelle.',
+                        details: 'Nous prenons en charge l\'ensemble des aspects de la gestion locative : recherche de locataires, établissement des contrats, encaissement des loyers, gestion des sinistres et relations avec les locataires. Notre équipe dédiée assure un suivi personnalisé de chaque bien.',
+                        features: [
+                            'Recherche et sélection de locataires',
+                            'Établissement des contrats de location',
+                            'Encaissement des loyers',
+                            'Gestion des impayés',
+                            'Visites et états des lieux'
+                        ],
+                        example: 'Pour un appartement de 70m² à Paris, nous garantissons une location sous 15 jours avec des locataires sérieux et une gestion sans souci pour le propriétaire.'
+                    },
+                    {
+                        id: 2,
+                        title: 'Transaction immobilière',
+                        icon: 'fas fa-euro-sign',
+                        description: 'Vente ou achat de biens immobiliers avec un accompagnement sur mesure.',
+                        details: 'Nos conseillers en transaction immobilière vous accompagnent dans toutes les étapes de votre projet, qu\'il s\'agisse d\'un achat ou d\'une vente. Estimation précise, marketing immobilier, négociation et suivi du dossier jusqu\'à la signature chez le notaire.',
+                        features: [
+                            'Estimation gratuite de votre bien',
+                            'Marketing immobilier personnalisé',
+                            'Visites organisées',
+                            'Négociation professionnelle',
+                            'Suivi jusqu\'à la signature'
+                        ],
+                        example: 'Nous avons vendu un loft de 120m² dans le Marais en 3 semaines seulement, à 5% au-dessus du prix initialement espéré par notre client.'
+                    },
+                    {
+                        id: 3,
+                        title: 'Syndic de copropriété',
+                        icon: 'fas fa-building',
+                        description: 'Gestion administrative, technique et financière de votre copropriété.',
+                        details: 'En tant que syndic professionnel, nous assurons la gestion quotidienne de votre copropriété : convocation et animation des assemblées générales, suivi des travaux, gestion des budgets et relations avec les copropriétaires. Notre objectif : préserver et valoriser votre patrimoine immobilier.',
+                        features: [
+                            'Gestion administrative complète',
+                            'Organisation des AG',
+                            'Suivi des travaux',
+                            'Gestion des budgets',
+                            'Relations avec les copropriétaires'
+                        ],
+                        example: 'Pour une copropriété de 50 lots à Lyon, nous avons réussi à réduire les charges de 15% tout en améliorant la qualité des services communs.'
+                    },
+                    {
+                        id: 4,
+                        title: 'Évaluation de biens',
+                        icon: 'fas fa-chart-line',
+                        description: 'Estimation précise et gratuite de votre bien immobilier.',
+                        details: 'Notre service d\'évaluation repose sur une analyse approfondie du marché local et des caractéristiques spécifiques de votre bien. Nous utilisons des outils professionnels et notre connaissance fine des différents quartiers pour vous fournir une estimation juste et réaliste.',
+                        features: [
+                            'Analyse comparative du marché',
+                            'Visite du bien',
+                            'Rapport détaillé',
+                            'Conseils de valorisation',
+                            'Gratuit et sans engagement'
+                        ],
+                        example: 'Un client souhaitait vendre sa maison à Bordeaux. Après notre évaluation et nos conseils de mise en valeur, il a pu la vendre 12% au-dessus du prix initialement envisagé.'
+                    },
+                    {
+                        id: 5,
+                        title: 'Conseil en investissement',
+                        icon: 'fas fa-piggy-bank',
+                        description: 'Stratégies d\'investissement immobilier adaptées à vos objectifs.',
+                        details: 'Nos conseillers en investissement vous accompagnent dans la définition et la mise en œuvre de votre stratégie patrimoniale. Analyse de votre situation, recommandations personnalisées, recherche de biens et suivi de votre portefeuille. Nous vous aidons à maximiser votre rendement tout en maîtrisant les risques.',
+                        features: [
+                            'Analyse de votre situation',
+                            'Stratégie personnalisée',
+                            'Recherche de biens ciblée',
+                            'Simulations financières',
+                            'Suivi régulier'
+                        ],
+                        example: 'Un jeune couple souhaitant constituer un patrimoine a pu acquérir 3 appartements en 5 ans grâce à notre accompagnement, avec un rendement net moyen de 5,2%.'
+                    },
+                    {
+                        id: 6,
+                        title: 'Gestion de patrimoine',
+                        icon: 'fas fa-landmark',
+                        description: 'Optimisation globale de votre patrimoine immobilier.',
+                        details: 'Notre approche globale du patrimoine prend en compte l\'ensemble de vos biens immobiliers pour vous proposer des solutions d\'optimisation fiscale, de transmission et de gestion. Nous travaillons en partenariat avec des experts comptables et notaires pour vous offrir un service complet.',
+                        features: [
+                            'Audit patrimonial',
+                            'Optimisation fiscale',
+                            'Stratégie de transmission',
+                            'Gestion locative intégrée',
+                            'Suivi personnalisé'
+                        ],
+                        example: 'Un client possédant 8 biens en région parisienne a pu réduire sa fiscalité de 28% tout en améliorant la gestion de son parc locatif grâce à notre expertise.'
+                    }
+                ]);
+                
+                const properties = ref([
+                    {
+                        id: 1,
+                        title: 'Appartement lumineux',
+                        type: 'Appartement',
+                        location: 'Paris 15ème',
+                        price: 450000,
+                        surface: 75,
+                        rooms: 3,
+                        bathrooms: 1,
+                        image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Bel appartement de 3 pièces dans un immeuble haussmannien, entièrement rénové.',
+                        featured: true,
+                        date: '2023-06-15'
+                    },
+                    {
+                        id: 2,
+                        title: 'Maison de ville',
+                        type: 'Maison',
+                        location: 'Versailles',
+                        price: 780000,
+                        surface: 120,
+                        rooms: 4,
+                        bathrooms: 2,
+                        image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Jolie maison de ville avec jardin clos et garage, proche du château.',
+                        featured: true,
+                        date: '2023-05-22'
+                    },
+                    {
+                        id: 3,
+                        title: 'Studio étudiant',
+                        type: 'Appartement',
+                        location: 'Lyon 2ème',
+                        price: 185000,
+                        surface: 28,
+                        rooms: 1,
+                        bathrooms: 1,
+                        image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Studio parfait pour étudiant, entièrement équipé, proche des transports.',
+                        featured: false,
+                        date: '2023-07-10'
+                    },
+                    {
+                        id: 4,
+                        title: 'Loft contemporain',
+                        type: 'Appartement',
+                        location: 'Bordeaux',
+                        price: 620000,
+                        surface: 110,
+                        rooms: 2,
+                        bathrooms: 1,
+                        image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1680&q=80',
+                        description: 'Magnifique loft avec hauteur sous plafond, dans quartier branché.',
+                        featured: true,
+                        date: '2023-04-18'
+                    },
+                    {
+                        id: 5,
+                        title: 'Local commercial',
+                        type: 'Local commercial',
+                        location: 'Marseille',
+                        price: 320000,
+                        surface: 85,
+                        rooms: 1,
+                        bathrooms: 1,
+                        image: 'https://images.unsplash.com/photo-1605346576938-a51a6a68d19e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Local commercial idéal pour boutique ou cabinet, grande vitrine.',
+                        featured: false,
+                        date: '2023-08-05'
+                    },
+                    {
+                        id: 6,
+                        title: 'Bureau moderne',
+                        type: 'Bureau',
+                        location: 'La Défense',
+                        price: 950000,
+                        surface: 150,
+                        rooms: 6,
+                        bathrooms: 2,
+                        image: 'https://images.unsplash.com/photo-1524758631624-e2822cef0c15?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Espace de travail moderne avec vue imprenable, accès 24/7.',
+                        featured: false,
+                        date: '2023-03-30'
+                    },
+                    {
+                        id: 7,
+                        title: 'Appartement standing',
+                        type: 'Appartement',
+                        location: 'Neuilly-sur-Seine',
+                        price: 1200000,
+                        surface: 140,
+                        rooms: 4,
+                        bathrooms: 2,
+                        image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80',
+                        description: 'Appartement haut de gamme avec terrasse et ascenseur privatif.',
+                        featured: false,
+                        date: '2023-07-22'
+                    },
+                    {
+                        id: 8,
+                        title: 'Maison de campagne',
+                        type: 'Maison',
+                        location: 'Normandie',
+                        price: 380000,
+                        surface: 180,
+                        rooms: 5,
+                        bathrooms: 3,
+                        image: 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Authentique maison normande avec grand terrain et dépendances.',
+                        featured: false,
+                        date: '2023-06-30'
+                    },
+                    {
+                        id: 9,
+                        title: 'Terrain constructible',
+                        type: 'Terrain',
+                        location: 'Toulouse',
+                        price: 150000,
+                        surface: 500,
+                        rooms: 0,
+                        bathrooms: 0,
+                        image: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Terrain plat et viabilisé, idéal pour construction maison individuelle.',
+                        featured: false,
+                        date: '2023-05-15'
+                    },
+                    {
+                        id: 10,
+                        title: 'Duplex spacieux',
+                        type: 'Appartement',
+                        location: 'Lille',
+                        price: 290000,
+                        surface: 95,
+                        rooms: 3,
+                        bathrooms: 1,
+                        image: 'https://images.unsplash.com/photo-1586023492125-27c2d015d29b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1588&q=80',
+                        description: 'Duplex très lumineux avec double exposition, proche centre-ville.',
+                        featured: false,
+                        date: '2023-08-12'
+                    },
+                    {
+                        id: 11,
+                        title: 'Penthouse luxueux',
+                        type: 'Appartement',
+                        location: 'Monaco',
+                        price: 4500000,
+                        surface: 220,
+                        rooms: 5,
+                        bathrooms: 3,
+                        image: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80',
+                        description: 'Exceptionnel penthouse avec vue mer, piscine intérieure et terrasse panoramique.',
+                        featured: false,
+                        date: '2023-04-05'
+                    },
+                    {
+                        id: 12,
+                        title: 'Appartement ancien',
+                        type: 'Appartement',
+                        location: 'Strasbourg',
+                        price: 230000,
+                        surface: 65,
+                        rooms: 2,
+                        bathrooms: 1,
+                        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
+                        description: 'Charmant appartement ancien avec parquet et moulures, centre-ville.',
+                        featured: false,
+                        date: '2023-07-28'
+                    }
+                ]);
+                
+                const testimonials = ref([
+                    {
+                        id: 1,
+                        name: 'Sophie Martin',
+                        position: 'Propriétaire bailleur',
+                        comment: 'MM Syndic gère mon appartement depuis 5 ans et je n\'ai jamais eu le moindre souci. Les loyers sont toujours payés à temps et l\'équipe est très réactive.',
+                        rating: 5,
+                        avatar: 'https://randomuser.me/api/portraits/women/43.jpg'
+                    },
+                    {
+                        id: 2,
+                        name: 'Pierre Dubois',
+                        position: 'Investisseur',
+                        comment: 'Grâce à leurs conseils avisés, j\'ai pu constituer un portefeuille de 6 biens en seulement 3 ans. Leur expertise du marché est impressionnante.',
+                        rating: 4,
+                        avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
+                    },
+                    {
+                        id: 3,
+                        name: 'Élodie Lambert',
+                        position: 'Copropriétaire',
+                        comment: 'Notre syndic précédent était catastrophique. Depuis que MM Syndic a pris la gestion, tout fonctionne parfaitement et les charges ont même baissé !',
+                        rating: 5,
+                        avatar: 'https://randomuser.me/api/portraits/women/65.jpg'
+                    }
+                ]);
+                
+                const teamMembers = ref([
+                    {
+                        id: 1,
+                        name: 'Marc Durand',
+                        position: 'Directeur général',
+                        bio: 'Fondateur de MM Syndic, Marc possède plus de 25 ans d\'expérience dans l\'immobilier.',
+                        image: 'https://randomuser.me/api/portraits/men/75.jpg',
+                        social: {
+                            linkedin: '#',
+                            twitter: '#'
+                        }
+                    },
+                    {
+                        id: 2,
+                        name: 'Marie Lefèvre',
+                        position: 'Responsable gestion locative',
+                        bio: 'Marie et son équipe gèrent plus de 800 biens avec un taux de satisfaction de 98%.',
+                        image: 'https://randomuser.me/api/portraits/women/68.jpg',
+                        social: {
+                            linkedin: '#',
+                            twitter: '#'
+                        }
+                    },
+                    {
+                        id: 3,
+                        name: 'Thomas Moreau',
+                        position: 'Responsable transaction',
+                        bio: 'Thomas a négocié plus de 200 transactions immobilières au cours des 5 dernières années.',
+                        image: 'https://randomuser.me/api/portraits/men/45.jpg',
+                        social: {
+                            linkedin: '#',
+                            twitter: '#'
+                        }
+                    }
+                ]);
+                
+                const agencies = ref([
+                    {
+                        id: 1,
+                        city: 'Paris',
+                        address: '123 Avenue des Champs-Élysées, 75008 Paris',
+                        phone: '+33 1 23 45 67 89',
+                        email: 'paris@mmsyndic.com',
+                        map: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.99144060821!2d2.292292615853889!3d48.85837007928746!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e2964e34e2d%3A0x8ddca9ee380ef7e0!2sTour%20Eiffel!5e0!3m2!1sfr!2sfr!4v1628683200000!5m2!1sfr!2sfr'
+                    },
+                    {
+                        id: 2,
+                        city: 'Lyon',
+                        address: '45 Rue de la République, 69002 Lyon',
+                        phone: '+33 4 78 12 34 56',
+                        email: 'lyon@mmsyndic.com',
+                        map: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2783.349646417018!2d4.835215615803161!3d45.7640431791056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f4ea516ae88797%3A0x408ab2ae4bb21f0!2sPlace%20Bellecour!5e0!3m2!1sfr!2sfr!4v1628683240000!5m2!1sfr!2sfr'
+                    },
+                    {
+                        id: 3,
+                        city: 'Marseille',
+                        address: '12 Rue Paradis, 13006 Marseille',
+                        phone: '+33 4 91 23 45 67',
+                        email: 'marseille@mmsyndic.com',
+                        map: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2905.762434021243!2d5.369789415803161!3d43.29649367913396!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12c9bf4344da5333%3A0x40819a5fd970220!2sVieux-Port%20de%20Marseille!5e0!3m2!1sfr!2sfr!4v1628683280000!5m2!1sfr!2sfr'
+                    }
+                ]);
+                
+                // Computed properties
+                const featuredProperties = computed(() => {
+                    return properties.value.filter(property => property.featured).slice(0, 3);
+                });
+                
+                const filteredProperties = computed(() => {
+                    let filtered = [...properties.value];
+                    
+                    // Apply filters
+                    if (filterLocation.value) {
+                        const searchTerm = filterLocation.value.toLowerCase();
+                        filtered = filtered.filter(property => 
+                            property.location.toLowerCase().includes(searchTerm)
+                        );
+                    }
+                    
+                    if (filterType.value) {
+                        filtered = filtered.filter(property => 
+                            property.type === filterType.value
+                        );
+                    }
+                    
+                    if (filterMinPrice.value) {
+                        filtered = filtered.filter(property => 
+                            property.price >= parseInt(filterMinPrice.value)
+                        );
+                    }
+                    
+                    if (filterMaxPrice.value) {
+                        filtered = filtered.filter(property => 
+                            property.price <= parseInt(filterMaxPrice.value)
+                        );
+                    }
+                    
+                    if (filterMinSurface.value) {
+                        filtered = filtered.filter(property => 
+                            property.surface >= parseInt(filterMinSurface.value)
+                        );
+                    }
+                    
+                    if (filterMaxSurface.value) {
+                        filtered = filtered.filter(property => 
+                            property.surface <= parseInt(filterMaxSurface.value)
+                        );
+                    }
+                    
+                    if (filterRooms.value) {
+                        filtered = filtered.filter(property => 
+                            property.rooms === parseInt(filterRooms.value)
+                        );
+                    }
+                    
+                    // Apply sorting
+                    switch(sortBy.value) {
+                        case 'price-asc':
+                            filtered.sort((a, b) => a.price - b.price);
+                            break;
+                        case 'price-desc':
+                            filtered.sort((a, b) => b.price - a.price);
+                            break;
+                        case 'surface-asc':
+                            filtered.sort((a, b) => a.surface - b.surface);
+                            break;
+                        case 'surface-desc':
+                            filtered.sort((a, b) => b.surface - a.surface);
+                            break;
+                        case 'date-desc':
+                            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+                            break;
+                    }
+                    
+                    return filtered;
+                });
+                
+                const paginatedProperties = computed(() => {
+                    const start = (currentPageNum.value - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    return filteredProperties.value.slice(start, end);
+                });
+                
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredProperties.value.length / itemsPerPage);
+                });
+                
+                // Methods
+                const performSearch = () => {
+                    currentPage.value = 'properties';
+                    
+                    // Apply search criteria to filters
+                    if (searchQuery.value) {
+                        filterLocation.value = searchQuery.value;
+                    }
+                    
+                    if (searchType.value) {
+                        filterType.value = searchType.value;
+                    }
+                    
+                    if (searchBudget.value) {
+                        const [min, max] = searchBudget.value.split('-');
+                        filterMinPrice.value = min || '';
+                        filterMaxPrice.value = max || '';
+                    }
+                    
+                    if (searchSurface.value) {
+                        const [min, max] = searchSurface.value.split('-');
+                        filterMinSurface.value = min || '';
+                        filterMaxSurface.value = max || '';
+                    }
+                    
+                    if (searchRooms.value) {
+                        filterRooms.value = searchRooms.value;
+                    }
+                    
+                    // Reset search form
+                    searchQuery.value = '';
+                    searchType.value = '';
+                    searchBudget.value = '';
+                    searchSurface.value = '';
+                    searchRooms.value = '';
+                };
+                
+                const applyFilters = () => {
+                    currentPageNum.value = 1; // Reset to first page when filters change
+                };
+                
+                const resetFilters = () => {
+                    filterLocation.value = '';
+                    filterType.value = '';
+
+</body>
+</html>

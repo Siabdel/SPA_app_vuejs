@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Django Digit 3 - Agence Digitale</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 80vh;
+            color: white;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .expertise-item {
+            border-left: 4px solid #0d6efd;
+            transition: all 0.3s ease;
+        }
+        
+        .expertise-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .contact-form {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="#">
+                    <span class="text-primary">MM</span> Django <span class="text-warning">Digit 3</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="currentPage = 'home'">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="currentPage = 'about'">À propos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="currentPage = 'expertise'">Nos Expertises</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="currentPage = 'services'">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="currentPage = 'contact'">Nous contacter</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Home Page -->
+            <div v-if="currentPage === 'home'" class="home-page">
+                <!-- Hero Section -->
+                <section class="hero-section d-flex align-items-center">
+                    <div class="container text-center">
+                        <h1 class="display-3 fw-bold mb-4">Votre partenaire digital innovant</h1>
+                        <p class="lead mb-5">Nous transformons vos idées en solutions digitales performantes</p>
+                        <a href="#" class="btn btn-primary btn-lg px-4 me-2" @click="currentPage = 'contact'">Nous contacter</a>
+                        <a href="#" class="btn btn-outline-light btn-lg px-4" @click="currentPage = 'services'">Nos services</a>
+                    </div>
+                </section>
+
+                <!-- About Section -->
+                <section class="py-5">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <h2 class="fw-bold mb-4">Qui sommes-nous ?</h2>
+                                <p class="lead">MM Django Digit 3 est une agence digitale spécialisée dans le développement web et mobile, le marketing digital et la création de contenu.</p>
+                                <p>Nous accompagnons les entreprises dans leur transformation digitale avec des solutions sur mesure et innovantes.</p>
+                                <a href="#" class="btn btn-outline-primary mt-3" @click="currentPage = 'about'">En savoir plus</a>
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Équipe digitale" class="img-fluid rounded shadow">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Services Preview -->
+                <section class="py-5 bg-light">
+                    <div class="container">
+                        <h2 class="text-center fw-bold mb-5">Nos services</h2>
+                        <div class="row g-4">
+                            <div class="col-md-4" v-for="(service, index) in services.slice(0, 3)" :key="index">
+                                <div class="card h-100 service-card border-0 shadow-sm">
+                                    <div class="card-body text-center p-4">
+                                        <i :class="service.icon + ' fa-3x text-primary mb-4'"></i>
+                                        <h5 class="card-title fw-bold">{{ service.title }}</h5>
+                                        <p class="card-text">{{ service.description }}</p>
+                                        <a href="#" class="btn btn-link text-primary" @click="currentPage = 'services'">En savoir plus →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- About Page -->
+            <div v-if="currentPage === 'about'" class="about-page py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto text-center">
+                            <h1 class="fw-bold mb-4">À propos de nous</h1>
+                            <p class="lead">MM Django Digit 3, une agence digitale à votre service</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-lg-6">
+                            <h2 class="fw-bold mb-4">Notre histoire</h2>
+                            <p>Fondée en 2015, MM Django Digit 3 est née de la passion commune de ses fondateurs pour les technologies digitales et l'innovation.</p>
+                            <p>Depuis nos débuts, nous avons accompagné plus de 200 clients dans leur transformation digitale, avec pour objectif constant de fournir des solutions sur mesure, performantes et adaptées à leurs besoins spécifiques.</p>
+                            <p>Notre équipe pluridisciplinaire réunit des experts en développement, design, marketing digital et stratégie pour offrir une approche globale à nos clients.</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Notre équipe" class="img-fluid rounded shadow">
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h2 class="fw-bold mb-4 text-center">Nos valeurs</h2>
+                        </div>
+                        <div class="col-md-4 mb-4" v-for="(value, index) in values" :key="index">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <i :class="value.icon + ' fa-2x text-primary mb-3'"></i>
+                                    <h5 class="card-title fw-bold">{{ value.title }}</h5>
+                                    <p class="card-text">{{ value.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expertise Page -->
+            <div v-if="currentPage === 'expertise'" class="expertise-page py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto text-center">
+                            <h1 class="fw-bold mb-4">Nos expertises</h1>
+                            <p class="lead">Des compétences pointues pour répondre à vos besoins digitaux</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-lg-6 mb-4" v-for="(expertise, index) in expertises" :key="index">
+                            <div class="p-4 expertise-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i :class="expertise.icon + ' fa-2x text-primary me-3'"></i>
+                                    <h3 class="fw-bold mb-0">{{ expertise.title }}</h3>
+                                </div>
+                                <p>{{ expertise.description }}</p>
+                                <ul class="list-unstyled">
+                                    <li v-for="(item, i) in expertise.items" :key="i" class="mb-2">
+                                        <i class="fas fa-check-circle text-success me-2"></i>{{ item }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <h2 class="fw-bold mb-4">Technologies maîtrisées</h2>
+                            <div class="d-flex flex-wrap justify-content-center gap-3">
+                                <span class="badge bg-primary p-3 fs-6" v-for="(tech, index) in technologies" :key="index">{{ tech }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Page -->
+            <div v-if="currentPage === 'services'" class="services-page py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto text-center">
+                            <h1 class="fw-bold mb-4">Nos services</h1>
+                            <p class="lead">Des solutions complètes pour votre présence digitale</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-md-6 col-lg-4 mb-4" v-for="(service, index) in services" :key="index">
+                            <div class="card h-100 service-card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i :class="service.icon + ' fa-2x text-primary me-3'"></i>
+                                        <h3 class="fw-bold mb-0">{{ service.title }}</h3>
+                                    </div>
+                                    <p>{{ service.description }}</p>
+                                    <ul class="list-unstyled">
+                                        <li v-for="(item, i) in service.items" :key="i" class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{{ item }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-12 text-center">
+                            <h2 class="fw-bold mb-4">Notre approche</h2>
+                            <div class="row g-4">
+                                <div class="col-md-4" v-for="(step, index) in processSteps" :key="index">
+                                    <div class="card h-100 border-0 bg-light">
+                                        <div class="card-body text-center p-4">
+                                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 50px; height: 50px;">
+                                                <span class="fw-bold">{{ index + 1 }}</span>
+                                            </div>
+                                            <h5 class="card-title fw-bold">{{ step.title }}</h5>
+                                            <p class="card-text">{{ step.description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Page -->
+            <div v-if="currentPage === 'contact'" class="contact-page py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto text-center">
+                            <h1 class="fw-bold mb-4">Contactez-nous</h1>
+                            <p class="lead">Prêt à démarrer votre projet ? Parlons-en !</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-lg-6">
+                            <div class="contact-form p-4 p-lg-5">
+                                <h3 class="fw-bold mb-4">Envoyez-nous un message</h3>
+                                <form @submit.prevent="submitForm">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Nom complet</label>
+                                        <input type="text" class="form-control" id="name" v-model="form.name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" v-model="form.email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" id="phone" v-model="form.phone">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="subject" class="form-label">Sujet</label>
+                                        <select class="form-select" id="subject" v-model="form.subject" required>
+                                            <option value="" disabled selected>Sélectionnez un sujet</option>
+                                            <option value="Devis">Demande de devis</option>
+                                            <option value="Information">Demande d'information</option>
+                                            <option value="Support">Support technique</option>
+                                            <option value="Autre">Autre</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="message" class="form-label">Message</label>
+                                        <textarea class="form-control" id="message" rows="5" v-model="form.message" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Envoyer</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mt-4 mt-lg-0">
+                            <h3 class="fw-bold mb-4">Nos coordonnées</h3>
+                            <div class="mb-4">
+                                <h5 class="fw-bold"><i class="fas fa-map-marker-alt text-primary me-2"></i> Adresse</h5>
+                                <p>123 Avenue de la République, 75011 Paris, France</p>
+                            </div>
+                            <div class="mb-4">
+                                <h5 class="fw-bold"><i class="fas fa-phone text-primary me-2"></i> Téléphone</h5>
+                                <p>+33 1 23 45 67 89</p>
+                            </div>
+                            <div class="mb-4">
+                                <h5 class="fw-bold"><i class="fas fa-envelope text-primary me-2"></i> Email</h5>
+                                <p>contact@mmdjangodigit3.com</p>
+                            </div>
+                            <div class="mb-4">
+                                <h5 class="fw-bold"><i class="fas fa-clock text-primary me-2"></i> Horaires</h5>
+                                <p>Lundi - Vendredi: 9h00 - 18h00</p>
+                                <p>Samedi - Dimanche: Fermé</p>
+                            </div>
+                            <div class="mt-5">
+                                <h5 class="fw-bold mb-3">Suivez-nous</h5>
+                                <div class="d-flex gap-3">
+                                    <a href="#" class="text-primary fs-4"><i class="fab fa-facebook"></i></a>
+                                    <a href="#" class="text-primary fs-4"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="text-primary fs-4"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="text-primary fs-4"><i class="fab fa-instagram"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <h3 class="fw-bold mb-4"><span class="text-primary">MM</span> Django <span class="text-warning">Digit 3</span></h3>
+                        <p>Votre partenaire digital pour des solutions innovantes et performantes.</p>
+                        <div class="d-flex gap-3 mt-4">
+                            <a href="#" class="text-white fs-5"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="text-white fs-5"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-white fs-5"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-white fs-5"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <h5 class="fw-bold mb-4">Liens rapides</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="currentPage = 'home'">Accueil</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="currentPage = 'about'">À propos</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="currentPage = 'expertise'">Expertises</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="currentPage = 'services'">Services</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="currentPage = 'contact'">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <h5 class="fw-bold mb-4">Nos services</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2" v-for="(service, index) in services.slice(0, 5)" :key="index">
+                                <a href="#" class="text-white text-decoration-none" @click="currentPage = 'services'">{{ service.title }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <h5 class="fw-bold mb-4">Newsletter</h5>
+                        <p>Abonnez-vous à notre newsletter pour recevoir nos dernières actualités.</p>
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Votre email">
+                            <button class="btn btn-primary" type="button">S'abonner</button>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; 2023 MM Django Digit 3. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p class="mb-0">
+                            <a href="#" class="text-white text-decoration-none me-3">Mentions légales</a>
+                            <a href="#" class="text-white text-decoration-none">Politique de confidentialité</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const { createApp, ref } = Vue;
+        
+        createApp({
+            setup() {
+                const currentPage = ref('home');
+                
+                const form = ref({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    subject: '',
+                    message: ''
+                });
+                
+                const services = ref([
+                    {
+                        title: 'Développement Web',
+                        description: 'Création de sites web sur mesure, performants et adaptés à vos besoins.',
+                        icon: 'fas fa-code',
+                        items: [
+                            'Sites vitrine',
+                            'Applications web',
+                            'E-commerce',
+                            'CMS personnalisé',
+                            'Intégration responsive'
+                        ]
+                    },
+                    {
+                        title: 'Développement Mobile',
+                        description: 'Applications mobiles natives et hybrides pour iOS et Android.',
+                        icon: 'fas fa-mobile-alt',
+                        items: [
+                            'Applications iOS',
+                            'Applications Android',
+                            'Applications hybrides',
+                            'Maintenance et mise à jour',
+                            'Intégration API'
+                        ]
+                    },
+                    {
+                        title: 'Design UI/UX',
+                        description: 'Conception d\'interfaces utilisateur intuitives et d\'expériences optimisées.',
+                        icon: 'fas fa-paint-brush',
+                        items: [
+                            'Maquettes et prototypes',
+                            'Design system',
+                            'Tests utilisateurs',
+                            'Audit UX',
+                            'Refonte d\'interface'
+                        ]
+                    },
+                    {
+                        title: 'Marketing Digital',
+                        description: 'Stratégies digitales pour augmenter votre visibilité et vos conversions.',
+                        icon: 'fas fa-bullseye',
+                        items: [
+                            'SEO et référencement',
+                            'Publicité en ligne',
+                            'Réseaux sociaux',
+                            'Email marketing',
+                            'Analyse de données'
+                        ]
+                    },
+                    {
+                        title: 'Stratégie Digitale',
+                        description: 'Accompagnement dans la définition et la mise en œuvre de votre stratégie digitale.',
+                        icon: 'fas fa-chess',
+                        items: [
+                            'Audit digital',
+                            'Plan stratégique',
+                            'Roadmap technologique',
+                            'Formation et coaching',
+                            'Suivi et optimisation'
+                        ]
+                    },
+                    {
+                        title: 'Hébergement & Maintenance',
+                        description: 'Solutions d\'hébergement sécurisées et maintenance proactive de vos applications.',
+                        icon: 'fas fa-server',
+                        items: [
+                            'Hébergement cloud',
+                            'Sauvegarde des données',
+                            'Surveillance 24/7',
+                            'Mises à jour de sécurité',
+                            'Support technique'
+                        ]
+                    }
+                ]);
+                
+                const expertises = ref([
+                    {
+                        title: 'Technologies Web',
+                        icon: 'fas fa-globe',
+                        description: 'Maîtrise des dernières technologies web pour des solutions performantes et évolutives.',
+                        items: [
+                            'Django, Python, Flask',
+                            'React, Vue.js, Angular',
+                            'Node.js, Express',
+                            'PHP, Symfony, Laravel',
+                            'Bases de données SQL/NoSQL'
+                        ]
+                    },
+                    {
+                        title: 'Mobile',
+                        icon: 'fas fa-mobile',
+                        description: 'Expertise dans le développement d\'applications mobiles natives et hybrides.',
+                        items: [
+                            'Swift, Kotlin, Java',
+                            'React Native, Flutter',
+                            'Optimisation des performances',
+                            'Intégration de services tiers',
+                            'Publication sur les stores'
+                        ]
+                    },
+                    {
+                        title: 'Cloud & DevOps',
+                        icon: 'fas fa-cloud',
+                        description: 'Déploiement et gestion d\'infrastructures cloud avec des approches DevOps.',
+                        items: [
+                            'AWS, Azure, Google Cloud',
+                            'Docker, Kubernetes',
+                            'CI/CD pipelines',
+                            'Infrastructure as Code',
+                            'Monitoring et logging'
+                        ]
+                    },
+                    {
+                        title: 'Data & IA',
+                        icon: 'fas fa-brain',
+                        description: 'Exploitation des données et intégration d\'intelligence artificielle.',
+                        items: [
+                            'Analyse et visualisation',
+                            'Machine Learning',
+                            'Traitement du langage naturel',
+                            'Reconnaissance d\'images',
+                            'Big Data'
+                        ]
+                    },
+                    {
+                        title: 'Sécurité',
+                        icon: 'fas fa-shield-alt',
+                        description: 'Mise en place de mesures de sécurité robustes pour protéger vos applications.',
+                        items: [
+                            'Tests de pénétration',
+                            'OWASP Top 10',
+                            'Chiffrement des données',
+                            'Authentification sécurisée',
+                            'Conformité RGPD'
+                        ]
+                    },
+                    {
+                        title: 'Agilité',
+                        icon: 'fas fa-sync-alt',
+                        description: 'Méthodologies agiles pour une gestion de projet efficace et transparente.',
+                        items: [
+                            'Scrum, Kanban',
+                            'User stories et backlog',
+                            'Sprints et revues',
+                            'Amélioration continue',
+                            'Collaboration client'
+                        ]
+                    }
+                ]);
+                
+                const technologies = ref([
+                    'Django', 'Python', 'React', 'Vue.js', 'Angular', 
+                    'Node.js', 'Swift', 'Kotlin', 'Flutter', 'React Native',
+                    'AWS', 'Docker', 'Kubernetes', 'PostgreSQL', 'MongoDB',
+                    'TensorFlow', 'PyTorch', 'Git', 'CI/CD', 'Agile'
+                ]);
+                
+                const values = ref([
+                    {
+                        title: 'Innovation',
+                        icon: 'fas fa-lightbulb',
+                        description: 'Nous repoussons les limites de la technologie pour créer des solutions avant-gardistes.'
+                    },
+                    {
+                        title: 'Qualité',
+                        icon: 'fas fa-award',
+                        description: 'L\'excellence est au cœur de notre démarche, avec des produits robustes et bien conçus.'
+                    },
+                    {
+                        title: 'Collaboration',
+                        icon: 'fas fa-handshake',
+                        description: 'Nous travaillons en étroite collaboration avec nos clients pour comprendre leurs besoins.'
+                    },
+                    {
+                        title: 'Transparence',
+                        icon: 'fas fa-eye',
+                        description: 'Des processus clairs et une communication ouverte tout au long du projet.'
+                    },
+                    {
+                        title: 'Engagement',
+                        icon: 'fas fa-heart',
+                        description: 'Nous nous engageons pleinement dans la réussite de chaque projet qui nous est confié.'
+                    },
+                    {
+                        title: 'Flexibilité',
+                        icon: 'fas fa-arrows-alt',
+                        description: 'Adaptabilité pour répondre aux évolutions et aux besoins changeants de nos clients.'
+                    }
+                ]);
+                
+                const processSteps = ref([
+                    {
+                        title: 'Écoute',
+                        description: 'Nous prenons le temps de comprendre vos besoins, vos objectifs et votre environnement.'
+                    },
+                    {
+                        title: 'Conception',
+                        description: 'Élaboration d\'une solution sur mesure avec des spécifications détaillées.'
+                    },
+                    {
+                        title: 'Développement',
+                        description: 'Implémentation rigoureuse avec des méthodologies agiles pour un résultat optimal.'
+                    },
+                    {
+                        title: 'Tests',
+                        description: 'Validation complète du produit pour garantir qualité et performance.'
+                    },
+                    {
+                        title: 'Livraison',
+                        description: 'Déploiement et formation pour une prise en main rapide de votre solution.'
+                    },
+                    {
+                        title: 'Suivi',
+                        description: 'Accompagnement post-livraison et améliorations continues.'
+                    }
+                ]);
+                
+                const submitForm = () => {
+                    alert('Merci pour votre message, nous vous contacterons bientôt !');
+                    form.value = {
+                        name: '',
+                        email: '',
+                        phone: '',
+                        subject: '',
+                        message: ''
+                    };
+                };
+                
+                return {
+                    currentPage,
+                    form,
+                    services,
+                    expertises,
+                    technologies,
+                    values,
+                    processSteps,
+                    submitForm
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

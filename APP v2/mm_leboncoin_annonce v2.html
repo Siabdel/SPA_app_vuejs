@@ -1,0 +1,810 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Django Digit 3 - Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .category-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .search-box {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .listing-card {
+            transition: transform 0.2s;
+        }
+        .listing-card:hover {
+            transform: translateY(-5px);
+        }
+        .price-tag {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        .location-tag {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #ff6b6b !important;
+        }
+        .active-category {
+            border-bottom: 3px solid #ff6b6b;
+            color: #ff6b6b !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="container">
+                <nav class="navbar navbar-expand-lg navbar-light py-3">
+                    <div class="container-fluid">
+                        <a class="navbar-brand fs-3" href="#">MM Django Digit 3</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#"><i class="fas fa-heart me-1"></i> Favoris</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#"><i class="fas fa-bell me-1"></i> Alertes</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#"><i class="fas fa-comment me-1"></i> Messages</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#"><i class="fas fa-user me-1"></i> Mon compte</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-danger ms-2" href="#">Déposer une annonce</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="py-4 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="search-box p-4 bg-white rounded">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control form-control-lg" placeholder="Que recherchez-vous ?" 
+                                    v-model="searchQuery" @keyup.enter="performSearch">
+                                <button class="btn btn-danger" type="button" @click="performSearch">
+                                    <i class="fas fa-search"></i> Rechercher
+                                </button>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="form-check" v-for="category in categories" :key="category.id">
+                                    <input class="form-check-input" type="radio" name="categoryRadio" 
+                                        :id="'category'+category.id" :value="category.id" v-model="selectedCategory">
+                                    <label class="form-check-label" :for="'category'+category.id">
+                                        {{ category.name }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Navigation -->
+        <section class="py-3 bg-white border-bottom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="nav nav-pills justify-content-center flex-nowrap overflow-auto">
+                            <li class="nav-item" v-for="category in categories" :key="category.id">
+                                <a class="nav-link d-flex flex-column align-items-center px-3" href="#" 
+                                    :class="{ 'active-category': selectedCategory === category.id }"
+                                    @click.prevent="selectCategory(category.id)">
+                                    <i :class="category.icon" class="category-icon"></i>
+                                    <span class="small">{{ category.name }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main class="py-4">
+            <div class="container">
+                <div class="row">
+                    <!-- Filters Sidebar -->
+                    <div class="col-lg-3 mb-4">
+                        <div class="filter-section p-3 mb-4">
+                            <h5 class="fw-bold mb-3">Filtrer</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Prix</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="number" class="form-control form-control-sm" placeholder="Min" v-model="priceMin">
+                                    <span class="mx-2">-</span>
+                                    <input type="number" class="form-control form-control-sm" placeholder="Max" v-model="priceMax">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Localisation</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="Ville ou code postal" v-model="location">
+                            </div>
+                            
+                            <div class="mb-3" v-if="selectedCategory === 1">
+                                <label class="form-label">Type de bien</label>
+                                <select class="form-select form-select-sm" v-model="propertyType">
+                                    <option value="">Tous</option>
+                                    <option value="appartement">Appartement</option>
+                                    <option value="maison">Maison</option>
+                                    <option value="terrain">Terrain</option>
+                                    <option value="parking">Parking</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" v-if="selectedCategory === 2">
+                                <label class="form-label">Type de véhicule</label>
+                                <select class="form-select form-select-sm" v-model="vehicleType">
+                                    <option value="">Tous</option>
+                                    <option value="voiture">Voiture</option>
+                                    <option value="moto">Moto</option>
+                                    <option value="utilitaire">Utilitaire</option>
+                                    <option value="camion">Camion</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-check mb-2" v-if="selectedCategory !== 4">
+                                <input class="form-check-input" type="checkbox" id="urgentCheck" v-model="urgentOnly">
+                                <label class="form-check-label" for="urgentCheck">Urgent seulement</label>
+                            </div>
+                            
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="proCheck" v-model="proOnly">
+                                <label class="form-check-label" for="proCheck">Professionnels seulement</label>
+                            </div>
+                            
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="particularCheck" v-model="particularOnly">
+                                <label class="form-check-label" for="particularCheck">Particuliers seulement</label>
+                            </div>
+                            
+                            <button class="btn btn-danger btn-sm w-100 mt-2" @click="applyFilters">Appliquer les filtres</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Listings -->
+                    <div class="col-lg-9">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="fw-bold">{{ getCategoryName(selectedCategory) }}</h4>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                    Trier par: {{ sortOptions.find(opt => opt.value === sortBy).text }}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li v-for="option in sortOptions" :key="option.value">
+                                        <a class="dropdown-item" href="#" @click.prevent="sortBy = option.value">{{ option.text }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div v-if="loading" class="text-center py-5">
+                            <div class="spinner-border text-danger" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                        
+                        <div v-else>
+                            <div class="row g-4">
+                                <div class="col-md-6 col-lg-4" v-for="listing in filteredListings" :key="listing.id">
+                                    <div class="card listing-card h-100">
+                                        <div class="position-relative">
+                                            <img :src="listing.image" class="card-img-top" :alt="listing.title" style="height: 180px; object-fit: cover;">
+                                            <span v-if="listing.urgent" class="badge bg-danger position-absolute top-0 start-0 m-2">Urgent</span>
+                                            <span class="badge bg-dark position-absolute top-0 end-0 m-2">{{ listing.type }}</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ listing.title }}</h5>
+                                            <p class="card-text text-muted small">{{ listing.description.substring(0, 60) }}...</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="price-tag">{{ listing.price }} €</span>
+                                                <span class="location-tag"><i class="fas fa-map-marker-alt me-1"></i>{{ listing.location }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-white border-top-0">
+                                            <small class="text-muted">Publié {{ formatDate(listing.date) }}</small>
+                                            <button class="btn btn-sm btn-outline-danger float-end" @click="addToFavorites(listing)">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div v-if="filteredListings.length === 0" class="text-center py-5">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <h5>Aucune annonce ne correspond à votre recherche</h5>
+                                <p>Essayez de modifier vos critères de recherche</p>
+                            </div>
+                            
+                            <nav aria-label="Page navigation" class="mt-4" v-if="filteredListings.length > 0">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                                        <a class="page-link" href="#" @click.prevent="prevPage">Précédent</a>
+                                    </li>
+                                    <li class="page-item" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }">
+                                        <a class="page-link" href="#" @click.prevent="goToPage(page)">{{ page }}</a>
+                                    </li>
+                                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                        <a class="page-link" href="#" @click.prevent="nextPage">Suivant</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <h5>MM Django Digit 3</h5>
+                        <p>Le meilleur site de petites annonces en France. Achetez et vendez en toute simplicité.</p>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <h5>À propos</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white-50">Qui sommes-nous ?</a></li>
+                            <li><a href="#" class="text-white-50">Nous rejoindre</a></li>
+                            <li><a href="#" class="text-white-50">Presse</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <h5>Assistance</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white-50">Centre d'aide</a></li>
+                            <li><a href="#" class="text-white-50">Nous contacter</a></li>
+                            <li><a href="#" class="text-white-50">Sécurité</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <h5>Juridique</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white-50">Conditions générales</a></li>
+                            <li><a href="#" class="text-white-50">Confidentialité</a></li>
+                            <li><a href="#" class="text-white-50">Cookies</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <h5>Suivez-nous</h5>
+                        <div class="d-flex gap-3">
+                            <a href="#" class="text-white"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-top pt-4 mt-4 text-center text-white-50">
+                    <p>© 2023 MM Django Digit 3 - Tous droits réservés</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                // Data
+                const categories = ref([
+                    { id: 1, name: 'Immobilier', icon: 'fas fa-home' },
+                    { id: 2, name: 'Véhicules', icon: 'fas fa-car' },
+                    { id: 3, name: 'Vacances', icon: 'fas fa-umbrella-beach' },
+                    { id: 4, name: 'Emploi', icon: 'fas fa-briefcase' },
+                    { id: 5, name: 'Mode', icon: 'fas fa-tshirt' },
+                    { id: 6, name: 'Maison & Jardin', icon: 'fas fa-couch' },
+                    { id: 7, name: 'Famille', icon: 'fas fa-baby-carriage' },
+                    { id: 8, name: 'Électronique', icon: 'fas fa-laptop' },
+                    { id: 9, name: 'Loisirs', icon: 'fas fa-gamepad' },
+                    { id: 10, name: 'Autres', icon: 'fas fa-ellipsis-h' }
+                ]);
+                
+                const listings = ref([]);
+                const searchQuery = ref('');
+                const selectedCategory = ref(1);
+                const loading = ref(true);
+                const priceMin = ref('');
+                const priceMax = ref('');
+                const location = ref('');
+                const propertyType = ref('');
+                const vehicleType = ref('');
+                const urgentOnly = ref(false);
+                const proOnly = ref(false);
+                const particularOnly = ref(false);
+                const currentPage = ref(1);
+                const itemsPerPage = 9;
+                const sortBy = ref('date_desc');
+                
+                const sortOptions = ref([
+                    { value: 'date_desc', text: 'Plus récentes' },
+                    { value: 'date_asc', text: 'Plus anciennes' },
+                    { value: 'price_desc', text: 'Prix décroissant' },
+                    { value: 'price_asc', text: 'Prix croissant' }
+                ]);
+                
+                // Computed
+                const filteredListings = computed(() => {
+                    let filtered = listings.value.filter(listing => {
+                        // Filter by category
+                        if (listing.categoryId !== selectedCategory.value) return false;
+                        
+                        // Filter by search query
+                        if (searchQuery.value && 
+                            !listing.title.toLowerCase().includes(searchQuery.value.toLowerCase()) && 
+                            !listing.description.toLowerCase().includes(searchQuery.value.toLowerCase())) {
+                            return false;
+                        }
+                        
+                        // Filter by price
+                        if (priceMin.value && listing.price < parseInt(priceMin.value)) return false;
+                        if (priceMax.value && listing.price > parseInt(priceMax.value)) return false;
+                        
+                        // Filter by location
+                        if (location.value && 
+                            !listing.location.toLowerCase().includes(location.value.toLowerCase())) {
+                            return false;
+                        }
+                        
+                        // Filter by property type (for real estate)
+                        if (selectedCategory.value === 1 && propertyType.value && 
+                            listing.type !== propertyType.value) {
+                            return false;
+                        }
+                        
+                        // Filter by vehicle type (for vehicles)
+                        if (selectedCategory.value === 2 && vehicleType.value && 
+                            listing.type !== vehicleType.value) {
+                            return false;
+                        }
+                        
+                        // Filter by urgent
+                        if (urgentOnly.value && !listing.urgent) return false;
+                        
+                        // Filter by pro/particular
+                        if (proOnly.value && !listing.isPro) return false;
+                        if (particularOnly.value && listing.isPro) return false;
+                        
+                        return true;
+                    });
+                    
+                    // Sort listings
+                    filtered.sort((a, b) => {
+                        if (sortBy.value === 'date_desc') return new Date(b.date) - new Date(a.date);
+                        if (sortBy.value === 'date_asc') return new Date(a.date) - new Date(b.date);
+                        if (sortBy.value === 'price_desc') return b.price - a.price;
+                        if (sortBy.value === 'price_asc') return a.price - b.price;
+                        return 0;
+                    });
+                    
+                    return filtered;
+                });
+                
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredListings.value.length / itemsPerPage);
+                });
+                
+                const paginatedListings = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+                    return filteredListings.value.slice(start, end);
+                });
+                
+                // Methods
+                const getCategoryName = (id) => {
+                    const category = categories.value.find(cat => cat.id === id);
+                    return category ? category.name : 'Toutes les annonces';
+                };
+                
+                const formatDate = (dateString) => {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays === 0) return "aujourd'hui";
+                    if (diffDays === 1) return "hier";
+                    return `il y a ${diffDays} jours`;
+                };
+                
+                const selectCategory = (categoryId) => {
+                    selectedCategory.value = categoryId;
+                    currentPage.value = 1;
+                    resetFilters();
+                };
+                
+                const performSearch = () => {
+                    currentPage.value = 1;
+                };
+                
+                const applyFilters = () => {
+                    currentPage.value = 1;
+                };
+                
+                const resetFilters = () => {
+                    priceMin.value = '';
+                    priceMax.value = '';
+                    location.value = '';
+                    propertyType.value = '';
+                    vehicleType.value = '';
+                    urgentOnly.value = false;
+                    proOnly.value = false;
+                    particularOnly.value = false;
+                };
+                
+                const addToFavorites = (listing) => {
+                    alert(`Annonce "${listing.title}" ajoutée aux favoris`);
+                };
+                
+                const prevPage = () => {
+                    if (currentPage.value > 1) currentPage.value--;
+                };
+                
+                const nextPage = () => {
+                    if (currentPage.value < totalPages.value) currentPage.value++;
+                };
+                
+                const goToPage = (page) => {
+                    currentPage.value = page;
+                };
+                
+                // Lifecycle hooks
+                onMounted(() => {
+                    // Simulate API call to get listings
+                    setTimeout(() => {
+                        listings.value = [
+                            // Immobilier
+                            { 
+                                id: 1, 
+                                categoryId: 1, 
+                                title: "Appartement lumineux 3 pièces", 
+                                description: "Bel appartement de 70m² avec balcon et vue dégagée. Proche commodités.", 
+                                price: 1200, 
+                                location: "Paris 15e", 
+                                date: "2023-06-15", 
+                                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: true, 
+                                type: "appartement", 
+                                isPro: false 
+                            },
+                            { 
+                                id: 2, 
+                                categoryId: 1, 
+                                title: "Maison avec jardin", 
+                                description: "Maison de 120m² avec grand jardin arboré et garage. Parfait pour famille.", 
+                                price: 250000, 
+                                location: "Lyon 3e", 
+                                date: "2023-06-10", 
+                                image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "maison", 
+                                isPro: true 
+                            },
+                            { 
+                                id: 3, 
+                                categoryId: 1, 
+                                title: "Studio meublé centre ville", 
+                                description: "Studio de 25m² entièrement meublé et équipé. Idéal étudiant.", 
+                                price: 650, 
+                                location: "Bordeaux", 
+                                date: "2023-06-18", 
+                                image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "appartement", 
+                                isPro: false 
+                            },
+                            
+                            // Véhicules
+                            { 
+                                id: 4, 
+                                categoryId: 2, 
+                                title: "Peugeot 208 1.2 PureTech", 
+                                description: "Voiture en excellent état, 45000km, entretien à jour. Première main.", 
+                                price: 14500, 
+                                location: "Toulouse", 
+                                date: "2023-06-12", 
+                                image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "voiture", 
+                                isPro: false 
+                            },
+                            { 
+                                id: 5, 
+                                categoryId: 2, 
+                                title: "Yamaha MT-07 2019", 
+                                description: "Moto en parfait état, 12000km, kit chaîne neuf. Contrôle technique OK.", 
+                                price: 7500, 
+                                location: "Marseille", 
+                                date: "2023-06-05", 
+                                image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: true, 
+                                type: "moto", 
+                                isPro: true 
+                            },
+                            { 
+                                id: 6, 
+                                categoryId: 2, 
+                                title: "Renault Trafic 2016", 
+                                description: "Utilitaire propre, 95000km, hayon, clim, très bon état général.", 
+                                price: 18500, 
+                                location: "Lille", 
+                                date: "2023-06-20", 
+                                image: "https://images.unsplash.com/photo-1626804475297-41608ea09aeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "utilitaire", 
+                                isPro: false 
+                            },
+                            
+                            // Vacances
+                            { 
+                                id: 7, 
+                                categoryId: 3, 
+                                title: "Location villa avec piscine", 
+                                description: "Villa 4 chambres avec piscine privée à 200m de la plage. Juillet/Août.", 
+                                price: 1500, 
+                                location: "Saint-Tropez", 
+                                date: "2023-06-08", 
+                                image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "location", 
+                                isPro: true 
+                            },
+                            { 
+                                id: 8, 
+                                categoryId: 3, 
+                                title: "Chalet montagne", 
+                                description: "Chalet cosy pour 6 personnes, station de ski à 5min. Semaine de Noël.", 
+                                price: 1200, 
+                                location: "Chamonix", 
+                                date: "2023-06-14", 
+                                image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: true, 
+                                type: "chalet", 
+                                isPro: false 
+                            },
+                            
+                            // Emploi
+                            { 
+                                id: 9, 
+                                categoryId: 4, 
+                                title: "Développeur Fullstack", 
+                                description: "CDI pour développeur expérimenté en React/Node.js. Télétravail possible.", 
+                                price: 45000, 
+                                location: "Nantes", 
+                                date: "2023-06-17", 
+                                image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "cdi", 
+                                isPro: true 
+                            },
+                            { 
+                                id: 10, 
+                                categoryId: 4, 
+                                title: "Serveur restaurant", 
+                                description: "Recherche serveur expérimenté pour restaurant gastronomique. CDD été.", 
+                                price: 1800, 
+                                location: "Cannes", 
+                                date: "2023-06-19", 
+                                image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "cdd", 
+                                isPro: false 
+                            },
+                            
+                            // Mode
+                            { 
+                                id: 11, 
+                                categoryId: 5, 
+                                title: "Veste en cuir homme", 
+                                description: "Veste en cuir véritable marque Belstaff, taille M, portée 2 fois.", 
+                                price: 350, 
+                                location: "Strasbourg", 
+                                date: "2023-06-11", 
+                                image: "https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "vetement", 
+                                isPro: false 
+                            },
+                            { 
+                                id: 12, 
+                                categoryId: 5, 
+                                title: "Sac à main Louis Vuitton", 
+                                description: "Sac Neverfull MM, authentique, avec pochette. Très bon état.", 
+                                price: 800, 
+                                location: "Nice", 
+                                date: "2023-06-09", 
+                                image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: true, 
+                                type: "accessoire", 
+                                isPro: false 
+                            },
+                            
+                            // Maison & Jardin
+                            { 
+                                id: 13, 
+                                categoryId: 6, 
+                                title: "Canapé d'angle convertible", 
+                                description: "Canapé en bon état, convertible en lit 140x190. Livraison possible.", 
+                                price: 250, 
+                                location: "Rennes", 
+                                date: "2023-06-13", 
+                                image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "meuble", 
+                                isPro: false 
+                            },
+                            { 
+                                id: 14, 
+                                categoryId: 6, 
+                                title: "Tondeuse à gazon", 
+                                description: "Tondeuse thermique Honda, 5.5CV, largeur de coupe 53cm. Très peu servi.", 
+                                price: 320, 
+                                location: "Tours", 
+                                date: "2023-06-16", 
+                                image: "https://images.unsplash.com/photo-1596638787647-904d822d751e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "jardin", 
+                                isPro: true 
+                            },
+                            
+                            // Famille
+                            { 
+                                id: 15, 
+                                categoryId: 7, 
+                                title: "Poussette double", 
+                                description: "Poussette duo en excellent état, avec housse de pluie et accessoires.", 
+                                price: 120, 
+                                location: "Montpellier", 
+                                date: "2023-06-07", 
+                                image: "https://images.unsplash.com/photo-1588479212349-fd55ba3e1b81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "enfant", 
+                                isPro: false 
+                            },
+                            
+                            // Électronique
+                            { 
+                                id: 16, 
+                                categoryId: 8, 
+                                title: "iPhone 13 Pro 128GB", 
+                                description: "Téléphone comme neuf, avec facture et accessoires. Garantie 6 mois.", 
+                                price: 750, 
+                                location: "Lyon", 
+                                date: "2023-06-04", 
+                                image: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: true, 
+                                type: "telephone", 
+                                isPro: false 
+                            },
+                            { 
+                                id: 17, 
+                                categoryId: 8, 
+                                title: "MacBook Pro M1 2020", 
+                                description: "Ordinateur portable 13 pouces, 16GB RAM, 512GB SSD. Parfait état.", 
+                                price: 1100, 
+                                location: "Paris", 
+                                date: "2023-06-21", 
+                                image: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "ordinateur", 
+                                isPro: true 
+                            },
+                            
+                            // Loisirs
+                            { 
+                                id: 18, 
+                                categoryId: 9, 
+                                title: "Vélo de route Cannondale", 
+                                description: "Vélo carbone SuperSix EVO, taille 54, groupe Shimano Ultegra. Comme neuf.", 
+                                price: 2200, 
+                                location: "Grenoble", 
+                                date: "2023-06-06", 
+                                image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "velo", 
+                                isPro: false 
+                            },
+                            { 
+                                id: 19, 
+                                categoryId: 9, 
+                                title: "PS5 + 5 jeux", 
+                                description: "Console PlayStation 5 édition standard avec 5 jeux récents.", 
+                                price: 550, 
+                                location: "Bordeaux", 
+                                date: "2023-06-03", 
+                                image: "https://images.unsplash.com/photo-1607853202273-797f1c22a38e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: true, 
+                                type: "jeu", 
+                                isPro: false 
+                            },
+                            
+                            // Autres
+                            { 
+                                id: 20, 
+                                categoryId: 10, 
+                                title: "Collection timbres rares", 
+                                description: "Lot de timbres anciens et rares des années 1900 à 1950.", 
+                                price: 850, 
+                                location: "Dijon", 
+                                date: "2023-06-22", 
+                                image: "https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80", 
+                                urgent: false, 
+                                type: "collection", 
+                                isPro: false 
+                            }
+                        ];
+                        loading.value = false;
+                    }, 1000);
+                });
+                
+                return {
+                    categories,
+                    listings,
+                    searchQuery,
+                    selectedCategory,
+                    loading,
+                    priceMin,
+                    priceMax,
+                    location,
+                    propertyType,
+                    vehicleType,
+                    urgentOnly,
+                    proOnly,
+                    particularOnly,
+                    currentPage,
+                    sortBy,
+                    sortOptions,
+                    filteredListings,
+                    paginatedListings,
+                    totalPages,
+                    getCategoryName,
+                    formatDate,
+                    selectCategory,
+                    performSearch,
+                    applyFilters,
+                    resetFilters,
+                    addToFavorites,
+                    prevPage,
+                    nextPage,
+                    goToPage
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

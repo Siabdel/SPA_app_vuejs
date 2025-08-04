@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonCoin - Annonces Gratuites</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #333;
+            --secondary-color: #f9f9f9;
+            --accent-color: #006699;
+            --border-color: #ddd;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .category-badge {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .category-badge:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .category-icon {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .search-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .filter-section {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 0;
+        }
+        
+        .filter-section:last-child {
+            border-bottom: none;
+        }
+        
+        .ad-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .ad-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .ad-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .price-tag {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+        
+        .category-active {
+            border-color: var(--accent-color) !important;
+            background-color: rgba(0, 102, 153, 0.05) !important;
+        }
+        
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+                <div class="container">
+                    <a class="navbar-brand fw-bold fs-4" href="#" style="color: var(--accent-color);">
+                        <i class="fas fa-ad me-2"></i>MonCoin
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    <div class="collapse navbar-collapse" id="navbarContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item" v-for="category in mainCategories" :key="category.id">
+                                <a href="#" @click.prevent="setActiveCategory(category.id)" 
+                                   class="nav-link" 
+                                   :class="{ 'active text-primary': activeCategory === category.id }">
+                                   {{ category.name }}
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="d-flex">
+                            <button class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-heart"></i> Favoris
+                            </button>
+                            <button class="btn btn-primary" @click="showPostModal = true">
+                                <i class="fas fa-plus"></i> Déposer une annonce
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Hero Section -->
+            <div class="bg-white py-4">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-7 mb-4 mb-lg-0">
+                            <h1 class="fw-bold mb-3">C'est le moment de vendre</h1>
+                            <p class="lead text-muted">Trouvez la bonne affaire sur le site de petites annonces gratuites</p>
+                            <button class="btn btn-lg btn-primary px-4 py-3" @click="showPostModal = true">
+                                Déposer une annonce gratuite
+                            </button>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="search-card p-4">
+                                <h2 class="h5 fw-bold mb-3">Rechercher une annonce</h2>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control form-control-lg" 
+                                           placeholder="Que recherchez-vous ?" 
+                                           v-model="searchQuery"
+                                           @keyup.enter="performSearch">
+                                    <button class="btn btn-lg btn-primary" type="button" @click="performSearch">
+                                        <i class="fas fa-search"></i> Rechercher
+                                    </button>
+                                </div>
+                                
+                                <!-- Category Quick Navigation -->
+                                <div class="d-flex flex-wrap">
+                                    <div v-for="category in mainCategories" :key="category.id"
+                                         class="category-badge"
+                                         :class="{ 'category-active': activeCategory === category.id }"
+                                         @click="setActiveCategory(category.id)">
+                                        <div class="category-icon">
+                                            <i :class="category.icon"></i>
+                                        </div>
+                                        <div class="text-center">{{ category.name }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="container my-5">
+            <!-- Filters and Results -->
+            <div class="row">
+                <!-- Filters Sidebar -->
+                <div class="col-lg-3 mb-4 mb-lg-0">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <h3 class="h5 fw-bold mb-3">Filtrer les résultats</h3>
+                        
+                        <!-- Category Filter -->
+                        <div class="filter-section">
+                            <h4 class="filter-title">Catégorie</h4>
+                            <div class="form-check" v-for="category in subCategories" :key="category.id">
+                                <input class="form-check-input" type="checkbox" 
+                                       :id="'cat-'+category.id" 
+                                       :value="category.id"
+                                       v-model="selectedCategories">
+                                <label class="form-check-label" :for="'cat-'+category.id">
+                                    {{ category.name }}
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Price Filter -->
+                        <div class="filter-section" v-if="activeCategory !== 'emploi' && activeCategory !== 'vacances'">
+                            <h4 class="filter-title">Prix</h4>
+                            <div class="mb-2">
+                                <input type="range" class="form-range" min="0" max="10000" step="100" 
+                                       v-model="priceRange.min" @change="performSearch">
+                                <input type="range" class="form-range" min="0" max="10000" step="100" 
+                                       v-model="priceRange.max" @change="performSearch">
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <input type="number" class="form-control form-control-sm" 
+                                       placeholder="Min" v-model="priceRange.min">
+                                <input type="number" class="form-control form-control-sm" 
+                                       placeholder="Max" v-model="priceRange.max">
+                            </div>
+                        </div>
+                        
+                        <!-- Location Filter -->
+                        <div class="filter-section">
+                            <h4 class="filter-title">Localisation</h4>
+                            <div class="mb-2">
+                                <select class="form-select form-select-sm" v-model="selectedLocation">
+                                    <option value="">Toute la France</option>
+                                    <option v-for="region in regions" :key="region" :value="region">
+                                        {{ region }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Filter -->
+                        <div class="filter-section">
+                            <h4 class="filter-title">Date de publication</h4>
+                            <div class="form-check" v-for="period in datePeriods" :key="period.value">
+                                <input class="form-check-input" type="radio" 
+                                       :id="'period-'+period.value" 
+                                       :value="period.value"
+                                       v-model="selectedPeriod">
+                                <label class="form-check-label" :for="'period-'+period.value">
+                                    {{ period.label }}
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 mt-3" @click="performSearch">
+                            <i class="fas fa-filter me-2"></i>Appliquer les filtres
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Results -->
+                <div class="col-lg-9">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h4 fw-bold">
+                            {{ getActiveCategoryName }} 
+                            <span class="text-muted fw-normal">({{ filteredAds.length }} résultats)</span>
+                        </h2>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                Trier par : {{ sortOptions.find(opt => opt.value === sortField).label }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li v-for="option in sortOptions" :key="option.value">
+                                    <a href="#" class="dropdown-item" @click.prevent="setSortField(option.value)">
+                                        {{ option.label }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Results -->
+                    <div v-if="filteredAds.length > 0" class="row">
+                        <div v-for="ad in displayedAds" :key="ad.id" class="col-md-6 col-lg-6 mb-4">
+                            <div class="ad-card h-100">
+                                <div class="ad-image" :style="{ backgroundImage: 'url(' + ad.image + ')' }"></div>
+                                <div class="p-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h3 class="h6 mb-1 fw-bold">{{ ad.title }}</h3>
+                                        <span class="price-tag" v-if="ad.price">{{ formatPrice(ad.price) }}</span>
+                                    </div>
+                                    <p class="text-muted small mb-2">{{ ad.location }} • {{ formatDate(ad.date) }}</p>
+                                    <p class="text-truncate" style="max-height: 2.4em; line-height: 1.2em;">{{ ad.description }}</p>
+                                    <div class="d-flex justify-content-between mt-3">
+                                        <span class="badge bg-light text-dark border">{{ getCategoryName(ad.category) }}</span>
+                                        <a href="#" class="text-decoration-none" @click.prevent="viewAd(ad)">
+                                            Voir l'annonce <i class="fas fa-chevron-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- No Results -->
+                    <div v-else class="text-center py-5 bg-white rounded shadow-sm">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h3>Aucun résultat trouvé</h3>
+                        <p class="text-muted">Aucune annonce ne correspond à vos critères de recherche.</p>
+                        <button class="btn btn-outline-primary" @click="resetFilters">Réinitialiser les filtres</button>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav v-if="filteredAds.length > itemsPerPage" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" :class="{ 'disabled': currentPage === 1 }">
+                                <a class="page-link" href="#" @click.prevent="currentPage = Math.max(1, currentPage - 1)">Précédent</a>
+                            </li>
+                            <li v-for="page in totalPages" :key="page" class="page-item" :class="{ 'active': currentPage === page }">
+                                <a class="page-link" href="#" @click.prevent="currentPage = page">{{ page }}</a>
+                            </li>
+                            <li class="page-item" :class="{ 'disabled': currentPage === totalPages }">
+                                <a class="page-link" href="#" @click.prevent="currentPage = Math.min(totalPages, currentPage + 1)">Suivant</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Post Ad Modal -->
+        <div class="modal fade" id="postAdModal" tabindex="-1" aria-hidden="true" 
+             :class="{ 'show': showPostModal }" style="display: none;" v-if="showPostModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Déposer une nouvelle annonce</h5>
+                        <button type="button" class="btn-close" @click="showPostModal = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="submitAd">
+                            <div class="mb-3">
+                                <label class="form-label">Catégorie</label>
+                                <select class="form-select" v-model="newAd.category" required>
+                                    <option v-for="category in allCategories" :key="category.id" :value="category.id">
+                                        {{ category.name }}
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Titre</label>
+                                <input type="text" class="form-control" v-model="newAd.title" required>
+                            </div>
+                            
+                            <div class="mb-3" v-if="!['emploi', 'vacances'].includes(newAd.category)">
+                                <label class="form-label">Prix (€)</label>
+                                <input type="number" class="form-control" v-model="newAd.price">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" rows="5" v-model="newAd.description" required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Localisation</label>
+                                <select class="form-select" v-model="newAd.location" required>
+                                    <option v-for="region in regions" :key="region" :value="region">
+                                        {{ region }}
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Photo</label>
+                                <input type="file" class="form-control" accept="image/*" @change="handleImageUpload">
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" v-model="newAd.urgent" id="urgentAd">
+                                <label class="form-check-label" for="urgentAd">Mettre en avant cette annonce (Urgent)</label>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Publier l'annonce</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show" @click="showPostModal = false"></div>
+        </div>
+        
+        <!-- View Ad Modal -->
+        <div class="modal fade" id="viewAdModal" tabindex="-1" aria-hidden="true" 
+             :class="{ 'show': selectedAd !== null }" style="display: none;" v-if="selectedAd">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ selectedAd?.title }}</h5>
+                        <button type="button" class="btn-close" @click="selectedAd = null"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="position-relative">
+                                    <div class="ad-image" style="height: 400px; border-radius: 8px; overflow: hidden;">
+                                        <img :src="selectedAd?.image" class="w-100 h-100" style="object-fit: cover;">
+                                    </div>
+                                    <div v-if="selectedAd?.urgent" class="position-absolute top-0 end-0 m-3">
+                                        <span class="badge bg-danger fs-6 px-3 py-2">URGENT</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h2 class="h4 mb-3">{{ selectedAd?.title }}</h2>
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div v-if="selectedAd?.price" class="price-tag fs-5 px-4 py-2">
+                                            {{ formatPrice(selectedAd.price) }}
+                                        </div>
+                                        <div class="text-muted">
+                                            <i class="far fa-calendar me-1"></i> {{ formatDate(selectedAd?.date) }} • 
+                                            <i class="fas fa-map-marker-alt me-1"></i> {{ selectedAd?.location }}
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 class="h5 mb-3">Description</h3>
+                                    <p class="lead">{{ selectedAd?.description }}</p>
+                                    
+                                    <div class="mt-5">
+                                        <h3 class="h5 mb-3">Informations complémentaires</h3>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="d-flex">
+                                                    <strong class="me-2">Catégorie:</strong>
+                                                    <span>{{ getCategoryName(selectedAd?.category) }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="d-flex">
+                                                    <strong class="me-2">Type:</strong>
+                                                    <span>{{ getCategoryType(selectedAd?.category) }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3" v-if="selectedAd?.mileage">
+                                                <div class="d-flex">
+                                                    <strong class="me-2">Kilométrage:</strong>
+                                                    <span>{{ selectedAd.mileage }} km</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3" v-if="selectedAd?.year">
+                                                <div class="d-flex">
+                                                    <strong class="me-2">Année:</strong>
+                                                    <span>{{ selectedAd.year }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="border rounded p-4 bg-light">
+                                    <h3 class="h5 mb-4">Contacter le vendeur</h3>
+                                    <div class="d-grid mb-3">
+                                        <button class="btn btn-lg btn-primary">
+                                            <i class="fas fa-phone me-2"></i>Appeler
+                                        </button>
+                                    </div>
+                                    <div class="d-grid mb-4">
+                                        <button class="btn btn-lg btn-outline-primary">
+                                            <i class="fas fa-envelope me-2"></i>Envoyer un message
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="border-top pt-4">
+                                        <h4 class="h6 fw-bold mb-3">À propos du vendeur</h4>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="rounded-circle bg-secondary" style="width: 50px; height: 50px;"></div>
+                                            <div class="ms-3">
+                                                <h5 class="h6 mb-0">Jean D.</h5>
+                                                <small class="text-muted">Membre depuis 2020</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex mb-2">
+                                            <i class="fas fa-star text-warning me-1"></i>
+                                            <i class="fas fa-star text-warning me-1"></i>
+                                            <i class="fas fa-star text-warning me-1"></i>
+                                            <i class="fas fa-star text-warning me-1"></i>
+                                            <i class="far fa-star text-warning me-1"></i>
+                                            <span class="ms-1">4.2 (24 avis)</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border-top pt-4 mt-3">
+                                        <h4 class="h6 fw-bold mb-3">Partager cette annonce</h4>
+                                        <div class="d-flex">
+                                            <button class="btn btn-sm btn-outline-secondary me-2">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-2">
+                                                <i class="fab fa-twitter"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-2">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-link"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show" @click="selectedAd = null"></div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5 class="fw-bold mb-3" style="color: var(--accent-color);">
+                            <i class="fas fa-ad me-2"></i>MonCoin
+                        </h5>
+                        <p>Le site de petites annonces gratuites entre particuliers et professionnels. Achetez, vendez ou donnez vos objets en toute simplicité.</p>
+                        <div class="d-flex mt-3">
+                            <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                            <a href="#" class="text-white"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2 mb-4 mb-md-0">
+                        <h6 class="fw-bold mb-3 text-white">Catégories</h6>
+                        <ul class="list-unstyled">
+                            <li v-for="category in mainCategories" :key="category.id">
+                                <a href="#" @click.prevent="setActiveCategory(category.id)" class="text-white text-decoration-none d-block mb-2">
+                                    {{ category.name }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4 mb-md-0">
+                        <h6 class="fw-bold mb-3 text-white">Informations</h6>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white text-decoration-none d-block mb-2">À propos de nous</a></li>
+                            <li><a href="#" class="text-white text-decoration-none d-block mb-2">Conditions générales</a></li>
+                            <li><a href="#" class="text-white text-decoration-none d-block mb-2">Politique de confidentialité</a></li>
+                            <li><a href="#" class="text-white text-decoration-none d-block mb-2">Sécurité</a></li>
+                            <li><a href="#" class="text-white text-decoration-none d-block mb-2">Nous contacter</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <h6 class="fw-bold mb-3 text-white">Application mobile</h6>
+                        <p>Téléchargez notre application pour une expérience optimale</p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-dark">
+                                <i class="fab fa-apple me-2"></i>App Store
+                            </button>
+                            <button class="btn btn-dark">
+                                <i class="fab fa-google-play me-2"></i>Google Play
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4 bg-light">
+                
+                <div class="text-center text-white">
+                    <p class="mb-0">&copy; 2023 MonCoin. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // JSON Data Fixtures
+        const regions = [
+            "Toute la France", "Île-de-France", "Auvergne-Rhône-Alpes", "Nouvelle-Aquitaine", 
+            "Occitanie", "Provence-Alpes-Côte d'Azur", "Hauts-de-France", "Grand Est", 
+            "Pays de la Loire", "Bretagne", "Normandie", "Centre-Val de Loire", "Bourgogne-Franche-Comté"
+        ];
+        
+        const datePeriods = [
+            { value: 'all', label: 'Toutes les annonces' },
+            { value: 'today', label: 'Aujourd\'hui' },
+            { value: 'week', label: 'Cette semaine' },
+            { value: 'month', label: 'Ce mois-ci' }
+        ];
+        
+        const mainCategories = [
+            { id: 'immobilier', name: 'Immobilier', icon: 'fas fa-home' },
+            { id: 'vehicules', name: 'Véhicules', icon: 'fas fa-car' },
+            { id: 'vacances', name: 'Vacances', icon: 'fas fa-umbrella-beach' },
+            { id: 'emploi', name: 'Emploi', icon: 'fas fa-briefcase' },
+            { id: 'mode', name: 'Mode', icon: 'fas fa-tshirt' },
+            { id: 'maison', name: 'Maison & Jardin', icon: 'fas fa-couch' },
+            { id: 'famille', name: 'Famille', icon: 'fas fa-baby' },
+            { id: 'electronique', name: 'Électronique', icon: 'fas fa-laptop' },
+            { id: 'loisirs', name: 'Loisirs', icon: 'fas fa-gamepad' },
+            { id: 'autres', name: 'Autres', icon: 'fas fa-th' }
+        ];
+        
+        const allCategories = [
+            ...mainCategories,
+            { id: 'appartement', name: 'Appartement', parent: 'immobilier', type: 'Immobilier' },
+            { id: 'maison', name: 'Maison', parent: 'immobilier', type: 'Immobilier' },
+            { id: 'location', name: 'Location', parent: 'immobilier', type: 'Immobilier' },
+            { id: 'voiture', name: 'Voiture', parent: 'vehicules', type: 'Véhicule' },
+            { id: 'moto', name: 'Moto', parent: 'vehicules', type: 'Véhicule' },
+            { id: 'camion', name: 'Camion', parent: 'vehicules', type: 'Véhicule' },
+            { id: 'vacances-location', name: 'Location vacances', parent: 'vacances', type: 'Vacances' },
+            { id: 'vacances-vente', name: 'Vente vacances', parent: 'vacances', type: 'Vacances' },
+            { id: 'emploi-plein', name: 'Temps plein', parent: 'emploi', type: 'Emploi' },
+            { id: 'emploi-partiel', name: 'Temps partiel', parent: 'emploi', type: 'Emploi' },
+            { id: 'emploi-stage', name: 'Stage', parent: 'emploi', type: 'Emploi' },
+            { id: 'vetements', name: 'Vêtements', parent: 'mode', type: 'Mode' },
+            { id: 'chaussures', name: 'Chaussures', parent: 'mode', type: 'Mode' },
+            { id: 'accessoires', name: 'Accessoires', parent: 'mode', type: 'Mode' },
+            { id: 'meubles', name: 'Meubles', parent: 'maison', type: 'Maison' },
+            { id: 'deco', name: 'Décoration', parent: 'maison', type: 'Maison' },
+            { id: 'jardin', name: 'Jardin', parent: 'maison', type: 'Maison' },
+            { id: 'bebe', name: 'Bébé', parent: 'famille', type: 'Famille' },
+            { id: 'enfant', name: 'Enfant', parent: 'famille', type: 'Famille' },
+            { id: 'puericulture', name: 'Puériculture', parent: 'famille', type: 'Famille' },
+            { id: 'ordinateurs', name: 'Ordinateurs', parent: 'electronique', type: 'Électronique' },
+            { id: 'telephones', name: 'Téléphones', parent: 'electronique', type: 'Électronique' },
+            { id: 'audio', name: 'Audio', parent: 'electronique', type: 'Électronique' },
+            { id: 'sport', name: 'Sport', parent: 'loisirs', type: 'Loisirs' },
+            { id: 'livres', name: 'Livres', parent: 'loisirs', type: 'Loisirs' },
+            { id: 'jeux', name: 'Jeux vidéo', parent: 'loisirs', type: 'Loisirs' },
+            { id: 'animaux', name: 'Animaux', parent: 'autres', type: 'Autres' },
+            { id: 'services', name: 'Services', parent: 'autres', type: 'Autres' },
+            { id: 'autre', name: 'Autre', parent: 'autres', type: 'Autres' }
+        ];
+        
+        // Generate realistic ads data
+        const generateAds = () => {
+            const ads = [];
+            const categories = allCategories.filter(cat => cat.parent);
+            const now = new Date();
+            
+            // Generate 50 ads for demonstration
+            for (let i = 1; i <= 50; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const isJob = category.parent === 'emploi';
+                const isVacances = category.parent === 'vacances';
+                
+                // Random date within the last 30 days
+                const date = new Date();
+                date.setDate(now.getDate() - Math.floor(Math.random() * 30));
+                
+                ads.push({
+                    id: i,
+                    title: generateTitle(category.id, i),
+                    description: generateDescription(category.id, i),
+                    price: isJob || isVacances ? null : Math.floor(Math.random() * 10000) + 100,
+                    location: regions[Math.floor(Math.random() * (regions.length - 1)) + 1],
+                    date: date,
+                    category: category.id,
+                    urgent: Math.random() > 0.7,
+                    image: getRandomImage(category.id),
+                    mileage: category.parent === 'vehicules' ? Math.floor(Math.random() * 200000) : null,
+                    year: category.parent === 'vehicules' ? 2000 + Math.floor(Math.random() * 23) : null
+                });
+            }
+            
+            return ads;
+        };
+        
+        // Helper functions for generating realistic data
+        function generateTitle(categoryId, index) {
+            const titles = {
+                'voiture': [
+                    'Peugeot 208 occasion', 'Renault Clio 4', 'Citroën C3 diesel', 
+                    'Volkswagen Golf 7', 'Ford Focus', 'Dacia Sandero'
+                ],
+                'appartement': [
+                    'Appartement T2 centre ville', 'Studio meublé proche métro', 
+                    'Appartement T3 avec balcon', 'Duplex moderne'
+                ],
+                'maison': [
+                    'Maison 4 pièces avec jardin', 'Villa contemporaine', 
+                    'Maison de village à rénover', 'Maison plain-pied'
+                ],
+                'ordinateurs': [
+                    'PC portable Dell', 'MacBook Pro 13"', 'PC gaming', 
+                    'Écran 27"', 'Clavier mécanique'
+                ],
+                'vetements': [
+                    'Robe d'été taille 38', 'Jean Levi\'s 501', 
+                    'Veste en cuir', 'Pull col V'
+                ],
+                'moto': [
+                    'Yamaha MT-07', 'Honda CB500', 'Kawasaki Ninja', 
+                    'Scooter 125cc', 'Triumph Bonneville'
+                ],
+                'emploi-plein': [
+                    'Développeur web', 'Chef de projet', 'Comptable', 
+                    'Commercial', 'Ingénieur informatique'
+                ],
+                'vacances-location': [
+                    'Appartement à Nice', 'Maison à la montagne', 
+                    'Studio bord de mer', 'Gîte rural'
+                ]
+            };
+            
+            const categoryType = categoryId.split('-')[0];
+            const categoryTitles = titles[categoryType] || [
+                'Annonce intéressante', 'Bonne occasion', 'À ne pas manquer', 
+                'Offre spéciale', 'Article comme neuf', 'Très bon état'
+            ];
+            
+            return categoryTitles[index % categoryTitles.length] + ' #' + index;
+        }
+        
+        function generateDescription(categoryId, index) {
+            const descriptions = {
+                'voiture': [
+                    'Voiture en excellent état, très bien entretenue, carnet d\'entretien à jour. Première main.',
+                    'Occasion à saisir ! Véhicule récent avec garantie constructeur. Équipements complets.',
+                    'Diesel économique, faible consommation. Parfaite pour les trajets quotidiens.',
+                    'Climatisation, GPS, caméra de recul. À voir rapidement !',
+                    'Véhicule non-fumeur, intérieur cuir, toit panoramique.'
+                ],
+                'appartement': [
+                    'Appartement lumineux situé dans un quartier calme et résidentiel. Proche des commodités.',
+                    'Grand T2 avec cuisine équipée, salle de bain récente et balcon. À deux pas du métro.',
+                    'Studio refait à neuf, parfait pour étudiant ou premier investissement.',
+                    'Appartement traversant avec vue dégagée, parquet ancien, cave incluse.'
+                ],
+                'maison': [
+                    'Maison de 100m² sur terrain de 500m², 3 chambres, garage. À rénover selon vos goûts.',
+                    'Villa moderne avec piscine, proche des écoles et commerces. Chauffage au gaz.',
+                    'Maison de village avec charme, pierres apparentes, tomettes. Idéal premier achat.',
+                    'Plain-pied de 80m², 2 chambres, grande pièce de vie avec cheminée. Proche forêt.'
+                ],
+                'ordinateurs': [
+                    'PC portable Dell XPS en excellent état, écran Full HD, 16Go RAM, SSD 512Go. Parfait pour le travail.',
+                    'MacBook Pro 13" avec Touch Bar, processeur i7, parfait état, boîte et accessoires d\'origine.',
+                    'PC de bureau pour gaming, carte graphique RTX 3070, processeur i7, 32Go RAM, écran 144Hz.',
+                    'Écran Dell 27" UltraSharp, résolution QHD, idéal pour le travail ou le gaming.'
+                ],
+                'vetements': [
+                    'Robe d\'été en coton, taille 38, portée 2 fois. Parfaite état.',
+                    'Jean Levi\'s 501 original, taille 32, jamais lavé, état neuf.',
+                    'Veste en cuir véritable, taille M, portée quelques fois. Très bon état.',
+                    'Pull col V en laine mérinos, couleur marine, taille L, état impeccable.'
+                ]
+            };
+            
+            const categoryType = categoryId.split('-')[0];
+            const categoryDescs = descriptions[categoryType] || [
+                'Article en très bon état, peu utilisé. À voir rapidement !',
+                'Parfait état, comme neuf. Prix intéressant, à saisir !',
+                'Objet de qualité, marque reconnue. Idéal pour débuter.',
+                'À vendre car double emploi. Fonctionne parfaitement.',
+                'Très bon rapport qualité-prix. À négocier selon offre.'
+            ];
+            
+            return categoryDescs[index % categoryDescs.length] + ' Annonce créée le ' + new Date().toLocaleDateString();
+        }
+        
+        function getRandomImage(categoryId) {
+            const imageCategories = {
+                'voiture': [
+                    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1548643510-29da66ef6696?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1502877338535-766e1452684a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                ],
+                'appartement': [
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                ],
+                'maison': [
+                    'https://images.unsplash.com/photo-1613545325278-f24b0cae1224?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1600596542815-4d7c0b698c57?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                ],
+                'ordinateurs': [
+                    'https://images.unsplash.com/photo-1546868871-7041f259154a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1593608308138-92b19b3434b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1546508365-fcf48650b189?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                ],
+                'vetements': [
+                    'https://images.unsplash.com/photo-1525507119023-8b5769a7c047?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1595433761257-9fb1757506d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1591048048693-e0e34b96d10a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                ],
+                'moto': [
+                    'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1518778566127-7da57a5d884e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    'https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+                ]
+            };
+            
+            const categoryType = categoryId.split('-')[0];
+            const categoryImages = imageCategories[categoryType] || [
+                'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+            ];
+            
+            return categoryImages[index % categoryImages.length];
+        }
+        
+        // Vue.js Application
+        const { createApp, ref, computed, watch } = Vue;
+        
+        const app = createApp({
+            setup() {
+                // State variables
+                const activeCategory = ref('vehicules');
+                const searchQuery = ref('');
+                const selectedCategories = ref([]);
+                const priceRange = ref({ min: 0, max: 10000 });
+                const selectedLocation = ref('');
+                const selectedPeriod = ref('all');
+                const currentPage = ref(1);
+                const itemsPerPage = ref(8);
+                const sortField = ref('date');
+                const showPostModal = ref(false);
+                const selectedAd = ref(null);
+                
+                // New ad form
+                const newAd = ref({
+                    category: 'voiture',
+                    title: '',
+                    description: '',
+                    price: '',
+                    location: regions[1],
+                    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    urgent: false
+                });
+                
+                // Generate ads data
+                const ads = ref(generateAds());
+                
+                // Computed properties
+                const subCategories = computed(() => {
+                    return allCategories.filter(cat => cat.parent === activeCategory.value);
+                });
+                
+                const getActiveCategoryName = computed(() => {
+                    const category = mainCategories.find(cat => cat.id === activeCategory.value);
+                    return category ? category.name : 'Annonces';
+                });
+                
+                const filteredAds = computed(() => {
+                    return ads.value.filter(ad => {
+                        // Filter by search query
+                        if (searchQuery.value && 
+                            !ad.title.toLowerCase().includes(searchQuery.value.toLowerCase()) && 
+                            !ad.description.toLowerCase().includes(searchQuery.value.toLowerCase())) {
+                            return false;
+                        }
+                        
+                        // Filter by category
+                        if (selectedCategories.value.length > 0 && 
+                            !selectedCategories.value.includes(ad.category)) {
+                            return false;
+                        }
+                        
+                        // Filter by price
+                        if (ad.price && (ad.price < priceRange.value.min || ad.price > priceRange.value.max)) {
+                            return false;
+                        }
+                        
+                        // Filter by location
+                        if (selectedLocation.value && ad.location !== selectedLocation.value) {
+                            return false;
+                        }
+                        
+                        // Filter by date period
+                        if (selectedPeriod.value !== 'all') {
+                            const adDate = new Date(ad.date);
+                            const now = new Date();
+                            
+                            if (selectedPeriod.value === 'today' && adDate.getDate() !== now.getDate()) {
+                                return false;
+                            }
+                            
+                            if (selectedPeriod.value === 'week') {
+                                const oneWeekAgo = new Date();
+                                oneWeekAgo.setDate(now.getDate() - 7);
+                                if (adDate < oneWeekAgo) return false;
+                            }
+                            
+                            if (selectedPeriod.value === 'month') {
+                                const oneMonthAgo = new Date();
+                                oneMonthAgo.setMonth(now.getMonth() - 1);
+                                if (adDate < oneMonthAgo) return false;
+                            }
+                        }
+                        
+                        return true;
+                    }).sort((a, b) => {
+                        // Sort by selected field
+                        if (sortField.value === 'price') {
+                            return (a.price || 0) - (b.price || 0);
+                        } else if (sortField.value === 'date') {
+                            return new Date(b.date) - new Date(a.date);
+                        } else if (sortField.value === 'location') {
+                            return a.location.localeCompare(b.location);
+                        }
+                        return 0;
+                    });
+                });
+                
+                const displayedAds = computed(() => {
+                    const start = (currentPage.value - 1) * itemsPerPage.value;
+                    const end = start + itemsPerPage.value;
+                    return filteredAds.value.slice(start, end);
+                });
+                
+                const totalPages = computed(() => {
+                    return Math.ceil(filteredAds.value.length / itemsPerPage.value);
+                });
+                
+                const sortOptions = [
+                    { value: 'date', label: 'Plus récentes' },
+                    { value: 'price', label: 'Prix croissant' },
+                    { value: 'price_desc', label: 'Prix décroissant' },
+                    { value: 'location', label: 'Localisation' }
+                ];
+                
+                // Methods
+                const setActiveCategory = (categoryId) => {
+                    activeCategory.value = categoryId;
+                    selectedCategories.value = [];
+                    currentPage.value = 1;
+                };
+                
+                const performSearch = () => {
+                    currentPage.value = 1;
+                };
+                
+                const resetFilters = () => {
+                    searchQuery.value = '';
+                    selectedCategories.value = [];
+                    priceRange.value = { min: 0, max: 10000 };
+                    selectedLocation.value = '';
+                    selectedPeriod.value = 'all';
+                    currentPage.value = 1;
+                };
+                
+                const setSortField = (field) => {
+                    if (field === 'price_desc') {
+                        sortField.value = 'price';
+                        // Reverse the sort order for price descending
+                        ads.value = [...ads.value].sort((a, b) => (b.price || 0) - (a.price || 0));
+                    } else {
+                        sortField.value = field;
+                    }
+                    currentPage.value = 1;
+                };
+                
+                const formatPrice = (price) => {
+                    if (!price) return '';
+                    return new Intl.NumberFormat('fr-FR').format(price) + ' €';
+                };
+                
+                const formatDate = (date) => {
+                    if (!date) return '';
+                    return new Date(date).toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                };
+                
+                const getCategoryName = (categoryId) => {
+                    const category = allCategories.find(cat => cat.id === categoryId);
+                    return category ? category.name : 'Autre';
+                };
+                
+                const getCategoryType = (categoryId) => {
+                    const category = allCategories.find(cat => cat.id === categoryId);
+                    return category && category.type ? category.type : 'Divers';
+                };
+                
+                const viewAd = (ad) => {
+                    selectedAd.value = ad;
+                };
+                
+                const submitAd = () => {
+                    const newAdObj = {
+                        ...newAd.value,
+                        id: ads.value.length + 1,
+                        date: new Date(),
+                        urgent: newAd.value.urgent
+                    };
+                    
+                    ads.value.unshift(newAdObj);
+                    showPostModal.value = false;
+                    
+                    // Reset form
+                    newAd.value = {
+                        category: 'voiture',
+                        title: '',
+                        description: '',
+                        price: '',
+                        location: regions[1],
+                        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                        urgent: false
+                    };
+                    
+                    alert('Votre annonce a été publiée avec succès !');
+                };
+                
+                const handleImageUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            newAd.value.image = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                
+                // Watchers
+                watch(activeCategory, (newVal) => {
+                    // When category changes, reset relevant filters
+                    selectedCategories.value = [];
+                    currentPage.value = 1;
+                });
+                
+                return {
+                    // Data
+                    mainCategories,
+                    allCategories,
+                    regions,
+                    datePeriods,
+                    ads,
+                    
+                    // Reactive variables
+                    activeCategory,
+                    searchQuery,
+                    selectedCategories,
+                    priceRange,
+                    selectedLocation,
+                    selectedPeriod,
+                    currentPage,
+                    itemsPerPage,
+                    sortField,
+                    showPostModal,
+                    selectedAd,
+                    newAd,
+                    
+                    // Computed
+                    subCategories,
+                    getActiveCategoryName,
+                    filteredAds,
+                    displayedAds,
+                    totalPages,
+                    sortOptions,
+                    
+                    // Methods
+                    setActiveCategory,
+                    performSearch,
+                    resetFilters,
+                    setSortField,
+                    formatPrice,
+                    formatDate,
+                    getCategoryName,
+                    getCategoryType,
+                    viewAd,
+                    submitAd,
+                    handleImageUpload
+                };
+            }
+        });
+        
+        // Mount the app
+        app.mount('#app');
+        
+        // Handle modal backdrop clicks
+        $(document).on('click', '.modal-backdrop', function() {
+            $('#postAdModal, #viewAdModal').modal('hide');
+        });
+    </script>
+</body>
+</html>

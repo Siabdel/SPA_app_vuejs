@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGWEB - Solutions Digitales</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .navbar {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://cgweb.ca/wp-content/uploads/2021/05/hero-image.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 80vh;
+        }
+        
+        .service-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .expertise-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            height: 250px;
+        }
+        
+        .expertise-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .expertise-item:hover .expertise-overlay {
+            transform: translateY(0);
+        }
+        
+        .contact-form {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <img src="https://cgweb.ca/wp-content/uploads/2021/05/cgweb-logo.png" alt="CGWEB" height="40">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="showHome">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="showAbout">À propos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="showExpertise">Nos Expertises</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="showServices">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click="showContact">Nous contacter</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Home Section -->
+        <section v-if="currentView === 'home'" class="hero-section d-flex align-items-center text-white">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h1 class="display-3 fw-bold mb-4">Solutions digitales sur mesure</h1>
+                        <p class="lead mb-5">Nous créons des expériences digitales qui transforment votre entreprise et engagent vos clients.</p>
+                        <a href="#" class="btn btn-primary btn-lg px-4 me-2" @click="showContact">Contactez-nous</a>
+                        <a href="#" class="btn btn-outline-light btn-lg px-4" @click="showServices">Nos services</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section v-if="currentView === 'about'" class="py-5">
+            <div class="container py-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h2 class="display-5 fw-bold mb-4">À propos de CGWEB</h2>
+                        <p class="lead mb-4">Fondée en 2010, CGWEB est une agence digitale spécialisée dans la création de solutions web innovantes et performantes.</p>
+                        <p>Notre équipe pluridisciplinaire combine expertise technique et créativité pour concevoir des plateformes digitales qui répondent aux besoins spécifiques de nos clients tout en offrant une expérience utilisateur exceptionnelle.</p>
+                        <div class="d-flex mt-4">
+                            <div class="pe-4">
+                                <h3 class="fw-bold">50+</h3>
+                                <p>Clients satisfaits</p>
+                            </div>
+                            <div class="pe-4">
+                                <h3 class="fw-bold">12</h3>
+                                <p>Années d'expérience</p>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold">100%</h3>
+                                <p>Engagement qualité</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <img src="https://cgweb.ca/wp-content/uploads/2021/05/about-image.jpg" alt="À propos" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+                
+                <div class="row mt-5 pt-5">
+                    <div class="col-12 text-center mb-5">
+                        <h2 class="fw-bold">Notre équipe</h2>
+                        <p class="lead">Des professionnels passionnés à votre service</p>
+                    </div>
+                    <div class="col-md-4 mb-4" v-for="member in teamMembers" :key="member.id">
+                        <div class="card border-0 shadow-sm h-100">
+                            <img :src="member.image" class="card-img-top" :alt="member.name">
+                            <div class="card-body text-center">
+                                <h5 class="card-title fw-bold">{{ member.name }}</h5>
+                                <p class="text-muted">{{ member.position }}</p>
+                                <p class="card-text">{{ member.bio }}</p>
+                            </div>
+                            <div class="card-footer bg-white border-0 text-center">
+                                <a :href="member.linkedin" class="text-decoration-none me-2" target="_blank">
+                                    <i class="fab fa-linkedin text-primary"></i>
+                                </a>
+                                <a :href="member.twitter" class="text-decoration-none" target="_blank">
+                                    <i class="fab fa-twitter text-info"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expertise Section -->
+        <section v-if="currentView === 'expertise'" class="py-5 bg-light">
+            <div class="container py-5">
+                <div class="row mb-5">
+                    <div class="col-12 text-center">
+                        <h2 class="display-5 fw-bold">Nos Expertises</h2>
+                        <p class="lead">Des compétences pointues pour des solutions digitales performantes</p>
+                    </div>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-4" v-for="expertise in expertises" :key="expertise.id">
+                        <div class="expertise-item position-relative">
+                            <img :src="expertise.image" class="img-fluid w-100 h-100 object-fit-cover" :alt="expertise.title">
+                            <div class="expertise-overlay">
+                                <h3 class="fw-bold">{{ expertise.title }}</h3>
+                                <p>{{ expertise.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5 pt-5">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h2 class="fw-bold mb-4">Notre approche</h2>
+                        <div class="accordion" id="expertiseAccordion">
+                            <div class="accordion-item mb-3 border-0 shadow-sm" v-for="(item, index) in approachItems" :key="item.id">
+                                <h3 class="accordion-header" :id="'heading' + index">
+                                    <button class="accordion-button collapsed bg-white" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse' + index" aria-expanded="false" :aria-controls="'collapse' + index">
+                                        {{ item.title }}
+                                    </button>
+                                </h3>
+                                <div :id="'collapse' + index" class="accordion-collapse collapse" :aria-labelledby="'heading' + index" data-bs-parent="#expertiseAccordion">
+                                    <div class="accordion-body">
+                                        {{ item.content }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="bg-white p-4 shadow-sm rounded">
+                            <h3 class="fw-bold mb-4">Technologies maîtrisées</h3>
+                            <div class="row">
+                                <div class="col-6 mb-3" v-for="tech in technologies" :key="tech.id">
+                                    <div class="d-flex align-items-center">
+                                        <img :src="tech.icon" :alt="tech.name" width="30" class="me-2">
+                                        <span>{{ tech.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-primary text-white p-4 mt-4 rounded shadow-sm">
+                            <h3 class="fw-bold mb-3">Pourquoi nous choisir ?</h3>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle me-2"></i> Expertise technique approfondie</li>
+                                <li class="mb-2"><i class="fas fa-check-circle me-2"></i> Approche centrée sur l'utilisateur</li>
+                                <li class="mb-2"><i class="fas fa-check-circle me-2"></i> Solutions sur mesure</li>
+                                <li class="mb-2"><i class="fas fa-check-circle me-2"></i> Support réactif et personnalisé</li>
+                                <li><i class="fas fa-check-circle me-2"></i> Engagement qualité</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section v-if="currentView === 'services'" class="py-5">
+            <div class="container py-5">
+                <div class="row mb-5">
+                    <div class="col-12 text-center">
+                        <h2 class="display-5 fw-bold">Nos Services</h2>
+                        <p class="lead">Des solutions complètes pour votre présence digitale</p>
+                    </div>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-4" v-for="service in services" :key="service.id">
+                        <div class="card service-card h-100">
+                            <div class="card-body p-4">
+                                <div class="mb-4">
+                                    <i :class="service.icon" class="display-4" :style="'color: ' + service.color"></i>
+                                </div>
+                                <h3 class="card-title fw-bold mb-3">{{ service.title }}</h3>
+                                <p class="card-text">{{ service.description }}</p>
+                                <ul class="list-unstyled mt-3">
+                                    <li v-for="feature in service.features" :key="feature" class="mb-2">
+                                        <i class="fas fa-check-circle me-2" :style="'color: ' + service.color"></i> {{ feature }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-white border-0">
+                                <a href="#" class="btn btn-outline-primary" @click="showContact">Demander un devis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5 pt-5">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h2 class="fw-bold mb-4">Notre processus de travail</h2>
+                        <div class="timeline">
+                            <div class="timeline-item" v-for="(step, index) in processSteps" :key="step.id">
+                                <div class="timeline-badge" :style="'background-color: ' + step.color">
+                                    <i :class="step.icon"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title fw-bold">{{ step.title }}</h4>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <p>{{ step.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="bg-light p-4 rounded">
+                            <h3 class="fw-bold mb-4">Questions fréquentes</h3>
+                            <div class="accordion" id="faqAccordion">
+                                <div class="accordion-item mb-3 border-0" v-for="(faq, index) in faqs" :key="faq.id">
+                                    <h3 class="accordion-header" :id="'faqHeading' + index">
+                                        <button class="accordion-button collapsed bg-white shadow-sm" type="button" data-bs-toggle="collapse" :data-bs-target="'#faqCollapse' + index" aria-expanded="false" :aria-controls="'faqCollapse' + index">
+                                            {{ faq.question }}
+                                        </button>
+                                    </h3>
+                                    <div :id="'faqCollapse' + index" class="accordion-collapse collapse" :aria-labelledby="'faqHeading' + index" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            {{ faq.answer }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-primary text-white p-4 mt-4 rounded shadow-sm">
+                            <h3 class="fw-bold mb-3">Prêt à démarrer votre projet ?</h3>
+                            <p class="mb-4">Contactez-nous pour discuter de vos besoins et obtenir une solution sur mesure.</p>
+                            <a href="#" class="btn btn-light" @click="showContact">Contactez-nous</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section v-if="currentView === 'contact'" class="py-5 bg-light">
+            <div class="container py-5">
+                <div class="row mb-5">
+                    <div class="col-12 text-center">
+                        <h2 class="display-5 fw-bold">Nous contacter</h2>
+                        <p class="lead">Discutons de votre projet et trouvons ensemble la meilleure solution</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-6 mb-5 mb-lg-0">
+                        <div class="contact-form p-4 h-100">
+                            <h3 class="fw-bold mb-4">Envoyez-nous un message</h3>
+                            <form @submit.prevent="submitForm">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nom complet</label>
+                                    <input type="text" class="form-control" id="name" v-model="form.name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" v-model="form.email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Téléphone</label>
+                                    <input type="tel" class="form-control" id="phone" v-model="form.phone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Sujet</label>
+                                    <select class="form-select" id="subject" v-model="form.subject" required>
+                                        <option value="" disabled selected>Sélectionnez un sujet</option>
+                                        <option value="Devis">Demande de devis</option>
+                                        <option value="Support">Support technique</option>
+                                        <option value="Partnership">Partenariat</option>
+                                        <option value="Other">Autre</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message" rows="5" v-model="form.message" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Envoyer le message</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-5">
+                            <h3 class="fw-bold mb-4">Nos coordonnées</h3>
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-map-marker-alt text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Adresse</h5>
+                                    <p class="mb-0">123 Rue Digitale, Montréal, QC H3A 1B1</p>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-phone-alt text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Téléphone</h5>
+                                    <p class="mb-0">(514) 123-4567</p>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-envelope text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Email</h5>
+                                    <p class="mb-0">info@cgweb.ca</p>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-clock text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Heures d'ouverture</h5>
+                                    <p class="mb-0">Lundi - Vendredi: 9h00 - 17h00</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h3 class="fw-bold mb-4">Suivez-nous</h3>
+                            <div class="d-flex">
+                                <a href="#" class="social-icon me-2">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="social-icon me-2">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="social-icon me-2">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="social-icon me-2">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="social-icon">
+                                    <i class="fab fa-youtube"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="fw-bold mb-4">Localisation</h3>
+                            <div class="ratio ratio-16x9">
+                                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2796.048437600941!2d-73.5698656844646!3d45.503545979101474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a541c64b70d%3A0x654e3138211fefef!2sMontreal%2C%20QC!5e0!3m2!1sen!2sca!4v1620000000000!5m2!1sen!2sca" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 mb-4 mb-lg-0">
+                        <img src="https://cgweb.ca/wp-content/uploads/2021/05/cgweb-logo-white.png" alt="CGWEB" height="40" class="mb-3">
+                        <p>CGWEB crée des solutions digitales innovantes qui transforment votre entreprise et engagent vos clients.</p>
+                        <div class="d-flex mt-4">
+                            <a href="#" class="social-icon me-2">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-icon me-2">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-icon me-2">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-icon">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                        <h5 class="fw-bold mb-4">Navigation</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="showHome">Accueil</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="showAbout">À propos</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="showExpertise">Expertises</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none" @click="showServices">Services</a></li>
+                            <li><a href="#" class="text-white text-decoration-none" @click="showContact">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
+                        <h5 class="fw-bold mb-4">Services</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none">Développement Web</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none">Design UX/UI</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none">Marketing Digital</a></li>
+                            <li class="mb-2"><a href="#" class="text-white text-decoration-none">E-commerce</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Hébergement</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <h5 class="fw-bold mb-4">Contact</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Rue Digitale, Montréal</li>
+                            <li class="mb-2"><i class="fas fa-phone-alt me-2"></i> (514) 123-4567</li>
+                            <li class="mb-2"><i class="fas fa-envelope me-2"></i> info@cgweb.ca</li>
+                            <li><i class="fas fa-clock me-2"></i> Lun-Ven: 9h-17h</li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="my-4 bg-light opacity-10">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; 2023 CGWEB. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <a href="#" class="text-white text-decoration-none me-3">Politique de confidentialité</a>
+                        <a href="#" class="text-white text-decoration-none">Conditions d'utilisation</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const { createApp, ref } = Vue;
+        
+        createApp({
+            setup() {
+                const currentView = ref('home');
+                
+                const showHome = () => {
+                    currentView.value = 'home';
+                    window.scrollTo(0, 0);
+                };
+                
+                const showAbout = () => {
+                    currentView.value = 'about';
+                    window.scrollTo(0, 0);
+                };
+                
+                const showExpertise = () => {
+                    currentView.value = 'expertise';
+                    window.scrollTo(0, 0);
+                };
+                
+                const showServices = () => {
+                    currentView.value = 'services';
+                    window.scrollTo(0, 0);
+                };
+                
+                const showContact = () => {
+                    currentView.value = 'contact';
+                    window.scrollTo(0, 0);
+                };
+                
+                // Team Members Data
+                const teamMembers = ref([
+                    {
+                        id: 1,
+                        name: 'Jean Dupont',
+                        position: 'Directeur Technique',
+                        bio: 'Expert en développement web avec plus de 15 ans d\'expérience dans la création de solutions complexes.',
+                        image: 'https://randomuser.me/api/portraits/men/32.jpg',
+                        linkedin: '#',
+                        twitter: '#'
+                    },
+                    {
+                        id: 2,
+                        name: 'Marie Tremblay',
+                        position: 'Designer UX/UI',
+                        bio: 'Passionnée par la création d\'interfaces intuitives et esthétiques qui améliorent l\'expérience utilisateur.',
+                        image: 'https://randomuser.me/api/portraits/women/44.jpg',
+                        linkedin: '#',
+                        twitter: '#'
+                    },
+                    {
+                        id: 3,
+                        name: 'Pierre Gagnon',
+                        position: 'Spécialiste Marketing',
+                        bio: 'Stratège en marketing digital qui aide les entreprises à maximiser leur présence en ligne.',
+                        image: 'https://randomuser.me/api/portraits/men/75.jpg',
+                        linkedin: '#',
+                        twitter: '#'
+                    }
+                ]);
+                
+                // Expertises Data
+                const expertises = ref([
+                    {
+                        id: 1,
+                        title: 'Développement Web',
+                        description: 'Création de sites web et applications performantes avec les dernières technologies.',
+                        image: 'https://cgweb.ca/wp-content/uploads/2021/05/web-dev.jpg'
+                    },
+                    {
+                        id: 2,
+                        title: 'Design UX/UI',
+                        description: 'Conception d\'interfaces utilisateur intuitives et esthétiques pour une expérience optimale.',
+                        image: 'https://cgweb.ca/wp-content/uploads/2021/05/ux-design.jpg'
+                    },
+                    {
+                        id: 3,
+                        title: 'Marketing Digital',
+                        description: 'Stratégies de marketing digital sur mesure pour maximiser votre visibilité en ligne.',
+                        image: 'https://cgweb.ca/wp-content/uploads/2021/05/digital-marketing.jpg'
+                    },
+                    {
+                        id: 4,
+                        title: 'E-commerce',
+                        description: 'Solutions e-commerce complètes pour vendre efficacement vos produits en ligne.',
+                        image: 'https://cgweb.ca/wp-content/uploads/2021/05/ecommerce.jpg'
+                    },
+                    {
+                        id: 5,
+                        title: 'Hébergement',
+                        description: 'Services d\'hébergement sécurisés et performants pour vos applications web.',
+                        image: 'https://cgweb.ca/wp-content/uploads/2021/05/hosting.jpg'
+                    },
+                    {
+                        id: 6,
+                        title: 'Consultation',
+                        description: 'Expertise stratégique pour guider vos décisions digitales et technologiques.',
+                        image: 'https://cgweb.ca/wp-content/uploads/2021/05/consulting.jpg'
+                    }
+                ]);
+                
+                // Approach Items
+                const approachItems = ref([
+                    {
+                        id: 1,
+                        title: 'Écoute et analyse',
+                        content: 'Nous commençons par une écoute attentive de vos besoins et une analyse approfondie de votre secteur d\'activité.'
+                    },
+                    {
+                        id: 2,
+                        title: 'Conception sur mesure',
+                        content: 'Nous élaborons une solution parfaitement adaptée à vos objectifs et à votre public cible.'
+                    },
+                    {
+                        id: 3,
+                        title: 'Développement agile',
+                        content: 'Nous utilisons des méthodologies agiles pour un développement itératif et collaboratif.'
+                    },
+                    {
+                        id: 4,
+                        title: 'Tests et optimisation',
+                        content: 'Nous testons rigoureusement chaque aspect de la solution avant son déploiement.'
+                    },
+                    {
+                        id: 5,
+                        title: 'Support continu',
+                        content: 'Nous offrons un support technique réactif et des mises à jour régulières.'
+                    }
+                ]);
+                
+                // Technologies
+                const technologies = ref([
+                    { id: 1, name: 'HTML5', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg' },
+                    { id: 2, name: 'CSS3', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
+                    { id: 3, name: 'JavaScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
+                    { id: 4, name: 'Vue.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg' },
+                    { id: 5, name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
+                    { id: 6, name: 'Node.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+                    { id: 7, name: 'PHP', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg' },
+                    { id: 8, name: 'Python', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+                    { id: 9, name: 'WordPress', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-original.svg' },
+                    { id: 10, name: 'Shopify', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/shopify/shopify-original.svg' },
+                    { id: 11, name: 'MySQL', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
+                    { id: 12, name: 'MongoDB', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg' }
+                ]);
+                
+                // Services Data
+                const services = ref([
+                    {
+                        id: 1,
+                        title: 'Développement Web',
+                        description: 'Création de sites web et applications performantes avec les dernières technologies.',
+                        icon: 'fas fa-code',
+                        color: '#3498db',
+                        features: [
+                            'Sites vitrines responsives',
+                            'Applications web sur mesure',
+                            'Intégration CMS',
+                            'API RESTful'
+                        ]
+                    },
+                    {
+                        id: 2,
+                        title: 'Design UX/UI',
+                        description: 'Conception d\'interfaces utilisateur intuitives et esthétiques pour une expérience optimale.',
+                        icon: 'fas fa-paint-brush',
+                        color: '#e74c3c',
+                        features: [
+                            'Audit UX',
+                            'Maquettes interactives',
+                            'Design system',
+                            'Tests utilisateurs'
+                        ]
+                    },
+                    {
+                        id: 3,
+                        title: 'Marketing Digital',
+                        description: 'Stratégies de marketing digital sur mesure pour maximiser votre visibilité en ligne.',
+                        icon: 'fas fa-bullseye',
+                        color: '#2ecc71',
+                        features: [
+                            'SEO/SEA',
+                            'Réseaux sociaux',
+                            'Email marketing',
+                            'Analyse de données'
+                        ]
+                    },
+                    {
+                        id: 4,
+                        title: 'E-commerce',
+                        description: 'Solutions e-commerce complètes pour vendre efficacement vos produits en ligne.',
+                        icon: 'fas fa-shopping-cart',
+                        color: '#9b59b6',
+                        features: [
+                            'Boutique en ligne',
+                            'Paiements sécurisés',
+                            'Gestion de stock',
+                            'Analytics'
+                        ]
+                    },
+                    {
+                        id: 5,
+                        title: 'Hébergement',
+                        description: 'Services d\'hébergement sécurisés et performants pour vos applications web.',
+                        icon: 'fas fa-server',
+                        color: '#f39c12',
+                        features: [
+                            'Hébergement cloud',
+                            'Sauvegardes automatiques',
+                            'SSL inclus',
+                            'Support 24/7'
+                        ]
+                    },
+                    {
+                        id: 6,
+                        title: 'Consultation',
+                        description: 'Expertise stratégique pour guider vos décisions digitales et technologiques.',
+                        icon: 'fas fa-chalkboard-teacher',
+                        color: '#1abc9c',
+                        features: [
+                            'Audit technique',
+                            'Roadmap digitale',
+                            'Formation',
+                            'Accompagnement'
+                        ]
+                    }
+                ]);
+                
+                // Process Steps
+                const processSteps = ref([
+                    {
+                        id: 1,
+                        title: 'Découverte',
+                        description: 'Nous analysons vos besoins et vos objectifs pour comprendre parfaitement votre projet.',
+                        icon: 'fas fa-search',
+                        color: '#3498db'
+                    },
+                    {
+                        id: 2,
+                        title: 'Conception',
+                        description: 'Nous créons des maquettes et prototypes pour visualiser la solution proposée.',
+                        icon: 'fas fa-pencil-ruler',
+                        color: '#e74c3c'
+                    },
+                    {
+                        id: 3,
+                        title: 'Développement',
+                        description: 'Nous codons votre solution avec les meilleures pratiques et technologies.',
+                        icon: 'fas fa-code',
+                        color: '#2ecc71'
+                    },
+                    {
+                        id: 4,
+                        title: 'Tests',
+                        description: 'Nous testons rigoureusement chaque fonctionnalité pour garantir qualité et performance.',
+                        icon: 'fas fa-bug',
+                        color: '#f39c12'
+                    },
+                    {
+                        id: 5,
+                        title: 'Lancement',
+                        description: 'Nous déployons votre solution et assurons un suivi post-lancement.',
+                        icon: 'fas fa-rocket',
+                        color: '#9b59b6'
+                    }
+                ]);
+                
+                // FAQs
+                const faqs = ref([
+                    {
+                        id: 1,
+                        question: 'Quel est votre délai moyen pour un projet de site web ?',
+                        answer: 'Le délai varie en fonction de la complexité du projet. Un site vitrine simple peut prendre 4-6 semaines, tandis qu\'une application web complexe peut nécessiter plusieurs mois.'
+                    },
+                    {
+                        id: 2,
+                        question: 'Proposez-vous des services de maintenance après le lancement ?',
+                        answer: 'Oui, nous offrons différents forfaits de maintenance incluant mises à jour, sauvegardes, sécurité et support technique.'
+                    },
+                    {
+                        id: 3,
+                        question: 'Quelle est votre approche pour le design UX/UI ?',
+                        answer: 'Nous suivons un processus centré utilisateur, en commençant par la recherche utilisateur, la création de personas, des parcours utilisateurs, puis des prototypes itératifs.'
+                    },
+                    {
+                        id: 4,
+                        question: 'Travaillez-vous avec des CMS comme WordPress ?',
+                        answer: 'Oui, nous travaillons avec plusieurs CMS dont WordPress, Shopify, Drupal et d\'autres selon les besoins du projet.'
+                    },
+                    {
+                        id: 5,
+                        question: 'Comment puis-je suivre l\'avancement de mon projet ?',
+                        answer: 'Nous fournissons un accès à un tableau de bord client où vous pouvez voir l\'avancement, les livrables et communiquer avec notre équipe.'
+                    }
+                ]);
+                
+                // Contact Form
+                const form = ref({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    subject: '',
+                    message: ''
+                });
+                
+                const submitForm = () => {
+                    alert('Merci pour votre message! Nous vous contacterons bientôt.');
+                    form.value = {
+                        name: '',
+                        email: '',
+                        phone: '',
+                        subject: '',
+                        message: ''
+                    };
+                };
+                
+                // Navbar scroll effect
+                $(window).scroll(function() {
+                    if ($(window).scrollTop() > 50) {
+                        $('.navbar').addClass('scrolled');
+                    } else {
+                        $('.navbar').removeClass('scrolled');
+                    }
+                });
+                
+                return {
+                    currentView,
+                    showHome,
+                    showAbout,
+                    showExpertise,
+                    showServices,
+                    showContact,
+                    teamMembers,
+                    expertises,
+                    approachItems,
+                    technologies,
+                    services,
+                    processSteps,
+                    faqs,
+                    form,
+                    submitForm
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

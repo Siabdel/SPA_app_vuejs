@@ -1,0 +1,1318 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Diacamma - Gestion de Syndic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .active-menu {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen bg-gray-100">
+        <!-- Top Navigation -->
+        <nav class="bg-blue-800 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button @click="toggleSidebar" class="md:hidden text-white focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <div class="flex items-center">
+                        <i class="fas fa-building text-2xl mr-2"></i>
+                        <span class="text-xl font-semibold">MM Diacamma</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="hover:text-blue-200 transition"><i class="fas fa-bell"></i></a>
+                    <a href="#" class="hover:text-blue-200 transition"><i class="fas fa-envelope"></i></a>
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 focus:outline-none">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-8 h-8 rounded-full">
+                            <span>Admin</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-50">
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-blue-100">Profil</a>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-blue-100">Paramètres</a>
+                            <div class="border-t border-gray-200"></div>
+                            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-blue-100">Déconnexion</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside :class="{'hidden md:block': !sidebarOpen, 'block': sidebarOpen}" class="bg-blue-900 text-white w-64 min-h-screen fixed z-40 transition-all duration-300">
+                <div class="p-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-building text-xl"></i>
+                        <span class="text-lg font-semibold">Copropriété</span>
+                    </div>
+                    <div class="mt-6">
+                        <div class="px-3 py-2 text-blue-200 uppercase text-xs font-semibold">Menu Principal</div>
+                        <ul>
+                            <li>
+                                <a href="#" @click="activeMenu = 'dashboard'" :class="{'active-menu': activeMenu === 'dashboard'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-tachometer-alt mr-3"></i>
+                                    <span>Tableau de bord</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click="activeMenu = 'owners'" :class="{'active-menu': activeMenu === 'owners'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-users mr-3"></i>
+                                    <span>Copropriétaires</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click="activeMenu = 'funds'" :class="{'active-menu': activeMenu === 'funds'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-euro-sign mr-3"></i>
+                                    <span>Appels de fonds</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click="activeMenu = 'expenses'" :class="{'active-menu': activeMenu === 'expenses'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-receipt mr-3"></i>
+                                    <span>Dépenses</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click="activeMenu = 'accounting'" :class="{'active-menu': activeMenu === 'accounting'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-calculator mr-3"></i>
+                                    <span>Comptabilité</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click="activeMenu = 'documents'" :class="{'active-menu': activeMenu === 'documents'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-folder mr-3"></i>
+                                    <span>Documents</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" @click="activeMenu = 'reports'" :class="{'active-menu': activeMenu === 'reports'}" class="flex items-center px-4 py-3 sidebar-link transition">
+                                    <i class="fas fa-chart-bar mr-3"></i>
+                                    <span>Rapports</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main :class="{'md:ml-64': sidebarOpen}" class="flex-1 p-6 transition-all duration-300">
+                <!-- Dashboard Content -->
+                <div v-if="activeMenu === 'dashboard'" class="space-y-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Tableau de bord</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6 card-hover transition">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Copropriétaires</p>
+                                    <h3 class="text-2xl font-bold">42</h3>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6 card-hover transition">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Appels de fonds</p>
+                                    <h3 class="text-2xl font-bold">12</h3>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <i class="fas fa-euro-sign text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6 card-hover transition">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Dépenses ce mois</p>
+                                    <h3 class="text-2xl font-bold">€3,245</h3>
+                                </div>
+                                <div class="bg-red-100 p-3 rounded-full">
+                                    <i class="fas fa-receipt text-red-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6 card-hover transition">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Documents</p>
+                                    <h3 class="text-2xl font-bold">156</h3>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded-full">
+                                    <i class="fas fa-folder text-purple-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Derniers appels de fonds</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th class="text-left py-2 px-4">Date</th>
+                                            <th class="text-left py-2 px-4">Montant</th>
+                                            <th class="text-left py-2 px-4">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(fund, index) in recentFunds" :key="index" class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">{{ fund.date }}</td>
+                                            <td class="py-3 px-4">{{ fund.amount }}</td>
+                                            <td class="py-3 px-4">
+                                                <span :class="{'bg-green-100 text-green-800': fund.status === 'Payé', 'bg-yellow-100 text-yellow-800': fund.status === 'En attente', 'bg-red-100 text-red-800': fund.status === 'En retard'}" class="px-2 py-1 rounded-full text-xs">
+                                                    {{ fund.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Dernières dépenses</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th class="text-left py-2 px-4">Date</th>
+                                            <th class="text-left py-2 px-4">Fournisseur</th>
+                                            <th class="text-left py-2 px-4">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(expense, index) in recentExpenses" :key="index" class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">{{ expense.date }}</td>
+                                            <td class="py-3 px-4">{{ expense.supplier }}</td>
+                                            <td class="py-3 px-4">{{ expense.amount }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Owners Management -->
+                <div v-if="activeMenu === 'owners'" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold text-gray-800">Gestion des copropriétaires</h1>
+                        <button @click="showAddOwnerModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Ajouter
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="relative w-64">
+                                <input v-model="ownerSearch" type="text" placeholder="Rechercher..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-filter"></i> Filtres
+                                </button>
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-download"></i> Exporter
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Nom</th>
+                                        <th class="text-left py-3 px-4">Email</th>
+                                        <th class="text-left py-3 px-4">Téléphone</th>
+                                        <th class="text-left py-3 px-4">Tantièmes</th>
+                                        <th class="text-left py-3 px-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(owner, index) in filteredOwners" :key="index" class="border-b hover:bg-gray-50">
+                                        <td class="py-4 px-4">{{ owner.name }}</td>
+                                        <td class="py-4 px-4">{{ owner.email }}</td>
+                                        <td class="py-4 px-4">{{ owner.phone }}</td>
+                                        <td class="py-4 px-4">{{ owner.share }}</td>
+                                        <td class="py-4 px-4">
+                                            <button @click="editOwner(owner)" class="text-blue-600 hover:text-blue-800 mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button @click="deleteOwner(owner.id)" class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="text-sm text-gray-600">
+                                Affichage de {{ filteredOwners.length }} sur {{ owners.length }} entrées
+                            </div>
+                            <div class="flex space-x-1">
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-angle-left"></i>
+                                </button>
+                                <button class="px-3 py-1 border rounded bg-blue-600 text-white">1</button>
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">2</button>
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-angle-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Funds Management -->
+                <div v-if="activeMenu === 'funds'" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold text-gray-800">Appels de fonds</h1>
+                        <button @click="showAddFundModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Nouvel appel
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="relative w-64">
+                                <input v-model="fundSearch" type="text" placeholder="Rechercher..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <div class="flex space-x-2">
+                                <select v-model="fundStatusFilter" class="px-3 py-1 border rounded focus:outline-none">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="Payé">Payé</option>
+                                    <option value="En attente">En attente</option>
+                                    <option value="En retard">En retard</option>
+                                </select>
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-download"></i> Exporter
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Date</th>
+                                        <th class="text-left py-3 px-4">Référence</th>
+                                        <th class="text-left py-3 px-4">Montant total</th>
+                                        <th class="text-left py-3 px-4">Statut</th>
+                                        <th class="text-left py-3 px-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(fund, index) in filteredFunds" :key="index" class="border-b hover:bg-gray-50">
+                                        <td class="py-4 px-4">{{ fund.date }}</td>
+                                        <td class="py-4 px-4">{{ fund.reference }}</td>
+                                        <td class="py-4 px-4">{{ fund.amount }}</td>
+                                        <td class="py-4 px-4">
+                                            <span :class="{'bg-green-100 text-green-800': fund.status === 'Payé', 'bg-yellow-100 text-yellow-800': fund.status === 'En attente', 'bg-red-100 text-red-800': fund.status === 'En retard'}" class="px-2 py-1 rounded-full text-xs">
+                                                {{ fund.status }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <button @click="viewFundDetails(fund)" class="text-blue-600 hover:text-blue-800 mr-3">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button @click="editFund(fund)" class="text-blue-600 hover:text-blue-800 mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button @click="deleteFund(fund.id)" class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expenses Management -->
+                <div v-if="activeMenu === 'expenses'" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold text-gray-800">Gestion des dépenses</h1>
+                        <button @click="showAddExpenseModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Nouvelle dépense
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="relative w-64">
+                                <input v-model="expenseSearch" type="text" placeholder="Rechercher..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <div class="flex space-x-2">
+                                <select v-model="expenseCategoryFilter" class="px-3 py-1 border rounded focus:outline-none">
+                                    <option value="">Toutes catégories</option>
+                                    <option v-for="category in expenseCategories" :value="category">{{ category }}</option>
+                                </select>
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-download"></i> Exporter
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Date</th>
+                                        <th class="text-left py-3 px-4">Fournisseur</th>
+                                        <th class="text-left py-3 px-4">Catégorie</th>
+                                        <th class="text-left py-3 px-4">Montant</th>
+                                        <th class="text-left py-3 px-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(expense, index) in filteredExpenses" :key="index" class="border-b hover:bg-gray-50">
+                                        <td class="py-4 px-4">{{ expense.date }}</td>
+                                        <td class="py-4 px-4">{{ expense.supplier }}</td>
+                                        <td class="py-4 px-4">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                                {{ expense.category }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4">{{ expense.amount }}</td>
+                                        <td class="py-4 px-4">
+                                            <button @click="viewExpenseDetails(expense)" class="text-blue-600 hover:text-blue-800 mr-3">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button @click="editExpense(expense)" class="text-blue-600 hover:text-blue-800 mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button @click="deleteExpense(expense.id)" class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accounting Management -->
+                <div v-if="activeMenu === 'accounting'" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold text-gray-800">Comptabilité</h1>
+                        <div class="flex space-x-3">
+                            <button @click="showAddTransactionModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Transaction
+                            </button>
+                            <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center">
+                                <i class="fas fa-file-export mr-2"></i> Clôturer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Solde actuel</h3>
+                            <div class="text-3xl font-bold text-green-600">€12,456.78</div>
+                            <div class="mt-2 text-sm text-gray-500">Dernière mise à jour: 15/06/2023</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Recettes ce mois</h3>
+                            <div class="text-3xl font-bold text-blue-600">€8,245.00</div>
+                            <div class="mt-2 text-sm text-gray-500">+12% par rapport au mois dernier</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Dépenses ce mois</h3>
+                            <div class="text-3xl font-bold text-red-600">€3,245.50</div>
+                            <div class="mt-2 text-sm text-gray-500">-5% par rapport au mois dernier</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-lg">Journal des transactions</h3>
+                            <div class="relative w-64">
+                                <input v-model="transactionSearch" type="text" placeholder="Rechercher..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Date</th>
+                                        <th class="text-left py-3 px-4">Référence</th>
+                                        <th class="text-left py-3 px-4">Libellé</th>
+                                        <th class="text-left py-3 px-4">Débit</th>
+                                        <th class="text-left py-3 px-4">Crédit</th>
+                                        <th class="text-left py-3 px-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(transaction, index) in filteredTransactions" :key="index" class="border-b hover:bg-gray-50">
+                                        <td class="py-4 px-4">{{ transaction.date }}</td>
+                                        <td class="py-4 px-4">{{ transaction.reference }}</td>
+                                        <td class="py-4 px-4">{{ transaction.label }}</td>
+                                        <td class="py-4 px-4 text-red-600">{{ transaction.debit }}</td>
+                                        <td class="py-4 px-4 text-green-600">{{ transaction.credit }}</td>
+                                        <td class="py-4 px-4">
+                                            <button @click="editTransaction(transaction)" class="text-blue-600 hover:text-blue-800 mr-3">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button @click="deleteTransaction(transaction.id)" class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documents Management -->
+                <div v-if="activeMenu === 'documents'" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-2xl font-bold text-gray-800">Gestion documentaire</h1>
+                        <button @click="showUploadDocumentModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-upload mr-2"></i> Uploader
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="relative w-64">
+                                <input v-model="documentSearch" type="text" placeholder="Rechercher..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <div class="flex space-x-2">
+                                <select v-model="documentCategoryFilter" class="px-3 py-1 border rounded focus:outline-none">
+                                    <option value="">Toutes catégories</option>
+                                    <option v-for="category in documentCategories" :value="category">{{ category }}</option>
+                                </select>
+                                <button class="px-3 py-1 border rounded hover:bg-gray-100">
+                                    <i class="fas fa-download"></i> Exporter
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div v-for="(document, index) in filteredDocuments" :key="index" class="border rounded-lg p-4 hover:shadow-md transition">
+                                <div class="flex items-start">
+                                    <div class="mr-4">
+                                        <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold">{{ document.name }}</h3>
+                                        <p class="text-sm text-gray-500">{{ document.category }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">Ajouté le {{ document.date }} par {{ document.addedBy }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end mt-4 space-x-2">
+                                    <button @click="downloadDocument(document)" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button @click="shareDocument(document)" class="text-green-600 hover:text-green-800">
+                                        <i class="fas fa-share"></i>
+                                    </button>
+                                    <button @click="deleteDocument(document.id)" class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reports -->
+                <div v-if="activeMenu === 'reports'" class="space-y-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Rapports</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Synthèse annuelle</h3>
+                            <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
+                                <span class="text-gray-500">Graphique des dépenses/revenus</span>
+                            </div>
+                            <div class="mt-4 flex justify-center">
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                                    <i class="fas fa-download mr-2"></i> Télécharger
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Répartition des charges</h3>
+                            <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
+                                <span class="text-gray-500">Graphique camembert</span>
+                            </div>
+                            <div class="mt-4 flex justify-center">
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                                    <i class="fas fa-download mr-2"></i> Télécharger
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold text-lg mb-4">Générer un rapport personnalisé</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Type de rapport</label>
+                                <select class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Compte de résultat</option>
+                                    <option>Bilan</option>
+                                    <option>Détail des charges</option>
+                                    <option>Récapitulatif des appels de fonds</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Période</label>
+                                <select class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Ce mois</option>
+                                    <option>Ce trimestre</option>
+                                    <option>Cette année</option>
+                                    <option>Personnalisé</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
+                                    <i class="fas fa-file-export mr-2"></i> Générer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Add Owner Modal -->
+        <div v-if="showAddOwnerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Ajouter un copropriétaire</h3>
+                    <button @click="showAddOwnerModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form @submit.prevent="saveOwner">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                            <input v-model="newOwner.name" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input v-model="newOwner.email" type="email" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                            <input v-model="newOwner.phone" type="tel" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tantièmes</label>
+                            <input v-model="newOwner.share" type="number" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button @click="showAddOwnerModal = false" type="button" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">
+                                Annuler
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Fund Modal -->
+        <div v-if="showAddFundModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Nouvel appel de fonds</h3>
+                    <button @click="showAddFundModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form @submit.prevent="saveFund">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <input v-model="newFund.date" type="date" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Référence</label>
+                            <input v-model="newFund.reference" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Montant total</label>
+                            <input v-model="newFund.amount" type="number" step="0.01" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea v-model="newFund.description" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button @click="showAddFundModal = false" type="button" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">
+                                Annuler
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Expense Modal -->
+        <div v-if="showAddExpenseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Nouvelle dépense</h3>
+                    <button @click="showAddExpenseModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form @submit.prevent="saveExpense">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <input v-model="newExpense.date" type="date" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fournisseur</label>
+                            <input v-model="newExpense.supplier" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                            <select v-model="newExpense.category" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option v-for="category in expenseCategories" :value="category">{{ category }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Montant</label>
+                            <input v-model="newExpense.amount" type="number" step="0.01" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea v-model="newExpense.description" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button @click="showAddExpenseModal = false" type="button" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">
+                                Annuler
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Transaction Modal -->
+        <div v-if="showAddTransactionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Nouvelle transaction</h3>
+                    <button @click="showAddTransactionModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form @submit.prevent="saveTransaction">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <input v-model="newTransaction.date" type="date" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <select v-model="newTransaction.type" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="debit">Débit</option>
+                                <option value="credit">Crédit</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Montant</label>
+                            <input v-model="newTransaction.amount" type="number" step="0.01" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Libellé</label>
+                            <input v-model="newTransaction.label" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Référence</label>
+                            <input v-model="newTransaction.reference" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button @click="showAddTransactionModal = false" type="button" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">
+                                Annuler
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upload Document Modal -->
+        <div v-if="showUploadDocumentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-lg font-semibold">Uploader un document</h3>
+                    <button @click="showUploadDocumentModal = false" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form @submit.prevent="uploadDocument">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du document</label>
+                            <input v-model="newDocument.name" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                            <select v-model="newDocument.category" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option v-for="category in documentCategories" :value="category">{{ category }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fichier</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <input type="file" @change="handleFileUpload" class="hidden" id="document-upload" required>
+                                <label for="document-upload" class="cursor-pointer">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-500">Cliquez pour uploader ou glissez-déposez</p>
+                                </label>
+                                <p v-if="newDocument.fileName" class="text-sm text-gray-700 mt-2">{{ newDocument.fileName }}</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button @click="showUploadDocumentModal = false" type="button" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">
+                                Annuler
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Uploader
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                // State
+                const sidebarOpen = ref(true);
+                const activeMenu = ref('dashboard');
+                
+                // Owners
+                const owners = ref([
+                    { id: 1, name: 'Jean Dupont', email: 'jean.dupont@example.com', phone: '0612345678', share: 150 },
+                    { id: 2, name: 'Marie Martin', email: 'marie.martin@example.com', phone: '0623456789', share: 200 },
+                    { id: 3, name: 'Pierre Durand', email: 'pierre.durand@example.com', phone: '0634567890', share: 180 },
+                    { id: 4, name: 'Sophie Lambert', email: 'sophie.lambert@example.com', phone: '0645678901', share: 220 },
+                    { id: 5, name: 'Thomas Leroy', email: 'thomas.leroy@example.com', phone: '0656789012', share: 170 },
+                    { id: 6, name: 'Julie Moreau', email: 'julie.moreau@example.com', phone: '0667890123', share: 190 },
+                    { id: 7, name: 'David Simon', email: 'david.simon@example.com', phone: '0678901234', share: 210 },
+                    { id: 8, name: 'Laura Laurent', email: 'laura.laurent@example.com', phone: '0689012345', share: 160 },
+                ]);
+                
+                const ownerSearch = ref('');
+                const showAddOwnerModal = ref(false);
+                const newOwner = ref({
+                    id: null,
+                    name: '',
+                    email: '',
+                    phone: '',
+                    share: ''
+                });
+                
+                // Funds
+                const funds = ref([
+                    { id: 1, date: '15/06/2023', reference: 'AF-2023-06', amount: '€3,245.00', status: 'Payé', description: 'Charges trimestrielles' },
+                    { id: 2, date: '15/05/2023', reference: 'AF-2023-05', amount: '€1,245.50', status: 'Payé', description: 'Travaux ascenseur' },
+                    { id: 3, date: '15/04/2023', reference: 'AF-2023-04', amount: '€3,245.00', status: 'Payé', description: 'Charges trimestrielles' },
+                    { id: 4, date: '15/03/2023', reference: 'AF-2023-03', amount: '€2,100.00', status: 'Payé', description: 'Nettoyage façade' },
+                    { id: 5, date: '15/02/2023', reference: 'AF-2023-02', amount: '€3,245.00', status: 'Payé', description: 'Charges trimestrielles' },
+                    { id: 6, date: '15/01/2023', reference: 'AF-2023-01', amount: '€1,500.00', status: 'Payé', description: 'Réparation chaudière' },
+                    { id: 7, date: '15/12/2022', reference: 'AF-2022-12', amount: '€3,245.00', status: 'Payé', description: 'Charges trimestrielles' },
+                    { id: 8, date: '15/11/2022', reference: 'AF-2022-11', amount: '€2,800.00', status: 'Payé', description: 'Peinture parties communes' },
+                ]);
+                
+                const recentFunds = computed(() => funds.value.slice(0, 5));
+                const fundSearch = ref('');
+                const fundStatusFilter = ref('');
+                const showAddFundModal = ref(false);
+                const newFund = ref({
+                    id: null,
+                    date: '',
+                    reference: '',
+                    amount: '',
+                    status: 'En attente',
+                    description: ''
+                });
+                
+                // Expenses
+                const expenseCategories = ['Entretien', 'Nettoyage', 'Électricité', 'Eau', 'Gaz', 'Assurance', 'Sécurité', 'Divers'];
+                const expenses = ref([
+                    { id: 1, date: '10/06/2023', supplier: 'Propreté Services', category: 'Nettoyage', amount: '€450.00', description: 'Nettoyage mensuel' },
+                    { id: 2, date: '05/06/2023', supplier: 'EDF', category: 'Électricité', amount: '€1,245.50', description: 'Facture trimestrielle' },
+                    { id: 3, date: '01/06/2023', supplier: 'Eau de Paris', category: 'Eau', amount: '€320.00', description: 'Consommation eau' },
+                    { id: 4, date: '28/05/2023', supplier: 'Ascenseurs France', category: 'Entretien', amount: '€1,200.00', description: 'Contrat entretien' },
+                    { id: 5, date: '15/05/2023', supplier: 'Sécurité Plus', category: 'Sécurité', amount: '€750.00', description: 'Alarme incendie' },
+                    { id: 6, date: '10/05/2023', supplier: 'Gaz Réseau', category: 'Gaz', amount: '€980.00', description: 'Facture gaz' },
+                    { id: 7, date: '05/05/2023', supplier: 'Assur Immo', category: 'Assurance', amount: '€1,500.00', description: 'Assurance annuelle' },
+                    { id: 8, date: '01/05/2023', supplier: 'Brico Pro', category: 'Divers', amount: '€120.50', description: 'Matériel divers' },
+                ]);
+                
+                const recentExpenses = computed(() => expenses.value.slice(0, 5));
+                const expenseSearch = ref('');
+                const expenseCategoryFilter = ref('');
+                const showAddExpenseModal = ref(false);
+                const newExpense = ref({
+                    id: null,
+                    date: '',
+                    supplier: '',
+                    category: 'Entretien',
+                    amount: '',
+                    description: ''
+                });
+                
+                // Accounting
+                const transactions = ref([
+                    { id: 1, date: '15/06/2023', reference: 'REC-2023-06', label: 'Appel de fonds juin', debit: '', credit: '€3,245.00' },
+                    { id: 2, date: '10/06/2023', reference: 'DEP-2023-06', label: 'Nettoyage mensuel', debit: '€450.00', credit: '' },
+                    { id: 3, date: '05/06/2023', reference: 'DEP-2023-05', label: 'Facture EDF', debit: '€1,245.50', credit: '' },
+                    { id: 4, date: '01/06/2023', reference: 'DEP-2023-04', label: 'Facture eau', debit: '€320.00', credit: '' },
+                    { id: 5, date: '28/05/2023', reference: 'DEP-2023-03', label: 'Entretien ascenseur', debit: '€1,200.00', credit: '' },
+                    { id: 6, date: '15/05/2023', reference: 'DEP-2023-02', label: 'Sécurité incendie', debit: '€750.00', credit: '' },
+                    { id: 7, date: '10/05/2023', reference: 'DEP-2023-01', label: 'Facture gaz', debit: '€980.00', credit: '' },
+                    { id: 8, date: '05/05/2023', reference: 'REC-2023-05', label: 'Appel de fonds mai', debit: '', credit: '€1,245.50' },
+                ]);
+                
+                const transactionSearch = ref('');
+                const showAddTransactionModal = ref(false);
+                const newTransaction = ref({
+                    id: null,
+                    date: '',
+                    type: 'debit',
+                    amount: '',
+                    label: '',
+                    reference: '',
+                    debit: '',
+                    credit: ''
+                });
+                
+                // Documents
+                const documentCategories = ['Comptabilité', 'Assemblée générale', 'Règlement', 'Factures', 'Contrats', 'Travaux', 'Divers'];
+                const documents = ref([
+                    { id: 1, name: 'Compte rendu AG 2023', category: 'Assemblée générale', date: '15/06/2023', addedBy: 'Admin', fileName: 'cr-ag-2023.pdf' },
+                    { id: 2, name: 'Budget prévisionnel 2023', category: 'Comptabilité', date: '01/06/2023', addedBy: 'Admin', fileName: 'budget-2023.pdf' },
+                    { id: 3, name: 'Contrat nettoyage', category: 'Contrats', date: '15/05/2023', addedBy: 'Admin', fileName: 'contrat-nettoyage.pdf' },
+                    { id: 4, name: 'Devis peinture', category: 'Travaux', date: '10/05/2023', addedBy: 'Admin', fileName: 'devis-peinture.pdf' },
+                    { id: 5, name: 'Règlement intérieur', category: 'Règlement', date: '01/05/2023', addedBy: 'Admin', fileName: 'reglement-interieur.pdf' },
+                    { id: 6, name: 'Facture EDF juin', category: 'Factures', date: '05/06/2023', addedBy: 'Admin', fileName: 'facture-edf-06-2023.pdf' },
+                    { id: 7, name: 'Assurance bâtiment', category: 'Contrats', date: '15/04/2023', addedBy: 'Admin', fileName: 'assurance-2023.pdf' },
+                    { id: 8, name: 'Plan des parties communes', category: 'Divers', date: '01/04/2023', addedBy: 'Admin', fileName: 'plan-parties-communes.pdf' },
+                ]);
+                
+                const documentSearch = ref('');
+                const documentCategoryFilter = ref('');
+                const showUploadDocumentModal = ref(false);
+                const newDocument = ref({
+                    id: null,
+                    name: '',
+                    category: 'Comptabilité',
+                    date: '',
+                    addedBy: 'Admin',
+                    fileName: '',
+                    file: null
+                });
+                
+                // Computed
+                const filteredOwners = computed(() => {
+                    return owners.value.filter(owner => 
+                        owner.name.toLowerCase().includes(ownerSearch.value.toLowerCase()) ||
+                        owner.email.toLowerCase().includes(ownerSearch.value.toLowerCase()) ||
+                        owner.phone.toLowerCase().includes(ownerSearch.value.toLowerCase())
+                    );
+                });
+                
+                const filteredFunds = computed(() => {
+                    return funds.value.filter(fund => 
+                        (fund.reference.toLowerCase().includes(fundSearch.value.toLowerCase()) ||
+                        fund.description.toLowerCase().includes(fundSearch.value.toLowerCase())) &&
+                        (fundStatusFilter.value === '' || fund.status === fundStatusFilter.value)
+                    );
+                });
+                
+                const filteredExpenses = computed(() => {
+                    return expenses.value.filter(expense => 
+                        (expense.supplier.toLowerCase().includes(expenseSearch.value.toLowerCase()) ||
+                        expense.description.toLowerCase().includes(expenseSearch.value.toLowerCase())) &&
+                        (expenseCategoryFilter.value === '' || expense.category === expenseCategoryFilter.value)
+                    );
+                });
+                
+                const filteredTransactions = computed(() => {
+                    return transactions.value.filter(transaction => 
+                        transaction.reference.toLowerCase().includes(transactionSearch.value.toLowerCase()) ||
+                        transaction.label.toLowerCase().includes(transactionSearch.value.toLowerCase())
+                    );
+                });
+                
+                const filteredDocuments = computed(() => {
+                    return documents.value.filter(document => 
+                        document.name.toLowerCase().includes(documentSearch.value.toLowerCase()) &&
+                        (documentCategoryFilter.value === '' || document.category === documentCategoryFilter.value)
+                    );
+                });
+                
+                // Methods
+                const toggleSidebar = () => {
+                    sidebarOpen.value = !sidebarOpen.value;
+                };
+                
+                // Owner methods
+                const saveOwner = () => {
+                    if (newOwner.value.id) {
+                        // Update existing owner
+                        const index = owners.value.findIndex(o => o.id === newOwner.value.id);
+                        if (index !== -1) {
+                            owners.value[index] = {...newOwner.value};
+                        }
+                    } else {
+                        // Add new owner
+                        newOwner.value.id = owners.value.length + 1;
+                        owners.value.push({...newOwner.value});
+                    }
+                    resetOwnerForm();
+                    showAddOwnerModal.value = false;
+                };
+                
+                const editOwner = (owner) => {
+                    newOwner.value = {...owner};
+                    showAddOwnerModal.value = true;
+                };
+                
+                const deleteOwner = (id) => {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer ce copropriétaire ?')) {
+                        owners.value = owners.value.filter(owner => owner.id !== id);
+                    }
+                };
+                
+                const resetOwnerForm = () => {
+                    newOwner.value = {
+                        id: null,
+                        name: '',
+                        email: '',
+                        phone: '',
+                        share: ''
+                    };
+                };
+                
+                // Fund methods
+                const saveFund = () => {
+                    if (newFund.value.id) {
+                        // Update existing fund
+                        const index = funds.value.findIndex(f => f.id === newFund.value.id);
+                        if (index !== -1) {
+                            funds.value[index] = {...newFund.value};
+                        }
+                    } else {
+                        // Add new fund
+                        newFund.value.id = funds.value.length + 1;
+                        funds.value.push({...newFund.value});
+                    }
+                    resetFundForm();
+                    showAddFundModal.value = false;
+                };
+                
+                const viewFundDetails = (fund) => {
+                    alert(`Détails de l'appel de fonds:\n\nDate: ${fund.date}\nRéférence: ${fund.reference}\nMontant: ${fund.amount}\nStatut: ${fund.status}\nDescription: ${fund.description}`);
+                };
+                
+                const editFund = (fund) => {
+                    newFund.value = {...fund};
+                    showAddFundModal.value = true;
+                };
+                
+                const deleteFund = (id) => {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cet appel de fonds ?')) {
+                        funds.value = funds.value.filter(fund => fund.id !== id);
+                    }
+                };
+                
+                const resetFundForm = () => {
+                    newFund.value = {
+                        id: null,
+                        date: '',
+                        reference: '',
+                        amount: '',
+                        status: 'En attente',
+                        description: ''
+                    };
+                };
+                
+                // Expense methods
+                const saveExpense = () => {
+                    if (newExpense.value.id) {
+                        // Update existing expense
+                        const index = expenses.value.findIndex(e => e.id === newExpense.value.id);
+                        if (index !== -1) {
+                            expenses.value[index] = {...newExpense.value};
+                        }
+                    } else {
+                        // Add new expense
+                        newExpense.value.id = expenses.value.length + 1;
+                        expenses.value.push({...newExpense.value});
+                    }
+                    resetExpenseForm();
+                    showAddExpenseModal.value = false;
+                };
+                
+                const viewExpenseDetails = (expense) => {
+                    alert(`Détails de la dépense:\n\nDate: ${expense.date}\nFournisseur: ${expense.supplier}\nCatégorie: ${expense.category}\nMontant: ${expense.amount}\nDescription: ${expense.description}`);
+                };
+                
+                const editExpense = (expense) => {
+                    newExpense.value = {...expense};
+                    showAddExpenseModal.value = true;
+                };
+                
+                const deleteExpense = (id) => {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) {
+                        expenses.value = expenses.value.filter(expense => expense.id !== id);
+                    }
+                };
+                
+                const resetExpenseForm = () => {
+                    newExpense.value = {
+                        id: null,
+                        date: '',
+                        supplier: '',
+                        category: 'Entretien',
+                        amount: '',
+                        description: ''
+                    };
+                };
+                
+                // Transaction methods
+                const saveTransaction = () => {
+                    const transaction = {
+                        id: newTransaction.value.id || transactions.value.length + 1,
+                        date: newTransaction.value.date,
+                        reference: newTransaction.value.reference,
+                        label: newTransaction.value.label,
+                        debit: newTransaction.value.type === 'debit' ? `€${newTransaction.value.amount}` : '',
+                        credit: newTransaction.value.type === 'credit' ? `€${newTransaction.value.amount}` : ''
+                    };
+                    
+                    if (newTransaction.value.id) {
+                        // Update existing transaction
+                        const index = transactions.value.findIndex(t => t.id === newTransaction.value.id);
+                        if (index !== -1) {
+                            transactions.value[index] = transaction;
+                        }
+                    } else {
+                        // Add new transaction
+                        transactions.value.push(transaction);
+                    }
+                    
+                    resetTransactionForm();
+                    showAddTransactionModal.value = false;
+                };
+                
+                const editTransaction = (transaction) => {
+                    newTransaction.value = {
+                        id: transaction.id,
+                        date: transaction.date,
+                        type: transaction.debit ? 'debit' : 'credit',
+                        amount: transaction.debit ? transaction.debit.replace('€', '') : transaction.credit.replace('€', ''),
+                        label: transaction.label,
+                        reference: transaction.reference
+                    };
+                    showAddTransactionModal.value = true;
+                };
+                
+                const deleteTransaction = (id) => {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
+                        transactions.value = transactions.value.filter(transaction => transaction.id !== id);
+                    }
+                };
+                
+                const resetTransactionForm = () => {
+                    newTransaction.value = {
+                        id: null,
+                        date: '',
+                        type: 'debit',
+                        amount: '',
+                        label: '',
+                        reference: '',
+                        debit: '',
+                        credit: ''
+                    };
+                };
+                
+                // Document methods
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        newDocument.value.fileName = file.name;
+                        newDocument.value.file = file;
+                    }
+                };
+                
+                const uploadDocument = () => {
+                    if (!newDocument.value.file) {
+                        alert('Veuillez sélectionner un fichier');
+                        return;
+                    }
+                    
+                    const document = {
+                        id: newDocument.value.id || documents.value.length + 1,
+                        name: newDocument.value.name,
+                        category: newDocument.value.category,
+                        date: new Date().toLocaleDateString('fr-FR'),
+                        addedBy: 'Admin',
+                        fileName: newDocument.value.fileName
+                    };
+                    
+                    if (newDocument.value.id) {
+                        // Update existing document
+                        const index = documents.value.findIndex(d => d.id === newDocument.value.id);
+                        if (index !== -1) {
+                            documents.value[index] = document;
+                        }
+                    } else {
+                        // Add new document
+                        documents.value.push(document);
+                    }
+                    
+                    resetDocumentForm();
+                    showUploadDocumentModal.value = false;
+                };
+                
+                const downloadDocument = (document) => {
+                    alert(`Téléchargement du document: ${document.name}`);
+                };
+                
+                const shareDocument = (document) => {
+                    alert(`Partage du document: ${document.name}`);
+                };
+                
+                const deleteDocument = (id) => {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
+                        documents.value = documents.value.filter(document => document.id !== id);
+                    }
+                };
+                
+                const resetDocumentForm = () => {
+                    newDocument.value = {
+                        id: null,
+                        name: '',
+                        category: 'Comptabilité',
+                        date: '',
+                        addedBy: 'Admin',
+                        fileName: '',
+                        file: null
+                    };
+                };
+                
+                // Lifecycle
+                onMounted(() => {
+                    // Set current date for new entries
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    newFund.value.date = formattedDate;
+                    newExpense.value.date = formattedDate;
+                    newTransaction.value.date = formattedDate;
+                });
+                
+                return {
+                    sidebarOpen,
+                    activeMenu,
+                    toggleSidebar,
+                    
+                    // Owners
+                    owners,
+                    ownerSearch,
+                    filteredOwners,
+                    showAddOwnerModal,
+                    newOwner,
+                    saveOwner,
+                    editOwner,
+                    deleteOwner,
+                    
+                    // Funds
+                    funds,
+                    recentFunds,
+                    fundSearch,
+                    fundStatusFilter,
+                    filteredFunds,
+                    showAddFundModal,
+                    newFund,
+                    saveFund,
+                    viewFundDetails,
+                    editFund,
+                    deleteFund,
+                    
+                    // Expenses
+                    expenseCategories,
+                    expenses,
+                    recentExpenses,
+                    expenseSearch,
+                    expenseCategoryFilter,
+                    filteredExpenses,
+                    showAddExpenseModal,
+                    newExpense,
+                    saveExp
+</body>
+</html>
