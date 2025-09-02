@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scanner Inventaire PWA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+  <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    #scanner-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+      background-color: #000;
+    }
+    #scanner-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 150px;
+      border: 2px solid #4ade80;
+      box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scanner-line {
+      position: absolute;
+      width: 100%;
+      height: 3px;
+      background-color: #4ade80;
+      animation: scan 2s infinite linear;
+    }
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    .product-card {
+      transition: all 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <header class="bg-green-600 text-white shadow-lg">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Gestion Inventaire</h1>
+        <button @click="toggleScanner" class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+          </svg>
+          {{ scannerActive ? 'Arrêter' : 'Scanner' }}
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+      <!-- Scanner Section -->
+      <div v-if="scannerActive" class="mb-8 bg-white rounded-xl shadow-md overflow-hidden">
+        <div id="scanner-container">
+          <div id="scanner-overlay">
+            <div class="scanner-line"></div>
+            <p class="text-white text-lg font-semibold">Alignez le code-barres dans le cadre</p>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Scanner de code-barres</h2>
+            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+              {{ scanStatus }}
+            </span>
+          </div>
+          <input 
+            v-model="manualBarcode" 
+            @keyup.enter="processBarcode(manualBarcode)"
+            type="text" 
+            placeholder="Ou saisissez manuellement le code-barres"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+        </div>
+      </div>
+
+      <!-- Product Info Section -->
+      <div v-if="currentProduct" class="mb-8 bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800">{{ currentProduct.name }}</h2>
+              <p class="text-gray-600">{{ currentProduct.description }}</p>
+            </div>
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+              {{ currentProduct.barcode }}
+            </span>
+          </div>
+
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-sm font-medium text-gray-500">Stock actuel</h3>
+              <p class="text-2xl font-semibold">{{ currentProduct.stock }}</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-sm font-medium text-gray-500">Prix unitaire</h3>
+              <p class="text-2xl font-semibold">{{ currentProduct.price }} €</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-sm font-medium text-gray-500">Dernière mise à jour</h3>
+              <p class="text-2xl font-semibold">{{ formatDate(currentProduct.lastUpdated) }}</p>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <h3 class="text-lg font-medium mb-2">Mise à jour du stock</h3>
+            <div class="flex items-center space-x-4">
+              <button @click="updateStock(-1)" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <input 
+                v-model.number="stockUpdateValue" 
+                type="number" 
+                class="w-20 px-3 py-2 border rounded-lg text-center"
+              >
+              <button @click="updateStock(1)" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <button 
+                @click="submitStockUpdate" 
+                :disabled="isUpdating"
+                class="ml-4 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center"
+              >
+                <svg v-if="isUpdating" xmlns="http://www.w3.org/2000/svg" class="animate-spin h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+                <span>{{ isUpdating ? 'Enregistrement...' : 'Enregistrer' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Scans Section -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6">
+          <h2 class="text-xl font-semibold mb-4">Produits scannés récemment</h2>
+          
+          <div v-if="scannedProducts.length === 0" class="text-center py-8 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+            <p class="mt-2">Aucun produit scanné. Commencez à scanner pour voir les résultats.</p>
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div 
+              v-for="product in scannedProducts" 
+              :key="product.barcode"
+              @click="selectProduct(product)"
+              class="product-card cursor-pointer border rounded-lg p-4 hover:border-green-300"
+            >
+              <div class="flex justify-between items-start">
+                <h3 class="font-medium text-lg">{{ product.name }}</h3>
+                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">{{ product.barcode }}</span>
+              </div>
+              <div class="mt-2 flex justify-between items-center">
+                <span class="text-gray-600">Stock: {{ product.stock }}</span>
+                <span class="font-semibold">{{ product.price }} €</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Notification -->
+    <div v-if="notification.show" class="fixed bottom-4 right-4">
+      <div :class="['px-6 py-4 rounded-lg shadow-lg text-white', notification.success ? 'bg-green-500' : 'bg-red-500']">
+        {{ notification.message }}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted, onBeforeUnmount } = Vue;
+
+    createApp({
+      setup() {
+        // State
+        const scannerActive = ref(false);
+        const scanStatus = ref('Prêt');
+        const manualBarcode = ref('');
+        const currentProduct = ref(null);
+        const scannedProducts = ref([]);
+        const stockUpdateValue = ref(1);
+        const isUpdating = ref(false);
+        const notification = ref({
+          show: false,
+          message: '',
+          success: false
+        });
+
+        // Mock product database
+        const productDatabase = [
+          {
+            barcode: '123456789012',
+            name: 'Smartphone Premium',
+            description: 'Smartphone haut de gamme avec écran AMOLED 6.7"',
+            stock: 42,
+            price: 899.99,
+            lastUpdated: new Date(),
+            category: 'Électronique'
+          },
+          {
+            barcode: '987654321098',
+            name: 'Casque Bluetooth',
+            description: 'Casque sans fil avec réduction de bruit active',
+            stock: 15,
+            price: 199.99,
+            lastUpdated: new Date(),
+            category: 'Audio'
+          },
+          {
+            barcode: '456789012345',
+            name: 'Chargeur USB-C',
+            description: 'Chargeur rapide 65W compatible avec la plupart des appareils',
+            stock: 87,
+            price: 29.99,
+            lastUpdated: new Date(),
+            category: 'Accessoires'
+          },
+          {
+            barcode: '789012345678',
+            name: 'Écouteurs True Wireless',
+            description: 'Écouteurs sans fil avec boîtier de charge',
+            stock: 23,
+            price: 129.99,
+            lastUpdated: new Date(),
+            category: 'Audio'
+          },
+          {
+            barcode: '345678901234',
+            name: 'Batterie Externe',
+            description: 'Batterie portable 20000mAh avec charge rapide',
+            stock: 31,
+            price: 49.99,
+            lastUpdated: new Date(),
+            category: 'Accessoires'
+          }
+        ];
+
+        // Methods
+        const toggleScanner = () => {
+          scannerActive.value = !scannerActive.value;
+          
+          if (scannerActive.value) {
+            startScanner();
+          } else {
+            stopScanner();
+          }
+        };
+
+        const startScanner = () => {
+          scanStatus.value = 'Initialisation...';
+          
+          Quagga.init({
+            inputStream: {
+              name: "Live",
+              type: "LiveStream",
+              target: document.querySelector('#scanner-container'),
+              constraints: {
+                width: 480,
+                height: 320,
+                facingMode: "environment"
+              },
+            },
+            decoder: {
+              readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"],
+              debug: {
+                drawBoundingBox: true,
+                showFrequency: true,
+                drawScanline: true,
+                showPattern: true
+              }
+            },
+            locate: true,
+          }, function(err) {
+            if (err) {
+              console.error(err);
+              scanStatus.value = 'Erreur: ' + err.message;
+              showNotification('Impossible de démarrer le scanner', false);
+              return;
+            }
+            scanStatus.value = 'En attente de scan...';
+            Quagga.start();
+          });
+
+          Quagga.onDetected(handleBarcodeDetection);
+        };
+
+        const stopScanner = () => {
+          if (Quagga) {
+            Quagga.offDetected(handleBarcodeDetection);
+            Quagga.stop();
+          }
+          scanStatus.value = 'Prêt';
+        };
+
+        const handleBarcodeDetection = (result) => {
+          const code = result.codeResult.code;
+          scanStatus.value = 'Code détecté: ' + code;
+          processBarcode(code);
+          
+          // Pause scanning briefly
+          Quagga.pause();
+          setTimeout(() => {
+            Quagga.onDetected(handleBarcodeDetection);
+            Quagga.start();
+            scanStatus.value = 'En attente de scan...';
+          }, 1000);
+        };
+
+        const processBarcode = (barcode) => {
+          // Simulate API call to fetch product info
+          scanStatus.value = 'Recherche du produit...';
+          
+          setTimeout(() => {
+            const product = findProductByBarcode(barcode);
+            
+            if (product) {
+              currentProduct.value = {...product};
+              addToScannedProducts(product);
+              showNotification('Produit trouvé avec succès', true);
+            } else {
+              showNotification('Produit non trouvé dans la base de données', scannedProducts.value);
+            }
+            
+            manualBarcode.value = '';
+          }, 800);
+        };
+
+        const findProductByBarcode = (barcode) => {
+          return productDatabase.find(p => p.barcode === barcode) || null;
+        };
+
+        const addToScannedProducts = (product) => {
+          // Check if product already exists in scanned list
+          const existingIndex = scannedProducts.value.findIndex(p => p.barcode === product.barcode);
+          
+          if (existingIndex >= 0) {
+            // Update existing entry
+            scannedProducts.value[existingIndex] = {...product};
+          } else {
+            // Add new product to beginning of array
+            scannedProducts.value = [product, ...scannedProducts.value].slice(0, 6);
+          }
+        };
+
+        const selectProduct = (product) => {
+          currentProduct.value = {...product};
+          scannerActive.value = false;
+          stopScanner();
+        };
+
+        const updateStock = (direction) => {
+          const change = direction * stockUpdateValue.value;
+          currentProduct.value.stock += change;
+          
+          // Ensure stock doesn't go negative
+          if (currentProduct.value.stock < 0) {
+            currentProduct.value.stock = 0;
+          }
+        };
+
+        const submitStockUpdate = () => {
+          isUpdating.value = true;
+          
+          // Simulate API call to update stock
+          setTimeout(() => {
+            // Update in our mock database
+            const productIndex = productDatabase.findIndex(p => p.barcode === currentProduct.value.barcode);
+            if (productIndex >= 0) {
+              productDatabase[productIndex] = {
+                ...currentProduct.value,
+                lastUpdated: new Date()
+              };
+            }
+            
+            // Update in scanned products list
+            const scannedIndex = scannedProducts.value.findIndex(p => p.barcode === currentProduct.value.barcode);
+            if (scannedIndex >= 0) {
+              scannedProducts.value[scannedIndex] = {
+                ...currentProduct.value,
+                lastUpdated: new Date()
+              };
+            }
+            
+            isUpdating.value = false;
+            showNotification('Stock mis à jour avec succès', true);
+          }, 1200);
+        };
+
+        const showNotification = (message, success) => {
+          notification.value = {
+            show: true,
+            message,
+            success
+          };
+          
+          setTimeout(() => {
+            notification.value.show = false;
+          }, 3000);
+        };
+
+        const formatDate = (date) => {
+          return new Date(date).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        };
+
+        // Lifecycle hooks
+        onBeforeUnmount(() => {
+          stopScanner();
+        });
+
+        return {
+          scannerActive,
+          scanStatus,
+          manualBarcode,
+          currentProduct,
+          scannedProducts,
+          stockUpdateValue,
+          isUpdating,
+          notification,
+          toggleScanner,
+          processBarcode,
+          selectProduct,
+          updateStock,
+          submitStockUpdate,
+          formatDate
+        };
+      }
+    }).mount('#app');
+
+    // PWA setup
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('ServiceWorker registration successful');
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

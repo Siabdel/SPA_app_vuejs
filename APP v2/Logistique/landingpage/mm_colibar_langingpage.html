@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Colibar Logistique - Solution SaaS de gestion des colis pour PME</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .pricing-card:hover {
+            transform: scale(1.03);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #2563eb;
+            border-radius: 50%;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .workflow-connector::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background-color: #2563eb;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-box-open text-blue-600 text-2xl mr-2"></i>
+                        <span class="font-bold text-xl text-gray-800">MM Colibar</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-blue-600 transition">Fonctionnalités</a>
+                    <a href="#technology" class="text-gray-600 hover:text-blue-600 transition">Technologie</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition">Tarifs</a>
+                    <a href="#testimonials" class="text-gray-600 hover:text-blue-600 transition">Clients</a>
+                </div>
+                <div>
+                    <a href="#cta" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition shadow-md">Essai gratuit</a>
+                </div>
+                <button class="md:hidden focus:outline-none" id="menu-toggle">
+                    <i class="fas fa-bars text-gray-600 text-xl"></i>
+                </button>
+            </div>
+            <div class="md:hidden hidden mt-4" id="mobile-menu">
+                <a href="#features" class="block py-2 text-gray-600 hover:text-blue-600">Fonctionnalités</a>
+                <a href="#technology" class="block py-2 text-gray-600 hover:text-blue-600">Technologie</a>
+                <a href="#pricing" class="block py-2 text-gray-600 hover:text-blue-600">Tarifs</a>
+                <a href="#testimonials" class="block py-2 text-gray-600 hover:text-blue-600">Clients</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">Simplifiez la gestion de vos colis avec notre solution SaaS tout-en-un</h1>
+                <p class="text-xl mb-8">Digitalisez votre chaîne logistique, gagnez en efficience et maîtrisez vos coûts avec une plateforme pensée pour les PME, transporteurs locaux et e-commerçants.</p>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#cta" class="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition text-center shadow-lg">Démarrer l'essai gratuit</a>
+                    <a href="#features" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition text-center">Découvrir les fonctionnalités</a>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Gestion de colis" class="rounded-lg shadow-2xl animate-float max-w-md w-full">
+            </div>
+        </div>
+    </section>
+
+    <!-- Slogan Banner -->
+    <div class="bg-blue-500 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p class="text-xl font-medium"><i class="fas fa-bolt mr-2"></i> Votre logistique, simple, rapide et connectée.</p>
+        </div>
+    </div>
+
+    <!-- Why Choose Us -->
+    <section class="py-16 bg-white" id="why">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Pourquoi choisir notre solution ?</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-6 rounded-xl feature-card transition duration-300">
+                    <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-building"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Conçue pour les PME logistiques</h3>
+                    <p class="text-gray-600">Une solution adaptée aux besoins spécifiques des petites et moyennes entreprises du secteur logistique.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl feature-card transition duration-300">
+                    <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-euro-sign"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Alternative économique</h3>
+                    <p class="text-gray-600">Une alternative abordable aux solutions complexes et coûteuses des grands groupes.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl feature-card transition duration-300">
+                    <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-cloud"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Plateforme cloud sécurisée</h3>
+                    <p class="text-gray-600">Accédez à vos données partout et à tout moment, avec une sécurité optimale.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl feature-card transition duration-300">
+                    <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-print"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Compatibilité étendue</h3>
+                    <p class="text-gray-600">Fonctionne avec vos imprimantes thermiques, scanners mobiles et douchettes existants.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl feature-card transition duration-300">
+                    <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-headset"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Support technique dédié</h3>
+                    <p class="text-gray-600">Un accompagnement personnalisé et des formations pour votre équipe.</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl feature-card transition duration-300">
+                    <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-rocket"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Déploiement rapide</h3>
+                    <p class="text-gray-600">Mise en place en quelques jours sans interruption de votre activité.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gray-50" id="features">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Fonctionnalités clés</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-md">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="py-4 px-6 text-left">Fonctionnalité</th>
+                            <th class="py-4 px-6 text-center">Starter</th>
+                            <th class="py-4 px-6 text-center">Pro</th>
+                            <th class="py-4 px-6 text-center">Premium</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="py-4 px-6 font-medium">Gestion expéditions</td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-4 px-6 font-medium">Génération étiquettes PDF</td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-medium">Scan colis (mobile/douchette)</td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-4 px-6 font-medium">Suivi en temps réel</td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-medium">Impression automatique</td>
+                            <td class="py-4 px-6 text-center text-red-500"><i class="fas fa-times"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-4 px-6 font-medium">Intégrations API</td>
+                            <td class="py-4 px-6 text-center text-red-500"><i class="fas fa-times"></i></td>
+                            <td class="py-4 px-6 text-center">Shopify, WooCommerce, autres</td>
+                            <td class="py-4 px-6 text-center">API ouverte, connecteurs sur demande</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-medium">Statistiques avancées</td>
+                            <td class="py-4 px-6 text-center text-red-500"><i class="fas fa-times"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-4 px-6 font-medium">Géolocalisation & signature électronique</td>
+                            <td class="py-4 px-6 text-center text-red-500"><i class="fas fa-times"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-medium">Support prioritaire</td>
+                            <td class="py-4 px-6 text-center text-red-500"><i class="fas fa-times"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                            <td class="py-4 px-6 text-center text-green-500"><i class="fas fa-check"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section class="py-16 bg-white" id="technology">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Technologie & Infrastructure</h2>
+            
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div class="text-blue-600 text-3xl mb-4"><i class="fab fa-python"></i></div>
+                            <h3 class="text-xl font-semibold mb-2">Backend robuste</h3>
+                            <p class="text-gray-600">Développé avec Django & Django REST Framework pour des performances optimales.</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div class="text-blue-600 text-3xl mb-4"><i class="fab fa-vuejs"></i></div>
+                            <h3 class="text-xl font-semibold mb-2">Interface moderne</h3>
+                            <p class="text-gray-600">Vue.js & Axios pour une expérience utilisateur fluide et réactive.</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-server"></i></div>
+                            <h3 class="text-xl font-semibold mb-2">Hébergement sécurisé</h3>
+                            <p class="text-gray-600">Infrastructure cloud haute disponibilité avec conformité RGPD.</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div class="text-blue-600 text-3xl mb-4"><i class="fas fa-plug"></i></div>
+                            <h3 class="text-xl font-semibold mb-2">Intégrations fluides</h3>
+                            <p class="text-gray-600">Connecteurs pour votre écosystème digital existant.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 md:pl-12">
+                    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Technologie" class="rounded-lg shadow-xl w-full">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Workflow simplifié</h2>
+            
+            <div class="relative">
+                <div class="workflow-connector absolute left-0 top-0 h-full ml-5 md:ml-10"></div>
+                
+                <div class="mb-12 relative pl-16 md:pl-24 workflow-step">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-600">1. Création d'expédition</h3>
+                        <p class="text-gray-600">Créez et enregistrez vos expéditions en quelques clics avec une interface intuitive.</p>
+                    </div>
+                </div>
+                
+                <div class="mb-12 relative pl-16 md:pl-24 workflow-step">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-600">2. Impression d'étiquettes</h3>
+                        <p class="text-gray-600">Générez et imprimez automatiquement vos étiquettes avec codes-barres et QR codes.</p>
+                    </div>
+                </div>
+                
+                <div class="mb-12 relative pl-16 md:pl-24 workflow-step">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-600">3. Scan des colis</h3>
+                        <p class="text-gray-600">Scannez les colis pour mise à jour instantanée du statut via smartphone ou douchette.</p>
+                    </div>
+                </div>
+                
+                <div class="mb-12 relative pl-16 md:pl-24 workflow-step">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-600">4. Suivi en temps réel</h3>
+                        <p class="text-gray-600">Visualisez l'avancement des livraisons via un tableau de bord intuitif.</p>
+                    </div>
+                </div>
+                
+                <div class="relative pl-16 md:pl-24 workflow-step">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-semibold mb-2 text-blue-600">5. Notifications automatisées</h3>
+                        <p class="text-gray-600">Recevez des alertes à chaque étape clé du processus de livraison.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-16 bg-white" id="pricing">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Tarification adaptée à vos besoins</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Starter Plan -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-lg pricing-card transition duration-300">
+                    <div class="bg-blue-100 p-6">
+                        <h3 class="text-xl font-bold text-center text-blue-800">Starter</h3>
+                        <div class="text-center mt-4">
+                            <span class="text-3xl font-bold">29€</span>
+                            <span class="text-gray-600">/mois</span>
+                        </div>
+                        <p class="text-center text-gray-600 mt-2">300 MAD</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Jusqu'à 100 colis/mois</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Gestion des expéditions</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Génération d'étiquettes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Scan colis mobile</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Suivi en temps réel</span>
+                            </li>
+                            <li class="flex items-start text-gray-400">
+                                <i class="fas fa-times mt-1 mr-2"></i>
+                                <span>Impression automatique</span>
+                            </li>
+                        </ul>
+                        <div class="mt-8 text-center">
+                            <a href="#cta" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition inline-block">Essai gratuit</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pro Plan (Featured) -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-xl border-2 border-blue-500 pricing-card transition duration-300 transform scale-105">
+                    <div class="bg-blue-600 p-6 text-white">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold">Pro</h3>
+                            <span class="bg-yellow-400 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">POPULAIRE</span>
+                        </div>
+                        <div class="text-center mt-4">
+                            <span class="text-3xl font-bold">79€</span>
+                            <span class="opacity-80">/mois</span>
+                        </div>
+                        <p class="text-center opacity-80 mt-2">800 MAD</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Jusqu'à 1 000 colis/mois</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Toutes fonctionnalités Starter</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Impression automatique</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Intégrations API (Shopify, WooCommerce)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Statistiques avancées</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Géolocalisation & signature électronique</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Support prioritaire</span>
+                            </li>
+                        </ul>
+                        <div class="mt-8 text-center">
+                            <a href="#cta" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition inline-block">Essai gratuit</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Premium Plan -->
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-lg pricing-card transition duration-300">
+                    <div class="bg-blue-800 p-6 text-white">
+                        <h3 class="text-xl font-bold text-center">Premium</h3>
+                        <div class="text-center mt-4">
+                            <span class="text-3xl font-bold">149€</span>
+                            <span class="opacity-80">/mois</span>
+                        </div>
+                        <p class="text-center opacity-80 mt-2">1 500 MAD</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Volume illimité</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Toutes fonctionnalités Pro</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>API ouverte</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Connecteurs sur demande</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Personnalisation avancée</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Support dédié</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Formation personnalisée</span>
+                            </li>
+                        </ul>
+                        <div class="mt-8 text-center">
+                            <a href="#cta" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition inline-block">Essai gratuit</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <p class="text-gray-600">Option "pay-per-use" disponible pour très petits volumes (0,1€/colis). <a href="#contact" class="text-blue-600 hover:underline">Contactez-nous</a> pour plus d'informations.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-gray-50" id="testimonials">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Ils nous font confiance</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center">
+                    <div class="w-24 h-24 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-3xl text-gray-500 font-bold">L1</div>
+                    <h3 class="text-xl font-semibold mb-2">Transporteur Local</h3>
+                    <p class="text-gray-600 text-center">"MM Colibar a révolutionné notre gestion des colis. Simple, efficace et parfaitement adapté à nos besoins."</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center">
+                    <div class="w-24 h-24 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-3xl text-gray-500 font-bold">E2</div>
+                    <h3 class="text-xl font-semibold mb-2">Boutique E-commerce</h3>
+                    <p class="text-gray-600 text-center">"L'intégration avec notre boutique en ligne est parfaite. Gain de temps considérable et réduction des erreurs."</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center">
+                    <div class="w-24 h-24 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-3xl text-gray-500 font-bold">P3</div>
+                    <h3 class="text-xl font-semibold mb-2">PME Logistique</h3>
+                    <p class="text-gray-600 text-center">"Enfin une solution abordable et complète pour notre activité. Le support est réactif et compétent."</p>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="#cta" class="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition inline-block">Découvrez comment nous avons aidé nos clients</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 hero-gradient text-white" id="cta">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Prêt à transformer votre logistique ?</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Testez gratuitement MM Colibar pendant 14 jours. Aucune carte bancaire requise.</p>
+            
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Démarrer votre essai gratuit</h3>
+                    
+                    <form id="trial-form">
+                        <div class="mb-4">
+                            <input type="text" placeholder="Nom de votre entreprise" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                        </div>
+                        <div class="mb-4">
+                            <input type="email" placeholder="Email professionnel" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                        </div>
+                        <div class="mb-4">
+                            <input type="tel" placeholder="Téléphone" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Je démarre mon essai gratuit</button>
+                    </form>
+                    
+                    <p class="text-gray-500 text-sm mt-4">En cliquant, vous acceptez nos <a href="#" class="text-blue-600 hover:underline">Conditions d'utilisation</a> et notre <a href="#" class="text-blue-600 hover:underline">Politique de confidentialité</a>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-box-open text-blue-400 text-2xl mr-2"></i>
+                        <span class="font-bold text-xl">MM Colibar</span>
+                    </div>
+                    <p class="text-gray-400">Votre solution SaaS tout-en-un pour la gestion simplifiée des colis.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Produit</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white">Fonctionnalités</a></li>
+                        <li><a href="#pricing" class="text-gray-400 hover:text-white">Tarifs</a></li>
+                        <li><a href="#technology" class="text-gray-400 hover:text-white">Technologie</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Nouveautés</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Ressources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Centre d'aide</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Webinaires</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center"><i class="fas fa-envelope mr-2 text-blue-400"></i> <a href="mailto:contact@mmcolibar.com" class="text-gray-400 hover:text-white">contact@mmcolibar.com</a></li>
+                        <li class="flex items-center"><i class="fas fa-phone mr-2 text-blue-400"></i> <span class="text-gray-400">+212 6 12 34 56 78</span></li>
+                        <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> <span class="text-gray-400">Casablanca, Maroc</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 MM Colibar Logistique. Tous droits réservés.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white">Mentions légales</a>
+                    <a href="#" class="text-gray-400 hover:text-white">CGV</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Politique de confidentialité</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        $('#menu-toggle').click(function() {
+            $('#mobile-menu').toggleClass('hidden');
+        });
+
+        // Smooth scrolling for anchor links
+        $('a[href*="#"]').on('click', function(e) {
+            e.preventDefault();
+            
+            $('html, body').animate(
+                {
+                    scrollTop: $($(this).attr('href')).offset().top,
+                },
+                500,
+                'linear'
+            );
+        });
+
+        // Form submission
+        $('#trial-form').submit(function(e) {
+            e.preventDefault();
+            alert('Merci pour votre demande ! Notre équipe vous contactera rapidement pour activer votre essai gratuit.');
+            $(this).trigger("reset");
+        });
+
+        // Vue.js animation for features
+        new Vue({
+            el: '#features',
+            mounted() {
+                this.animateFeatures();
+            },
+            methods: {
+                animateFeatures() {
+                    $('.feature-card').each(function(index) {
+                        $(this).delay(100 * index).animate({
+                            opacity: 1,
+                            marginTop: 0
+                        }, 300);
+                    });
+                }
+            }
+        });
+
+        // Scroll animations
+        $(window).scroll(function() {
+            $('.workflow-step').each(function() {
+                var position = $(this).offset().top;
+                var scroll = $(window).scrollTop();
+                var windowHeight = $(window).height();
+                
+                if (scroll > position - windowHeight + 100) {
+                    $(this).find('div').addClass('animate__animated animate__fadeInRight');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

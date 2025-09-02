@@ -1,0 +1,1624 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Frent Colibar - Gestion Logistique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.min.js"></script>
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #8B0000 0%, #A52A2A 100%);
+        }
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid white;
+        }
+        .card-stat {
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .card-stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .parcel-status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .barcode-preview {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        #map {
+            height: 300px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="#">
+                    <i class="bi bi-box-seam me-2"></i>MM Frent Colibar
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell-fill"></i>
+                                <span class="badge bg-danger rounded-pill">{{ notifications.length }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li v-for="notif in notifications" :key="notif.id">
+                                    <a class="dropdown-item" href="#">{{ notif.message }}</a>
+                                </li>
+                                <li v-if="notifications.length === 0">
+                                    <a class="dropdown-item text-muted" href="#">Aucune notification</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i> {{ currentUser.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" @click="showProfileModal"><i class="bi bi-person-lines-fill me-2"></i>Profil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" @click="logout"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 col-lg-2 d-md-block sidebar collapse bg-dark text-white p-0">
+                    <div class="position-sticky pt-3">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'dashboard'" :class="{ 'active': activeTab === 'dashboard' }">
+                                    <i class="bi bi-speedometer2 me-2"></i> Tableau de bord
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'parcels'" :class="{ 'active': activeTab === 'parcels' }">
+                                    <i class="bi bi-box-seam me-2"></i> Gestion des colis
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'clients'" :class="{ 'active': activeTab === 'clients' }">
+                                    <i class="bi bi-people-fill me-2"></i> Clients
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'carriers'" :class="{ 'active': activeTab === 'carriers' }">
+                                    <i class="bi bi-truck me-2"></i> Transporteurs
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'calendar'" :class="{ 'active': activeTab === 'calendar' }">
+                                    <i class="bi bi-calendar-event me-2"></i> Calendrier
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'reports'" :class="{ 'active': activeTab === 'reports' }">
+                                    <i class="bi bi-graph-up me-2"></i> Rapports
+                                </a>
+                            </li>
+                            <li class="nav-item" v-if="currentUser.is_admin">
+                                <a class="nav-link text-white" href="#" @click="activeTab = 'users'" :class="{ 'active': activeTab === 'users' }">
+                                    <i class="bi bi-shield-lock me-2"></i> Utilisateurs
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                    <!-- Dashboard Tab -->
+                    <div v-if="activeTab === 'dashboard'" class="tab-content">
+                        <h2 class="h3 mb-4 text-dark"><i class="bi bi-speedometer2 me-2"></i>Tableau de bord</h2>
+                        
+                        <!-- Stats Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card card-stat bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-subtitle mb-2 text-muted">Colis aujourd'hui</h6>
+                                                <h3 class="card-title mb-0 text-danger">{{ stats.today_parcels }}</h3>
+                                            </div>
+                                            <i class="bi bi-box-seam text-danger fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card card-stat bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-subtitle mb-2 text-muted">En transit</h6>
+                                                <h3 class="card-title mb-0 text-warning">{{ stats.in_transit }}</h3>
+                                            </div>
+                                            <i class="bi bi-truck text-warning fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card card-stat bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-subtitle mb-2 text-muted">Livrés</h6>
+                                                <h3 class="card-title mb-0 text-success">{{ stats.delivered }}</h3>
+                                            </div>
+                                            <i class="bi bi-check-circle text-success fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card card-stat bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-subtitle mb-2 text-muted">En retard</h6>
+                                                <h3 class="card-title mb-0 text-danger">{{ stats.late }}</h3>
+                                            </div>
+                                            <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Parcels and Map -->
+                        <div class="row">
+                            <div class="col-md-8 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Derniers colis</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Référence</th>
+                                                        <th>Destinataire</th>
+                                                        <th>Statut</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="parcel in recentParcels" :key="parcel.id" @click="showParcelModal(parcel.id)" style="cursor: pointer;">
+                                                        <td>{{ parcel.tracking_number }}</td>
+                                                        <td>{{ parcel.recipient_name }}</td>
+                                                        <td>
+                                                            <span class="parcel-status-badge" :class="getStatusClass(parcel.status)">
+                                                                {{ parcel.status }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ formatDate(parcel.created_at) }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0"><i class="bi bi-map me-2"></i>Localisation des livraisons</h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="map" class="w-100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Chart -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Performance hebdomadaire</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="performanceChart" height="100"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parcels Tab -->
+                    <div v-if="activeTab === 'parcels'" class="tab-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h3 mb-0 text-dark"><i class="bi bi-box-seam me-2"></i>Gestion des colis</h2>
+                            <button class="btn btn-danger" @click="showParcelModal(null)">
+                                <i class="bi bi-plus-circle me-1"></i> Nouveau colis
+                            </button>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Statut</label>
+                                        <select class="form-select" v-model="parcelFilters.status">
+                                            <option value="">Tous</option>
+                                            <option v-for="status in parcelStatuses" :value="status">{{ status }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Date de création</label>
+                                        <input type="date" class="form-control" v-model="parcelFilters.created_at">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Destinataire</label>
+                                        <input type="text" class="form-control" v-model="parcelFilters.recipient_name" placeholder="Nom du destinataire">
+                                    </div>
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button class="btn btn-outline-secondary me-2" @click="resetParcelFilters">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                        <button class="btn btn-danger flex-grow-1" @click="fetchParcels">
+                                            <i class="bi bi-funnel me-1"></i> Filtrer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search and Actions -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Rechercher par référence ou code-barres..." v-model="parcelSearchQuery">
+                                    <button class="btn btn-outline-secondary" type="button" @click="searchParcels">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary" @click="exportParcelsCSV">
+                                        <i class="bi bi-download me-1"></i> Exporter
+                                    </button>
+                                    <button class="btn btn-outline-secondary" @click="showImportModal">
+                                        <i class="bi bi-upload me-1"></i> Importer
+                                    </button>
+                                    <button class="btn btn-outline-secondary" @click="showBarcodeScanner">
+                                        <i class="bi bi-upc-scan me-1"></i> Scanner
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parcels Table -->
+                        <div class="card shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Référence</th>
+                                                <th>Expéditeur</th>
+                                                <th>Destinataire</th>
+                                                <th>Statut</th>
+                                                <th>Créé le</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="parcel in filteredParcels" :key="parcel.id">
+                                                <td>{{ parcel.tracking_number }}</td>
+                                                <td>{{ parcel.sender_name }}</td>
+                                                <td>{{ parcel.recipient_name }}</td>
+                                                <td>
+                                                    <span class="parcel-status-badge" :class="getStatusClass(parcel.status)">
+                                                        {{ parcel.status }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ formatDate(parcel.created_at) }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" @click="showParcelModal(parcel.id)">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" @click="printLabel(parcel.id)">
+                                                            <i class="bi bi-printer"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger" @click="confirmDeleteParcel(parcel.id)" v-if="currentUser.is_admin">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <nav aria-label="Pagination">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        <li class="page-item" :class="{ 'disabled': currentParcelPage === 1 }">
+                                            <a class="page-link" href="#" @click.prevent="prevParcelPage">Précédent</a>
+                                        </li>
+                                        <li class="page-item" v-for="page in parcelPages" :key="page" :class="{ 'active': page === currentParcelPage }">
+                                            <a class="page-link" href="#" @click.prevent="goToParcelPage(page)">{{ page }}</a>
+                                        </li>
+                                        <li class="page-item" :class="{ 'disabled': currentParcelPage === totalParcelPages }">
+                                            <a class="page-link" href="#" @click.prevent="nextParcelPage">Suivant</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clients Tab -->
+                    <div v-if="activeTab === 'clients'" class="tab-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h3 mb-0 text-dark"><i class="bi bi-people-fill me-2"></i>Gestion des clients</h2>
+                            <button class="btn btn-danger" @click="showClientModal(null)">
+                                <i class="bi bi-plus-circle me-1"></i> Nouveau client
+                            </button>
+                        </div>
+
+                        <!-- Clients Table -->
+                        <div class="card shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Type</th>
+                                                <th>Email</th>
+                                                <th>Téléphone</th>
+                                                <th>Adresse</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="client in clients" :key="client.id">
+                                                <td>{{ client.name }}</td>
+                                                <td>{{ client.type }}</td>
+                                                <td>{{ client.email }}</td>
+                                                <td>{{ client.phone }}</td>
+                                                <td>{{ client.address }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" @click="showClientModal(client.id)">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" @click="editClient(client.id)">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger" @click="confirmDeleteClient(client.id)" v-if="currentUser.is_admin">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carriers Tab -->
+                    <div v-if="activeTab === 'carriers'" class="tab-content">
+                        <h2 class="h3 mb-4 text-dark"><i class="bi bi-truck me-2"></i>Transporteurs et points relais</h2>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card shadow-sm mb-4">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0">Liste des transporteurs</h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nom</th>
+                                                        <th>Contact</th>
+                                                        <th>Type</th>
+                                                        <th>Performance</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="carrier in carriers" :key="carrier.id">
+                                                        <td>{{ carrier.name }}</td>
+                                                        <td>{{ carrier.contact_phone }}</td>
+                                                        <td>{{ carrier.type }}</td>
+                                                        <td>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar bg-success" role="progressbar" :style="{ width: carrier.performance + '%' }" :aria-valuenow="carrier.performance" aria-valuemin="0" aria-valuemax="100">
+                                                                    {{ carrier.performance }}%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <button class="btn btn-outline-primary" @click="showCarrierModal(carrier.id)">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </button>
+                                                                <button class="btn btn-outline-secondary" @click="editCarrier(carrier.id)">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0">Points relais</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group">
+                                            <a href="#" class="list-group-item list-group-item-action" v-for="relay in relayPoints" :key="relay.id">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">{{ relay.name }}</h6>
+                                                    <small>{{ relay.distance }} km</small>
+                                                </div>
+                                                <p class="mb-1">{{ relay.address }}</p>
+                                                <small>{{ relay.hours }}</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Tab -->
+                    <div v-if="activeTab === 'calendar'" class="tab-content">
+                        <h2 class="h3 mb-4 text-dark"><i class="bi bi-calendar-event me-2"></i>Calendrier des livraisons</h2>
+                        
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Tab -->
+                    <div v-if="activeTab === 'reports'" class="tab-content">
+                        <h2 class="h3 mb-4 text-dark"><i class="bi bi-graph-up me-2"></i>Rapports et statistiques</h2>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0">Statistiques des colis</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="parcelStatsChart" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0">Performance des transporteurs</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="carrierPerformanceChart" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Export de données</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Type de rapport</label>
+                                        <select class="form-select" v-model="reportType">
+                                            <option value="parcels">Colis</option>
+                                            <option value="clients">Clients</option>
+                                            <option value="carriers">Transporteurs</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Date de début</label>
+                                        <input type="date" class="form-control" v-model="reportStartDate">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Date de fin</label>
+                                        <input type="date" class="form-control" v-model="reportEndDate">
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-danger" @click="generateReport">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i> Générer PDF
+                                    </button>
+                                    <button class="btn btn-success ms-2" @click="exportReportCSV">
+                                        <i class="bi bi-file-earmark-excel me-1"></i> Exporter CSV
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Tab (Admin only) -->
+                    <div v-if="activeTab === 'users' && currentUser.is_admin" class="tab-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h3 mb-0 text-dark"><i class="bi bi-shield-lock me-2"></i>Gestion des utilisateurs</h2>
+                            <button class="btn btn-danger" @click="showUserModal(null)">
+                                <i class="bi bi-plus-circle me-1"></i> Nouvel utilisateur
+                            </button>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div class="card shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom d'utilisateur</th>
+                                                <th>Email</th>
+                                                <th>Rôle</th>
+                                                <th>Dernière connexion</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="user in users" :key="user.id">
+                                                <td>{{ user.username }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>
+                                                    <span class="badge" :class="getRoleClass(user.role)">
+                                                        {{ user.role }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ formatDate(user.last_login) }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" @click="showUserModal(user.id)">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" @click="editUser(user.id)">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-danger" @click="confirmDeleteUser(user.id)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Parcel Modal -->
+        <div class="modal fade" id="parcelModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ currentParcel.id ? 'Détails du colis' : 'Nouveau colis' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="saveParcel">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Référence</label>
+                                    <input type="text" class="form-control" v-model="currentParcel.tracking_number" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Statut</label>
+                                    <select class="form-select" v-model="currentParcel.status" required>
+                                        <option v-for="status in parcelStatuses" :value="status">{{ status }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Expéditeur</label>
+                                    <select class="form-select" v-model="currentParcel.sender_id" required>
+                                        <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Destinataire</label>
+                                    <select class="form-select" v-model="currentParcel.recipient_id" required>
+                                        <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Poids (kg)</label>
+                                    <input type="number" step="0.01" class="form-control" v-model="currentParcel.weight" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Dimensions (cm)</label>
+                                    <input type="text" class="form-control" v-model="currentParcel.dimensions" placeholder="L x l x H">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Valeur déclarée</label>
+                                    <input type="number" step="0.01" class="form-control" v-model="currentParcel.declared_value">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Transporteur</label>
+                                    <select class="form-select" v-model="currentParcel.carrier_id" required>
+                                        <option v-for="carrier in carriers" :value="carrier.id">{{ carrier.name }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Date de livraison estimée</label>
+                                    <input type="datetime-local" class="form-control" v-model="currentParcel.estimated_delivery">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" v-model="currentParcel.notes" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3" v-if="currentParcel.id">
+                                <label class="form-label">Code-barres</label>
+                                <div class="barcode-preview">
+                                    <img :src="'https://barcode.tec-it.com/barcode.ashx?data=' + currentParcel.tracking_number + '&code=Code128&dpi=96'" alt="Barcode">
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-danger">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Modal -->
+        <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ currentClient.id ? 'Détails client' : 'Nouveau client' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="saveClient">
+                            <div class="mb-3">
+                                <label class="form-label">Type</label>
+                                <select class="form-select" v-model="currentClient.type" required>
+                                    <option value="expéditeur">Expéditeur</option>
+                                    <option value="destinataire">Destinataire</option>
+                                    <option value="les deux">Les deux</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nom</label>
+                                <input type="text" class="form-control" v-model="currentClient.name" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" v-model="currentClient.email">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" v-model="currentClient.phone">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Adresse</label>
+                                <textarea class="form-control" v-model="currentClient.address" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-danger">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Modal -->
+        <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ currentUserModal.id ? 'Modifier utilisateur' : 'Nouvel utilisateur' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="saveUser">
+                            <div class="mb-3">
+                                <label class="form-label">Nom d'utilisateur</label>
+                                <input type="text" class="form-control" v-model="currentUserModal.username" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" v-model="currentUserModal.email" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Rôle</label>
+                                <select class="form-select" v-model="currentUserModal.role" required>
+                                    <option value="admin">Administrateur</option>
+                                    <option value="agent">Agent de dépôt</option>
+                                    <option value="livreur">Livreur</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">{{ currentUserModal.id ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe' }}</label>
+                                <input type="password" class="form-control" v-model="currentUserModal.password" :required="!currentUserModal.id">
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-danger">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Modal -->
+        <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Profil utilisateur</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            <div class="avatar bg-danger text-white d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; font-size: 2rem;">
+                                {{ currentUser.username.charAt(0).toUpperCase() }}
+                            </div>
+                            <h5 class="mt-3 mb-1">{{ currentUser.username }}</h5>
+                            <span class="badge bg-dark">{{ currentUser.role }}</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" v-model="currentUser.email" disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Dernière connexion</label>
+                            <input type="text" class="form-control" :value="formatDate(currentUser.last_login)" disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" v-model="newPassword">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" v-model="confirmPassword">
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Fermer</button>
+                            <button type="button" class="btn btn-danger" @click="updateProfile">Mettre à jour</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Modal -->
+        <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Importer des colis</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Fichier CSV</label>
+                            <input type="file" class="form-control" accept=".csv" @change="handleFileUpload">
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>Le fichier doit contenir les colonnes suivantes : 
+                            tracking_number, sender_id, recipient_id, weight, status, carrier_id
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                            <button type="button" class="btn btn-danger" @click="importParcels" :disabled="!importFile">Importer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barcode Scanner Modal -->
+        <div class="modal fade" id="barcodeScannerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Scanner un code-barres</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="scanner-container" style="width: 100%; height: 300px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                            <p class="text-muted">Zone de scan (simulation)</p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <label class="form-label">Ou saisir manuellement</label>
+                            <input type="text" class="form-control" v-model="manualBarcode" placeholder="Entrez le code-barres">
+                        </div>
+                        
+                        <div class="text-end mt-3">
+                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Annuler</button>
+                            <button type="button" class="btn btn-danger" @click="processBarcode">Valider</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ deleteConfirmMessage }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-danger" @click="confirmDeleteAction">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, computed } = Vue;
+        
+        createApp({
+            setup() {
+                // Authentication and user data
+                const currentUser = ref({
+                    id: 1,
+                    username: 'admin',
+                    email: 'admin@mmfrent.com',
+                    role: 'admin',
+                    is_admin: true,
+                    last_login: '2023-05-15T14:30:00Z'
+                });
+                
+                const newPassword = ref('');
+                const confirmPassword = ref('');
+                const notifications = ref([
+                    { id: 1, message: 'Colis #12345 en retard' },
+                    { id: 2, message: 'Nouveau client enregistré' }
+                ]);
+                
+                // Application state
+                const activeTab = ref('dashboard');
+                const isLoading = ref(false);
+                
+                // Dashboard data
+                const stats = ref({
+                    today_parcels: 42,
+                    in_transit: 18,
+                    delivered: 125,
+                    late: 7
+                });
+                
+                const recentParcels = ref([
+                    { id: 1, tracking_number: 'COL12345', recipient_name: 'Jean Dupont', status: 'en transit', created_at: '2023-05-15T10:30:00Z' },
+                    { id: 2, tracking_number: 'COL12346', recipient_name: 'Marie Martin', status: 'livré', created_at: '2023-05-14T16:45:00Z' },
+                    { id: 3, tracking_number: 'COL12347', recipient_name: 'Pierre Durand', status: 'en échec', created_at: '2023-05-14T09:15:00Z' },
+                    { id: 4, tracking_number: 'COL12348', recipient_name: 'Sophie Lambert', status: 'en préparation', created_at: '2023-05-13T14:20:00Z' },
+                    { id: 5, tracking_number: 'COL12349', recipient_name: 'Thomas Leroy', status: 'en transit', created_at: '2023-05-13T11:10:00Z' }
+                ]);
+                
+                // Parcels management
+                const parcels = ref([]);
+                const filteredParcels = ref([]);
+                const parcelFilters = ref({
+                    status: '',
+                    created_at: '',
+                    recipient_name: ''
+                });
+                const parcelSearchQuery = ref('');
+                const currentParcelPage = ref(1);
+                const parcelPerPage = ref(10);
+                const totalParcelPages = ref(1);
+                const parcelStatuses = ref([
+                    'en préparation',
+                    'en transit',
+                    'en livraison',
+                    'livré',
+                    'en échec',
+                    'retourné'
+                ]);
+                
+                const currentParcel = ref({
+                    id: null,
+                    tracking_number: '',
+                    sender_id: '',
+                    recipient_id: '',
+                    weight: '',
+                    dimensions: '',
+                    declared_value: '',
+                    status: 'en préparation',
+                    carrier_id: '',
+                    estimated_delivery: '',
+                    notes: ''
+                });
+                
+                // Clients management
+                const clients = ref([
+                    { id: 1, name: 'Amazon FR', type: 'expéditeur', email: 'contact@amazon.fr', phone: '01 23 45 67 89', address: '1 Rue de la Paix, Paris' },
+                    { id: 2, name: 'Jean Dupont', type: 'destinataire', email: 'jean.dupont@email.com', phone: '06 12 34 56 78', address: '15 Avenue des Champs, Lyon' },
+                    { id: 3, name: 'Darty', type: 'les deux', email: 'contact@darty.com', phone: '09 87 65 43 21', address: '30 Rue du Commerce, Marseille' }
+                ]);
+                
+                const currentClient = ref({
+                    id: null,
+                    type: 'expéditeur',
+                    name: '',
+                    email: '',
+                    phone: '',
+                    address: ''
+                });
+                
+                // Carriers management
+                const carriers = ref([
+                    { id: 1, name: 'Chronopost', contact_phone: '01 23 45 67 89', type: 'express', performance: 92 },
+                    { id: 2, name: 'Colissimo', contact_phone: '01 98 76 54 32', type: 'standard', performance: 85 },
+                    { id: 3, name: 'UPS', contact_phone: '01 45 67 89 01', type: 'international', performance: 88 }
+                ]);
+                
+                const relayPoints = ref([
+                    { id: 1, name: 'Relais City - Paris', address: '5 Rue de Rivoli, 75004 Paris', hours: '9h-19h', distance: 1.2 },
+                    { id: 2, name: 'Point Relais - Lyon', address: '12 Rue de la République, 69002 Lyon', hours: '8h30-18h30', distance: 3.5 },
+                    { id: 3, name: 'Relais Shop - Marseille', address: '20 Cours Belsunce, 13001 Marseille', hours: '10h-20h', distance: 2.8 }
+                ]);
+                
+                // Users management
+                const users = ref([
+                    { id: 1, username: 'admin', email: 'admin@mmfrent.com', role: 'admin', last_login: '2023-05-15T14:30:00Z' },
+                    { id: 2, username: 'agent1', email: 'agent1@mmfrent.com', role: 'agent', last_login: '2023-05-15T09:15:00Z' },
+                    { id: 3, username: 'livreur1', email: 'livreur1@mmfrent.com', role: 'livreur', last_login: '2023-05-14T16:45:00Z' }
+                ]);
+                
+                const currentUserModal = ref({
+                    id: null,
+                    username: '',
+                    email: '',
+                    role: 'agent',
+                    password: ''
+                });
+                
+                // Reports
+                const reportType = ref('parcels');
+                const reportStartDate = ref('');
+                const reportEndDate = ref('');
+                
+                // Import/Export
+                const importFile = ref(null);
+                const manualBarcode = ref('');
+                
+                // Delete confirmation
+                const deleteConfirmMessage = ref('');
+                const deleteAction = ref(null);
+                const deleteId = ref(null);
+                
+                // Calendar
+                let calendar = null;
+                
+                // Utility functions
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('fr-FR', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+                
+                const getStatusClass = (status) => {
+                    switch(status) {
+                        case 'livré': return 'bg-success text-white';
+                        case 'en transit': return 'bg-primary text-white';
+                        case 'en échec': return 'bg-danger text-white';
+                        case 'en préparation': return 'bg-secondary text-white';
+                        case 'en livraison': return 'bg-warning text-dark';
+                        case 'retourné': return 'bg-info text-dark';
+                        default: return 'bg-light text-dark';
+                    }
+                };
+                
+                const getRoleClass = (role) => {
+                    switch(role) {
+                        case 'admin': return 'bg-danger text-white';
+                        case 'agent': return 'bg-primary text-white';
+                        case 'livreur': return 'bg-success text-white';
+                        default: return 'bg-secondary text-white';
+                    }
+                };
+                
+                // Modal functions
+                const showProfileModal = () => {
+                    new bootstrap.Modal(document.getElementById('profileModal')).show();
+                };
+                
+                const showParcelModal = (id) => {
+                    if (id) {
+                        // In a real app, we would fetch the parcel details from the API
+                        const parcel = parcels.value.find(p => p.id === id) || recentParcels.value.find(p => p.id === id);
+                        if (parcel) {
+                            currentParcel.value = { ...parcel };
+                        }
+                    } else {
+                        currentParcel.value = {
+                            id: null,
+                            tracking_number: '',
+                            sender_id: '',
+                            recipient_id: '',
+                            weight: '',
+                            dimensions: '',
+                            declared_value: '',
+                            status: 'en préparation',
+                            carrier_id: '',
+                            estimated_delivery: '',
+                            notes: ''
+                        };
+                    }
+                    new bootstrap.Modal(document.getElementById('parcelModal')).show();
+                };
+                
+                const showClientModal = (id) => {
+                    if (id) {
+                        const client = clients.value.find(c => c.id === id);
+                        if (client) {
+                            currentClient.value = { ...client };
+                        }
+                    } else {
+                        currentClient.value = {
+                            id: null,
+                            type: 'expéditeur',
+                            name: '',
+                            email: '',
+                            phone: '',
+                            address: ''
+                        };
+                    }
+                    new bootstrap.Modal(document.getElementById('clientModal')).show();
+                };
+                
+                const showUserModal = (id) => {
+                    if (id) {
+                        const user = users.value.find(u => u.id === id);
+                        if (user) {
+                            currentUserModal.value = { ...user, password: '' };
+                        }
+                    } else {
+                        currentUserModal.value = {
+                            id: null,
+                            username: '',
+                            email: '',
+                            role: 'agent',
+                            password: ''
+                        };
+                    }
+                    new bootstrap.Modal(document.getElementById('userModal')).show();
+                };
+                
+                const showImportModal = () => {
+                    new bootstrap.Modal(document.getElementById('importModal')).show();
+                };
+                
+                const showBarcodeScanner = () => {
+                    new bootstrap.Modal(document.getElementById('barcodeScannerModal')).show();
+                };
+                
+                const confirmDeleteParcel = (id) => {
+                    deleteConfirmMessage.value = 'Êtes-vous sûr de vouloir supprimer ce colis ? Cette action est irréversible.';
+                    deleteAction.value = 'parcel';
+                    deleteId.value = id;
+                    new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
+                };
+                
+                const confirmDeleteClient = (id) => {
+                    deleteConfirmMessage.value = 'Êtes-vous sûr de vouloir supprimer ce client ? Tous les colis associés seront également supprimés.';
+                    deleteAction.value = 'client';
+                    deleteId.value = id;
+                    new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
+                };
+                
+                const confirmDeleteUser = (id) => {
+                    deleteConfirmMessage.value = 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.';
+                    deleteAction.value = 'user';
+                    deleteId.value = id;
+                    new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
+                };
+                
+                const confirmDeleteAction = () => {
+                    switch(deleteAction.value) {
+                        case 'parcel':
+                            parcels.value = parcels.value.filter(p => p.id !== deleteId.value);
+                            break;
+                        case 'client':
+                            clients.value = clients.value.filter(c => c.id !== deleteId.value);
+                            break;
+                        case 'user':
+                            users.value = users.value.filter(u => u.id !== deleteId.value);
+                            break;
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                };
+                
+                // CRUD operations
+                const saveParcel = () => {
+                    if (currentParcel.value.id) {
+                        // Update existing parcel
+                        const index = parcels.value.findIndex(p => p.id === currentParcel.value.id);
+                        if (index !== -1) {
+                            parcels.value[index] = { ...currentParcel.value };
+                        }
+                    } else {
+                        // Add new parcel
+                        currentParcel.value.id = parcels.value.length + 1;
+                        parcels.value.unshift({ ...currentParcel.value });
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('parcelModal')).hide();
+                };
+                
+                const saveClient = () => {
+                    if (currentClient.value.id) {
+                        // Update existing client
+                        const index = clients.value.findIndex(c => c.id === currentClient.value.id);
+                        if (index !== -1) {
+                            clients.value[index] = { ...currentClient.value };
+                        }
+                    } else {
+                        // Add new client
+                        currentClient.value.id = clients.value.length + 1;
+                        clients.value.unshift({ ...currentClient.value });
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+                };
+                
+                const saveUser = () => {
+                    if (currentUserModal.value.id) {
+                        // Update existing user
+                        const index = users.value.findIndex(u => u.id === currentUserModal.value.id);
+                        if (index !== -1) {
+                            users.value[index] = { ...currentUserModal.value };
+                        }
+                    } else {
+                        // Add new user
+                        currentUserModal.value.id = users.value.length + 1;
+                        users.value.unshift({ ...currentUserModal.value });
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                };
+                
+                const updateProfile = () => {
+                    if (newPassword.value && newPassword.value === confirmPassword.value) {
+                        alert('Mot de passe mis à jour avec succès');
+                        newPassword.value = '';
+                        confirmPassword.value = '';
+                    } else if (newPassword.value !== confirmPassword.value) {
+                        alert('Les mots de passe ne correspondent pas');
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+                };
+                
+                // Import/Export functions
+                const handleFileUpload = (event) => {
+                    importFile.value = event.target.files[0];
+                };
+                
+                const importParcels = () => {
+                    // In a real app, this would upload the file to the API
+                    alert(`Fichier ${importFile.value.name} importé avec succès (simulation)`);
+                    bootstrap.Modal.getInstance(document.getElementById('importModal')).hide();
+                    importFile.value = null;
+                };
+                
+                const exportParcelsCSV = () => {
+                    // In a real app, this would generate and download a CSV file
+                    alert('Export CSV des colis lancé (simulation)');
+                };
+                
+                const exportReportCSV = () => {
+                    alert(`Export CSV du rapport ${reportType.value} lancé (simulation)`);
+                };
+                
+                const generateReport = () => {
+                    alert(`Génération du rapport ${reportType.value} en PDF (simulation)`);
+                };
+                
+                // Barcode functions
+                const processBarcode = () => {
+                    const barcode = manualBarcode.value || 'COL12345'; // Default for simulation
+                    alert(`Code-barres scanné/saisi : ${barcode}. Recherche du colis correspondant (simulation)`);
+                    bootstrap.Modal.getInstance(document.getElementById('barcodeScannerModal')).hide();
+                    manualBarcode.value = '';
+                };
+                
+                const printLabel = (id) => {
+                    const parcel = parcels.value.find(p => p.id === id) || recentParcels.value.find(p => p.id === id);
+                    if (parcel) {
+                        alert(`Impression de l'étiquette pour le colis ${parcel.tracking_number} (simulation)`);
+                    }
+                };
+                
+                // Authentication
+                const logout = () => {
+                    // In a real app, this would call the API to invalidate the token
+                    alert('Déconnexion réussie (simulation)');
+                };
+                
+                // Filter and pagination functions
+                const fetchParcels = () => {
+                    // In a real app, this would call the API with filters
+                    filteredParcels.value = [...recentParcels.value]; // Simulate filtered data
+                };
+                
+                const searchParcels = () => {
+                    if (parcelSearchQuery.value) {
+                        filteredParcels.value = recentParcels.value.filter(p => 
+                            p.tracking_number.includes(parcelSearchQuery.value) || 
+                            p.recipient_name.toLowerCase().includes(parcelSearchQuery.value.toLowerCase())
+                        );
+                    } else {
+                        filteredParcels.value = [...recentParcels.value];
+                    }
+                };
+                
+                const resetParcelFilters = () => {
+                    parcelFilters.value = {
+                        status: '',
+                        created_at: '',
+                        recipient_name: ''
+                    };
+                    fetchParcels();
+                };
+                
+                const prevParcelPage = () => {
+                    if (currentParcelPage.value > 1) {
+                        currentParcelPage.value--;
+                    }
+                };
+                
+                const nextParcelPage = () => {
+                    if (currentParcelPage.value < totalParcelPages.value) {
+                        currentParcelPage.value++;
+                    }
+                };
+                
+                const goToParcelPage = (page) => {
+                    currentParcelPage.value = page;
+                };
+                
+                // Initialize calendar
+                const initCalendar = () => {
+                    const calendarEl = document.getElementById('calendar');
+                    if (calendarEl) {
+                        calendar = new FullCalendar.Calendar(calendarEl, {
+                            initialView: 'dayGridMonth',
+                            locale: 'fr',
+                            headerToolbar: {
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                            },
+                            events: [
+                                {
+                                    title: 'Livraison #COL12345',
+                                    start: '2023-05-16',
+                                    end: '2023-05-16',
+                                    color: '#dc3545'
+                                },
+                                {
+                                    title: 'Livraison #COL12346',
+                                    start: '2023-05-17T10:00:00',
+                                    end: '2023-05-17T12:00:00',
+                                    color: '#28a745'
+                                },
+                                {
+                                    title: 'Collecte Darty',
+                                    start: '2023-05-18T14:00:00',
+                                    end: '2023-05-18T16:00:00',
+                                    color: '#007bff'
+                                }
+                            ]
+                        });
+                        calendar.render();
+                    }
+                };
+                
+                // Initialize charts
+                const initCharts = () => {
+                    // Performance chart
+                    const performanceCtx = document.getElementById('performanceChart');
+                    if (performanceCtx) {
+                        new Chart(performanceCtx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                                datasets: [
+                                    {
+                                        label: 'Colis livrés',
+                                        data: [12, 19, 15, 27, 22, 8],
+                                        borderColor: '#28a745',
+                                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                        tension: 0.1,
+                                        fill: true
+                                    },
+                                    {
+                                        label: 'Colis en retard',
+                                        data: [2, 3, 1, 4, 2, 1],
+                                        borderColor: '#dc3545',
+                                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                        tension: 0.1,
+                                        fill: true
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Parcel stats chart
+                    const parcelStatsCtx = document.getElementById('parcelStatsChart');
+                    if (parcelStatsCtx) {
+                        new Chart(parcelStatsCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['En préparation', 'En transit', 'Livrés', 'En échec'],
+                                datasets: [{
+                                    data: [15, 28, 125, 7],
+                                    backgroundColor: [
+                                        '#6c757d',
+                                        '#007bff',
+                                        '#28a745',
+                                        '#dc3545'
+                                    ],
+                                    hoverOffset: 4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Carrier performance chart
+                    const carrierPerformanceCtx = document.getElementById('carrierPerformanceChart');
+                    if (carrierPerformanceCtx) {
+                        new Chart(carrierPerformanceCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Chronopost', 'Colissimo', 'UPS'],
+                                datasets: [{
+                                    label: 'Taux de livraison (%)',
+                                    data: [92, 85, 88],
+                                    backgroundColor: [
+                                        'rgba(220, 53, 69, 0.7)',
+                                        'rgba(0, 123, 255, 0.7)',
+                                        'rgba(40, 167, 69, 0.7)'
+                                    ],
+                                    borderColor: [
+                                        'rgb(220, 53, 69)',
+                                        'rgb(0, 123, 255)',
+                                        'rgb(40, 167, 69)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100
+                                    }
+                                }
+                            }
+                        });
+                    }
+                };
+                
+                // Initialize map (simulated)
+                const initMap = () => {
+                    const mapEl = document.getElementById('map');
+                    if (mapEl) {
+                        // In a real app, this would initialize a map with markers
+                        mapEl.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100"><div class="text-center"><i class="bi bi-map text-muted" style="font-size: 3rem;"></i><p class="mt-2">Carte des livraisons (simulation)</p></div></div>';
+                    }
+                };
+                
+                // Initialize data
+                onMounted(() => {
+                    fetchParcels();
+                    initCalendar();
+                    initCharts();
+                    initMap();
+                    
+                    // Set current date for reports
+                    const today = new Date();
+                    reportStartDate.value = today.toISOString().split('T')[0];
+                    reportEndDate.value = today.toISOString().split('T')[0];
+                    
+                    // Calculate pagination
+                    totalParcelPages.value = Math.ceil(filteredParcels.value.length / parcelPerPage.value);
+                });
+                
+                // Computed properties
+                const parcelPages = computed(() => {
+                    const pages = [];
+                    for (let i = 1; i <= totalParcelPages.value; i++) {
+                        pages.push(i);
+                    }
+                    return pages;
+                });
+                
+                return {
+                    // Data
+                    currentUser,
+                    newPassword,
+                    confirmPassword,
+                    notifications,
+                    activeTab,
+                    isLoading,
+                    stats,
+                    recentParcels,
+                    parcels,
+                    filteredParcels,
+                    parcelFilters,
+                    parcelSearchQuery,
+                    currentParcelPage,
+                    parcelPerPage,
+                    totalParcelPages,
+                    parcelStatuses,
+                    currentParcel,
+                    clients,
+                    currentClient,
+                    carriers,
+                    relayPoints,
+                    users,
+                    currentUserModal,
+                    reportType,
+                    reportStartDate,
+                    reportEndDate,
+                    importFile,
+                    manualBarcode,
+                    deleteConfirmMessage,
+                    
+                    // Methods
+                    formatDate,
+                    getStatusClass,
+                    getRoleClass,
+                    showProfileModal,
+                    showParcelModal,
+                    showClientModal,
+                    showUserModal,
+                    showImportModal,
+                    showBarcodeScanner,
+                    confirmDeleteParcel,
+                    confirmDeleteClient,
+                    confirmDeleteUser,
+                    confirmDeleteAction,
+                    saveParcel,
+                    saveClient,
+                    saveUser,
+                    updateProfile,
+                    handleFileUpload,
+                    importParcels,
+                    exportParcelsCSV,
+                    exportReportCSV,
+                    generateReport,
+                    processBarcode,
+                    printLabel,
+                    logout,
+                    fetchParcels,
+                    searchParcels,
+                    resetParcelFilters,
+                    prevParcelPage,
+                    nextParcelPage,
+                    goToParcelPage,
+                    
+                    // Computed
+                    parcelPages
+                };
+            }
+        }).mount('#app');
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastFood Order - Commandez en ligne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        /* Custom CSS for animations and transitions */
+        .menu-item {
+            transition: all 0.3s ease;
+        }
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .category-btn.active {
+            border-bottom: 3px solid #f59e0b;
+            color: #f59e0b;
+        }
+        .cart-item {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .order-status {
+            position: relative;
+        }
+        .order-status::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- PWA Install Prompt -->
+    <div id="installPrompt" class="hidden fixed bottom-0 left-0 right-0 bg-yellow-500 text-white p-4 shadow-lg z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <i class="fas fa-mobile-alt mr-2"></i>
+                <span>Installer l'application pour une meilleure expérience</span>
+            </div>
+            <div>
+                <button id="installBtn" class="bg-white text-yellow-700 px-4 py-2 rounded-lg font-bold mr-2">Installer</button>
+                <button id="dismissBtn" class="text-white">Plus tard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-red-600 text-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="https://via.placeholder.com/50" alt="Logo" class="h-10 w-10 mr-2">
+                <h1 class="text-xl font-bold">FastFood Order</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="cartBtn" class="relative">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </button>
+                <button id="accountBtn">
+                    <i class="fas fa-user-circle text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Hero Section -->
+        <section class="mb-8 bg-gradient-to-r from-red-600 to-yellow-500 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-6 md:mb-0">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Menu du jour spécial</h2>
+                    <p class="text-lg mb-4">Big Mac + Frites + Boisson à seulement 7,99€</p>
+                    <button class="bg-white text-red-600 font-bold px-6 py-2 rounded-full hover:bg-gray-100 transition">Commander maintenant</button>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="https://via.placeholder.com/300x200" alt="Special Menu" class="rounded-lg shadow-md max-h-48">
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="mb-8">
+            <div class="flex overflow-x-auto pb-2 space-x-2">
+                <button class="category-btn active px-4 py-2 font-medium whitespace-nowrap" data-category="all">Tous</button>
+                <button class="category-btn px-4 py-2 font-medium whitespace-nowrap" data-category="menus">Menus</button>
+                <button class="category-btn px-4 py-2 font-medium whitespace-nowrap" data-category="sandwich">Sandwichs</button>
+                <button class="category-btn px-4 py-2 font-medium whitespace-nowrap" data-category="salade">Salades</button>
+                <button class="category-btn px-4 py-2 font-medium whitespace-nowrap" data-category="frites">Frites</button>
+                <button class="category-btn px-4 py-2 font-medium whitespace-nowrap" data-category="boisson">Boissons</button>
+                <button class="category-btn px-4 py-2 font-medium whitespace-nowrap" data-category="dessert">Desserts</button>
+            </div>
+        </section>
+
+        <!-- Menu Items -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold mb-4">Nos produits</h2>
+            <div id="menuItems" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Items will be loaded here by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Votre panier</h2>
+                <button id="closeCartBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <div id="cartItems" class="mb-4">
+                <!-- Cart items will be loaded here -->
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                    <p>Votre panier est vide</p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-4">
+                <div class="flex justify-between mb-2">
+                    <span>Sous-total:</span>
+                    <span id="subtotal">0,00€</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>TVA:</span>
+                    <span id="tax">0,00€</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span id="total">0,00€</span>
+                </div>
+                
+                <button id="checkoutBtn" class="w-full bg-red-600 text-white py-3 rounded-lg font-bold mt-6 hover:bg-red-700 transition disabled:opacity-50" disabled>
+                    Passer la commande
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Finaliser la commande</h3>
+                    <button id="closeCheckoutModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="checkoutForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="name">Nom complet</label>
+                        <input type="text" id="name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="email">Email</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="phone">Téléphone</label>
+                        <input type="tel" id="phone" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Méthode de paiement</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" class="payment-method border rounded-lg p-2 text-center" data-method="card">
+                                <i class="fas fa-credit-card text-xl mb-1"></i>
+                                <span class="block text-xs">Carte</span>
+                            </button>
+                            <button type="button" class="payment-method border rounded-lg p-2 text-center" data-method="cash">
+                                <i class="fas fa-money-bill-wave text-xl mb-1"></i>
+                                <span class="block text-xs">Espèces</span>
+                            </button>
+                            <button type="button" class="payment-method border rounded-lg p-2 text-center" data-method="mobile">
+                                <i class="fas fa-mobile-alt text-xl mb-1"></i>
+                                <span class="block text-xs">Mobile</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="paymentMethod" value="" required>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">
+                        Payer <span id="finalTotal">0,00€</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation -->
+    <div id="orderConfirmation" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <div class="text-green-500 text-6xl mb-4">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Commande confirmée!</h3>
+                <p class="text-gray-600 mb-4">Votre commande #<span id="orderNumber">12345</span> a été passée avec succès.</p>
+                
+                <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                    <div class="flex justify-between mb-2">
+                        <span>Statut:</span>
+                        <span class="order-status font-bold text-yellow-600">En préparation</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span>Temps estimé:</span>
+                        <span>10-15 minutes</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6 flex justify-center">
+                    <div id="qrcode" class="border p-2">
+                        <img src="https://via.placeholder.com/150" alt="QR Code">
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button class="print-btn bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                        <i class="fas fa-print mr-2"></i> Imprimer
+                    </button>
+                    <button class="email-btn bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                        <i class="fas fa-envelope mr-2"></i> Envoyer
+                    </button>
+                </div>
+                
+                <button id="closeOrderConfirmation" class="w-full mt-6 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">
+                    Retour à l'accueil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">FastFood Order</h3>
+                    <p>Commandez vos repas préférés en quelques clics seulement. Service rapide et efficace.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Horaires</h3>
+                    <p>Lundi - Vendredi: 10h - 22h</p>
+                    <p>Samedi - Dimanche: 11h - 23h</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contact</h3>
+                    <p><i class="fas fa-phone mr-2"></i> 01 23 45 67 89</p>
+                    <p><i class="fas fa-envelope mr-2"></i> contact@fastfoodorder.com</p>
+                    <div class="flex space-x-4 mt-2">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center">
+                <p>&copy; 2023 FastFood Order. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sample data for menu items
+        const menuItems = [
+            {
+                id: 1,
+                name: "Big Mac",
+                description: "Le célèbre Big Mac avec ses deux steaks hachés, sa sauce spéciale, son fromage fondu, ses cornichons et ses oignons.",
+                price: 4.99,
+                category: "sandwich",
+                image: "https://via.placeholder.com/300x200?text=Big+Mac"
+            },
+            {
+                id: 2,
+                name: "McChicken",
+                description: "Un délicieux filet de poulet pané, accompagné de laitue et de mayonnaise.",
+                price: 3.99,
+                category: "sandwich",
+                image: "https://via.placeholder.com/300x200?text=McChicken"
+            },
+            {
+                id: 3,
+                name: "Menu Big Mac",
+                description: "Big Mac + Frites + Boisson",
+                price: 7.99,
+                category: "menus",
+                image: "https://via.placeholder.com/300x200?text=Menu+Big+Mac"
+            },
+            {
+                id: 4,
+                name: "Menu McChicken",
+                description: "McChicken + Frites + Boisson",
+                price: 6.99,
+                category: "menus",
+                image: "https://via.placeholder.com/300x200?text=Menu+McChicken"
+            },
+            {
+                id: 5,
+                name: "Frites",
+                description: "Nos délicieuses frites dorées et croustillantes.",
+                price: 2.49,
+                category: "frites",
+                image: "https://via.placeholder.com/300x200?text=Frites"
+            },
+            {
+                id: 6,
+                name: "Salade César",
+                description: "Salade fraîche avec poulet grillé, parmesan et sauce césar.",
+                price: 5.49,
+                category: "salade",
+                image: "https://via.placeholder.com/300x200?text=Salade+César"
+            },
+            {
+                id: 7,
+                name: "Coca-Cola",
+                description: "Boisson rafraîchissante Coca-Cola.",
+                price: 1.99,
+                category: "boisson",
+                image: "https://via.placeholder.com/300x200?text=Coca-Cola"
+            },
+            {
+                id: 8,
+                name: "McFlurry",
+                description: "Crème glacée onctueuse avec des morceaux de caramel ou de cookies.",
+                price: 2.99,
+                category: "dessert",
+                image: "https://via.placeholder.com/300x200?text=McFlurry"
+            }
+        ];
+
+        // Cart state
+        let cart = [];
+        let currentCategory = 'all';
+        let selectedPaymentMethod = '';
+
+        // DOM elements
+        const menuItemsContainer = document.getElementById('menuItems');
+        const cartItemsContainer = document.getElementById('cartItems');
+        const cartCount = document.getElementById('cartCount');
+        const subtotalElement = document.getElementById('subtotal');
+        const taxElement = document.getElementById('tax');
+        const totalElement = document.getElementById('total');
+        const finalTotalElement = document.getElementById('finalTotal');
+        const cartBtn = document.getElementById('cartBtn');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const checkoutModal = document.getElementById('checkoutModal');
+        const closeCheckoutModal = document.getElementById('closeCheckoutModal');
+        const checkoutForm = document.getElementById('checkoutForm');
+        const orderConfirmation = document.getElementById('orderConfirmation');
+        const closeOrderConfirmation = document.getElementById('closeOrderConfirmation');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const paymentMethodButtons = document.querySelectorAll('.payment-method');
+        const paymentMethodInput = document.getElementById('paymentMethod');
+
+        // Initialize the app
+        function init() {
+            renderMenuItems();
+            setupEventListeners();
+            checkPWAInstallPrompt();
+        }
+
+        // Render menu items based on current category
+        function renderMenuItems() {
+            menuItemsContainer.innerHTML = '';
+            
+            const filteredItems = currentCategory === 'all' 
+                ? menuItems 
+                : menuItems.filter(item => item.category === currentCategory);
+            
+            if (filteredItems.length === 0) {
+                menuItemsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        <i class="fas fa-utensils text-4xl mb-2"></i>
+                        <p>Aucun produit disponible dans cette catégorie</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredItems.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg';
+                menuItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">${item.name}</h3>
+                        <p class="text-gray-600 text-sm mb-3">${item.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-red-600">${item.price.toFixed(2)}€</span>
+                            <button class="add-to-cart-btn bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 transition" data-id="${item.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                menuItemsContainer.appendChild(menuItem);
+            });
+            
+            // Add event listeners to add to cart buttons
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const itemId = parseInt(btn.getAttribute('data-id'));
+                    addToCart(itemId);
+                });
+            });
+        }
+
+        // Add item to cart
+        function addToCart(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            if (!item) return;
+            
+            const existingItem = cart.find(i => i.id === itemId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    ...item,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+            showCartNotification(item.name);
+        }
+
+        // Show notification when item is added to cart
+        function showCartNotification(itemName) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center animate-fade-in-out';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${itemName} ajouté au panier</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // Update cart UI
+        function updateCart() {
+            cartCount.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                        <p>Votre panier est vide</p>
+                    </div>
+                `;
+                checkoutBtn.disabled = true;
+            } else {
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item bg-gray-50 rounded-lg p-3 mb-3 flex justify-between items-center';
+                    cartItem.innerHTML = `
+                        <div class="flex items-center">
+                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
+                            <div class="ml-3">
+                                <h4 class="font-medium">${item.name}</h4>
+                                <p class="text-sm text-gray-500">${item.price.toFixed(2)}€</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button class="decrease-btn text-gray-500 hover:text-red-500 px-2" data-id="${item.id}">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button class="increase-btn text-gray-500 hover:text-green-500 px-2" data-id="${item.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="remove-btn text-red-500 hover:text-red-700 ml-3" data-id="${item.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+                
+                checkoutBtn.disabled = false;
+            }
+            
+            // Calculate totals
+            const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.1; // 10% tax
+            const total = subtotal + tax;
+            
+            subtotalElement.textContent = subtotal.toFixed(2) + '€';
+            taxElement.textContent = tax.toFixed(2) + '€';
+            totalElement.textContent = total.toFixed(2) + '€';
+            finalTotalElement.textContent = total.toFixed(2) + '€';
+            
+            // Add event listeners to cart item buttons
+            document.querySelectorAll('.decrease-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const itemId = parseInt(btn.getAttribute('data-id'));
+                    decreaseQuantity(itemId);
+                });
+            });
+            
+            document.querySelectorAll('.increase-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const itemId = parseInt(btn.getAttribute('data-id'));
+                    increaseQuantity(itemId);
+                });
+            });
+            
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const itemId = parseInt(btn.getAttribute('data-id'));
+                    removeFromCart(itemId);
+                });
+            });
+        }
+
+        // Decrease item quantity
+        function decreaseQuantity(itemId) {
+            const item = cart.find(i => i.id === itemId);
+            if (!item) return;
+            
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+            } else {
+                removeFromCart(itemId);
+                return;
+            }
+            
+            updateCart();
+        }
+
+        // Increase item quantity
+        function increaseQuantity(itemId) {
+            const item = cart.find(i => i.id === itemId);
+            if (!item) return;
+            
+            item.quantity += 1;
+            updateCart();
+        }
+
+        // Remove item from cart
+        function removeFromCart(itemId) {
+            cart = cart.filter(i => i.id !== itemId);
+            updateCart();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Cart toggle
+            cartBtn.addEventListener('click', () => {
+                cartSidebar.classList.remove('translate-x-full');
+            });
+            
+            closeCartBtn.addEventListener('click', () => {
+                cartSidebar.classList.add('translate-x-full');
+            });
+            
+            // Category filter
+            categoryButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.getAttribute('data-category');
+                    renderMenuItems();
+                });
+            });
+            
+            // Checkout process
+            checkoutBtn.addEventListener('click', () => {
+                cartSidebar.classList.add('translate-x-full');
+                checkoutModal.classList.remove('hidden');
+            });
+            
+            closeCheckoutModal.addEventListener('click', () => {
+                checkoutModal.classList.add('hidden');
+            });
+            
+            // Payment method selection
+            paymentMethodButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    paymentMethodButtons.forEach(b => b.classList.remove('border-red-500', 'bg-red-50'));
+                    btn.classList.add('border-red-500', 'bg-red-50');
+                    selectedPaymentMethod = btn.getAttribute('data-method');
+                    paymentMethodInput.value = selectedPaymentMethod;
+                });
+            });
+            
+            // Form submission
+            checkoutForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                if (!selectedPaymentMethod) {
+                    alert('Veuillez sélectionner une méthode de paiement');
+                    return;
+                }
+                
+                // Simulate API call
+                setTimeout(() => {
+                    checkoutModal.classList.add('hidden');
+                    document.getElementById('orderNumber').textContent = Math.floor(Math.random() * 10000);
+                    orderConfirmation.classList.remove('hidden');
+                    
+                    // Clear cart after successful order
+                    cart = [];
+                    updateCart();
+                }, 1000);
+            });
+            
+            // Close order confirmation
+            closeOrderConfirmation.addEventListener('click', () => {
+                orderConfirmation.classList.add('hidden');
+            });
+            
+            // Print and email buttons
+            document.querySelector('.print-btn').addEventListener('click', () => {
+                alert('Fonction d\'impression simulée');
+            });
+            
+            document.querySelector('.email-btn').addEventListener('click', () => {
+                alert('Fonction d\'envoi par email simulée');
+            });
+        }
+
+        // Check for PWA install prompt
+        function checkPWAInstallPrompt() {
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show the install prompt
+                const installPrompt = document.getElementById('installPrompt');
+                installPrompt.classList.remove('hidden');
+                
+                // Install button click
+                document.getElementById('installBtn').addEventListener('click', () => {
+                    installPrompt.classList.add('hidden');
+                    deferredPrompt.prompt();
+                    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+                
+                // Dismiss button click
+                document.getElementById('dismissBtn').addEventListener('click', () => {
+                    installPrompt.classList.add('hidden');
+                });
+            });
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

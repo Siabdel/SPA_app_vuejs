@@ -1,0 +1,405 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weezevent - La solution de billetterie idéale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #5e35b1 0%, #1e88e5 100%);
+        }
+        .nav-shadow {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #5e35b1 0%, #1e88e5 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .mobile-menu.open {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white nav-shadow sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <a href="#" class="text-2xl font-bold text-indigo-800">Weezevent</a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-6 items-center">
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-indigo-600 font-medium flex items-center">
+                            Solutions <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md p-4 w-48">
+                            <a href="#" class="block py-2 text-gray-700 hover:text-indigo-600">Billetterie en ligne</a>
+                            <a href="#" class="block py-2 text-gray-700 hover:text-indigo-600">Badgeuse</a>
+                            <a href="#" class="block py-2 text-gray-700 hover:text-indigo-600">CRM</a>
+                        </div>
+                    </div>
+                    <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium">Tarifs</a>
+                    <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium">Ressources</a>
+                    <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium">Événements</a>
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-indigo-600 font-medium flex items-center">
+                            À propos <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md p-4 w-48">
+                            <a href="#" class="block py-2 text-gray-700 hover:text-indigo-600">L'entreprise</a>
+                            <a href="#" class="block py-2 text-gray-700 hover:text-indigo-600">Nous rejoindre</a>
+                            <a href="#" class="block py-2 text-gray-700 hover:text-indigo-600">Contact</a>
+                        </div>
+                    </div>
+                    <a href="#" class="text-gray-700 hover:text-indigo-600 font-medium">Se connecter</a>
+                    <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-md font-medium hover:bg-indigo-700 transition">Créer un compte</a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu md:hidden bg-white">
+                <div class="px-2 pt-2 pb-4 space-y-2">
+                    <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">Solutions</a>
+                    <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">Tarifs</a>
+                    <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">Ressources</a>
+                    <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">Événements</a>
+                    <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">À propos</a>
+                    <div class="pt-4 border-t">
+                        <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">Se connecter</a>
+                        <a href="#" class="block bg-indigo-600 text-white px-3 py-2 rounded-md text-center font-medium">Créer un compte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-6">La solution de billetterie idéale pour vos événements</h1>
+                    <p class="text-xl mb-8 opacity-90">Vendez vos billets en ligne simplement et gérez vos événements en toute sérénité.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#" class="btn-primary text-white px-6 py-3 rounded-md font-bold text-center">Créer un événement</a>
+                        <a href="#" class="bg-white text-indigo-700 px-6 py-3 rounded-md font-bold text-center hover:bg-gray-100 transition">Voir une démo</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://weezevent.com/wp-content/uploads/2022/06/hero-visuel-homepage-desktop-fr-1.png" alt="Interface Weezevent" class="rounded-lg shadow-xl w-full">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="bg-white py-12">
+        <div class="container mx-auto px-4">
+            <p class="text-center text-gray-600 mb-8">Ils nous font confiance</p>
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                <img src="https://weezevent.com/wp-content/uploads/2020/03/logo-coca-cola.png" alt="Coca Cola" class="h-8 opacity-70 hover:opacity-100 transition">
+                <img src="https://weezevent.com/wp-content/uploads/2020/03/logo-red-bull.png" alt="Red Bull" class="h-8 opacity-70 hover:opacity-100 transition">
+                <img src="https://weezevent.com/wp-content/uploads/2020/03/logo-unicef.png" alt="Unicef" class="h-8 opacity-70 hover:opacity-100 transition">
+                <img src="https://weezevent.com/wp-content/uploads/2020/03/logo-rock-en-seine.png" alt="Rock en Seine" class="h-8 opacity-70 hover:opacity-100 transition">
+                <img src="https://weezevent.com/wp-content/uploads/2020/03/logo-hello-bank.png" alt="Hello Bank" class="h-8 opacity-70 hover:opacity-100 transition">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Une solution complète pour vos événements</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Découvrez toutes les fonctionnalités adaptées à vos besoins</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-xl feature-card shadow-sm">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-ticket-alt text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Billetterie en ligne</h3>
+                    <p class="text-gray-600">Vendez vos billets simplement avec notre solution intuitive. Personnalisez votre page de billetterie et gérez vos stocks en temps réel.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-xl feature-card shadow-sm">
+                    <div class="w-14 h-14 bg-pink-100 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-qrcode text-pink-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Badgeuse mobile</h3>
+                    <p class="text-gray-600">Scannez les billets depuis votre smartphone. Gérez les accès avec notre solution hors ligne, même sans connexion internet.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-xl feature-card shadow-sm">
+                    <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">CRM intégré</h3>
+                    <p class="text-gray-600">Centralisez les données de vos participants. Créez des segments et développez votre audience pour vos prochains événements.</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-white p-8 rounded-xl feature-card shadow-sm">
+                    <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Statistiques en temps réel</h3>
+                    <p class="text-gray-600">Suivez la performance de votre événement avec des indicateurs clés. Analysez les données de vente et les profils de participants.</p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="bg-white p-8 rounded-xl feature-card shadow-sm">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-money-bill-wave text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Paiement sécurisé</h3>
+                    <p class="text-gray-600">Plusieurs solutions de paiement disponibles, avec un système ultra-sécurisé. Recevez directement vos fonds sur votre compte.</p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="bg-white p-8 rounded-xl feature-card shadow-sm">
+                    <div class="w-14 h-14 bg-yellow-100 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-headset text-yellow-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Support réactif</h3>
+                    <p class="text-gray-600">Notre équipe est disponible 7j/7 par chat, mail et téléphone. Des experts pour vous accompagner dans l'organisation de votre événement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-indigo-800 text-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <div class="text-5xl font-bold mb-2">250 000+</div>
+                    <p class="text-indigo-200">Événements créés chaque année</p>
+                </div>
+                <div>
+                    <div class="text-5xl font-bold mb-2">40+</div>
+                    <p class="text-indigo-200">Pays utilisateurs</p>
+                </div>
+                <div>
+                    <div class="text-5xl font-bold mb-2">99.9%</div>
+                    <p class="text-indigo-200">Disponibilité du service</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Ils recommandent Weezevent</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Julie B." class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Julie B.</h4>
+                                <p class="text-gray-600 text-sm">Organisatrice de concerts</p>
+                            </div>
+                        </div>
+                        <div class="ml-auto text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">"Weezevent a révolutionné la gestion de nos événements. La plateforme est intuitive et le support est toujours disponible quand on en a besoin."</p>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Thomas L." class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Thomas L.</h4>
+                                <p class="text-gray-600 text-sm">Responsable associatif</p>
+                            </div>
+                        </div>
+                        <div class="ml-auto text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">"La badgeuse mobile est un vrai plus ! Très pratique pour nos festivals avec plusieurs entrées. Le scan est ultra rapide, même en zone peu couverte."</p>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Sarah M." class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Sarah M.</h4>
+                                <p class="text-gray-600 text-sm">Directrice événementielle</p>
+                            </div>
+                        </div>
+                        <div class="ml-auto text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">"Les statistiques en temps réel nous permettent d'adapter notre communication et nos stratégies de vente. Un outil indispensable pour nos congrès."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-indigo-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center bg-white p-8 md:p-12 rounded-xl shadow-sm">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Prêt à organiser votre prochain événement ?</h2>
+                <p class="text-xl text-gray-600 mb-8">Rejoignez les milliers d'organisateurs qui nous font confiance</p>
+                <a href="#" class="btn-primary inline-block text-white px-8 py-3 rounded-md font-bold hover:shadow-lg">Créer un compte gratuit</a>
+                <p class="mt-4 text-gray-600">Aucune carte bancaire requise - Essai gratuit sans engagement</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <!-- Column 1 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Solutions</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Billetterie en ligne</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Badgeuse mobile</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">CRM événementiel</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Widget billetterie</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Application mobile</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 2 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Ressources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Tutoriels</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Centre d'aide</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">API</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 3 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">À propos</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">L'entreprise</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Nous rejoindre</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Presse</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Mentions légales</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 4 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contact</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-400"><i class="fas fa-phone-alt mr-3"></i> 01 86 95 30 00</li>
+                        <li class="flex items-center text-gray-400"><i class="fas fa-envelope mr-3"></i> contact@weezevent.com</li>
+                        <li class="flex items-center text-gray-400"><i class="fas fa-map-marker-alt mr-3"></i> 10 Rue St Marc, 75002 Paris</li>
+                    </ul>
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin-in text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <a href="#" class="text-2xl font-bold text-white">Weezevent</a>
+                    </div>
+                    <div class="text-gray-500 text-sm">
+                        © 2023 Weezevent. Tous droits réservés.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('open');
+            
+            // Change icon
+            const icon = this.querySelector('i');
+            if (menu.classList.contains('open')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

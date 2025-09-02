@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Scan Reader - Gestion Logistique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(0, 255, 0, 0.5);
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2);
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        #map {
+            height: 300px;
+            border-radius: 8px;
+        }
+        
+        .scan-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, rgba(0, 255, 0, 0), rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0));
+            animation: scan 2s infinite linear;
+            z-index: 11;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .package-status-pending {
+            border-left: 4px solid #F59E0B;
+        }
+        
+        .package-status-delivered {
+            border-left: 4px solid #10B981;
+        }
+        
+        .package-status-problem {
+            border-left: 4px solid #EF4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <h1 class="text-xl font-bold">MM Scan Reader</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="bg-blue-500 hover:bg-blue-700 px-3 py-1 rounded-md text-sm flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nouveau colis
+                    </button>
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="Profile" class="w-8 h-8 rounded-full cursor-pointer">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column - Scanner and Actions -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Scanner Section -->
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-800">Scanner de colis</h2>
+                        <div id="scanner-container">
+                            <video id="scanner-video" class="w-full h-auto" playsinline></video>
+                            <div id="scanner-overlay">
+                                <div class="scan-animation"></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between">
+                            <button id="start-scanner" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10" />
+                                </svg>
+                                Démarrer
+                            </button>
+                            <button id="stop-scanner" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                Arrêter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Manual Input Section -->
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-800">Saisie manuelle</h2>
+                        <div class="space-y-3">
+                            <div>
+                                <label for="tracking-number" class="block text-sm font-medium text-gray-700">Code de suivi</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <input type="text" id="tracking-number" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2 sm:text-sm border-gray-300 rounded-md" placeholder="Ex: ABC123456789" autofocus>
+                                    <div class="absolute inset-y-0 right-0 flex items-center">
+                                        <button id="
+</body>
+</html>

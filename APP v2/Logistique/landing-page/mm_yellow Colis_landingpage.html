@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Yellow Colis - Gestion de colis pour PME logistiques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-vue@2.23.1/dist/bootstrap-vue.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-vue@2.23.1/dist/bootstrap-vue.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+        }
+        .shadow-custom {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            border-bottom: 3px solid #fbbf24;
+        }
+        .calendar-container {
+            height: 500px;
+        }
+        @media (max-width: 768px) {
+            .calendar-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                            <i class="fas fa-box text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-800">MM Yellow Colis</span>
+                    </div>
+                    
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="#" class="nav-link active text-gray-800 font-medium">Accueil</a>
+                        <a href="#" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Fonctionnalités</a>
+                        <a href="#" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Tarifs</a>
+                        <a href="#" class="nav-link text-gray-600 hover:text-gray-800 font-medium">Contact</a>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-300">
+                            Connexion
+                        </button>
+                        <button class="hidden md:block bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                            Essai gratuit
+                        </button>
+                        <button class="md:hidden text-gray-600">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="gradient-bg py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-10 md:mb-0">
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Gérez vos colis simplement et efficacement</h1>
+                        <p class="text-lg text-gray-700 mb-8">Solution tout-en-un pour les PME logistiques : suivi, étiquettes, scan et statistiques en temps réel.</p>
+                        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                            <button class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-3 px-6 rounded-lg transition duration-300">
+                                Démarrer l'essai gratuit
+                            </button>
+                            <button class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-6 rounded-lg transition duration-300">
+                                Voir la démo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="bg-white p-6 rounded-xl shadow-custom">
+                            <img src="https://via.placeholder.com/600x400" alt="Dashboard Preview" class="rounded-lg w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Fonctionnalités clés</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">Découvrez comment MM Yellow Colis simplifie votre gestion logistique au quotidien</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-custom feature-card">
+                        <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-boxes text-yellow-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Gestion des expéditions</h3>
+                        <p class="text-gray-600">Enregistrez, modifiez et suivez vos colis en temps réel avec une interface intuitive.</p>
+                    </div>
+                    
+                    <!-- Feature 2 -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-custom feature-card">
+                        <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-barcode text-yellow-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Étiquettes intelligentes</h3>
+                        <p class="text-gray-600">Générez automatiquement des étiquettes avec codes-barres compatibles imprimantes thermiques.</p>
+                    </div>
+                    
+                    <!-- Feature 3 -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-custom feature-card">
+                        <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-qrcode text-yellow-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Scan des colis</h3>
+                        <p class="text-gray-600">Modifiez les statuts en temps réel via smartphone ou douchette pour une traçabilité optimale.</p>
+                    </div>
+                    
+                    <!-- Feature 4 -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-custom feature-card">
+                        <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-chart-line text-yellow-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Tableau de bord</h3>
+                        <p class="text-gray-600">Visualisez vos statistiques, alertes et KPIs sur un dashboard personnalisable.</p>
+                    </div>
+                    
+                    <!-- Feature 5 -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-custom feature-card">
+                        <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-search text-yellow-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Recherche avancée</h3>
+                        <p class="text-gray-600">Trouvez rapidement un colis avec des filtres multiples (date, statut, client, etc.).</p>
+                    </div>
+                    
+                    <!-- Feature 6 -->
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-custom feature-card">
+                        <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-bell text-yellow-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Notifications</h3>
+                        <p class="text-gray-600">Alertes par email et notifications en temps réel pour chaque changement de statut.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Preview -->
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Votre tableau de bord en un coup d'œil</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">Une interface moderne et intuitive pour gérer votre activité logistique</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-custom">
+                    <!-- Tabs -->
+                    <b-tabs content-class="mt-4">
+                        <b-tab title="Statistiques" active>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-500">Colis aujourd'hui</p>
+                                            <h3 class="text-2xl font-bold text-gray-800">124</h3>
+                                        </div>
+                                        <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-box text-yellow-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-500">Livrés</p>
+                                            <h3 class="text-2xl font-bold text-gray-800">89</h3>
+                                        </div>
+                                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-check-circle text-blue-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-red-50 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-gray-500">En retard</p>
+                                            <h3 class="text-2xl font-bold text-gray-800">7</h3>
+                                        </div>
+                                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-exclamation-triangle text-red-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="bg-white p-4 border border-gray-200 rounded-lg">
+                                    <h4 class="font-bold text-gray-800 mb-4">Statut des colis</h4>
+                                    <img src="https://via.placeholder.com/500x300" alt="Statut des colis" class="rounded-lg w-full">
+                                </div>
+                                <div class="bg-white p-4 border border-gray-200 rounded-lg">
+                                    <h4 class="font-bold text-gray-800 mb-4">Activité récente</h4>
+                                    <div class="space-y-4">
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                                <i class="fas fa-box text-yellow-500 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">Nouveau colis enregistré</p>
+                                                <p class="text-sm text-gray-500">Ref: YC-45879 - Client: Amazon</p>
+                                                <p class="text-xs text-gray-400">Il y a 15 minutes</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">Colis livré</p>
+                                                <p class="text-sm text-gray-500">Ref: YC-45871 - Client: Darty</p>
+                                                <p class="text-xs text-gray-400">Il y a 1 heure</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                                <i class="fas fa-truck text-blue-500 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">Colis en cours de livraison</p>
+                                                <p class="text-sm text-gray-500">Ref: YC-45865 - Client: FNAC</p>
+                                                <p class="text-xs text-gray-400">Il y a 2 heures</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </b-tab>
+                        <b-tab title="Calendrier">
+                            <div class="calendar-container">
+                                <div id="calendar"></div>
+                            </div>
+                        </b-tab>
+                        <b-tab title="Étiquettes">
+                            <div class="flex flex-col items-center">
+                                <div class="w-full max-w-md bg-white p-6 border border-gray-200 rounded-lg mb-6">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <div>
+                                            <h4 class="font-bold text-gray-800">MM Yellow Colis</h4>
+                                            <p class="text-sm text-gray-500">Ref: YC-45879</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium">Expéditeur: Amazon</p>
+                                            <p class="text-sm">Destinataire: Jean Dupont</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-4">
+                                        <div>
+                                            <p class="text-sm">Date: 15/06/2023</p>
+                                            <p class="text-sm">Poids: 2.5 kg</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm">Dimensions: 30x20x15 cm</p>
+                                            <p class="text-sm">Fragile: Oui</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-center mb-4">
+                                        <img src="https://via.placeholder.com/200x80" alt="Code barre" class="h-16">
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs text-gray-500">Scannez ce code pour suivre votre colis</p>
+                                    </div>
+                                </div>
+                                <button class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-2 px-6 rounded-lg transition duration-300">
+                                    <i class="fas fa-print mr-2"></i> Imprimer l'étiquette
+                                </button>
+                            </div>
+                        </b-tab>
+                    </b-tabs>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Choisissez votre formule</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">Des tarifs adaptés à la taille de votre activité</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Basic Plan -->
+                    <div class="bg-gray-50 p-8 rounded-xl shadow-custom">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Starter</h3>
+                            <p class="text-gray-600 mb-4">Parfait pour les petites entreprises</p>
+                            <div class="flex justify-center items-baseline">
+                                <span class="text-4xl font-bold text-gray-800">29€</span>
+                                <span class="text-gray-500 ml-1">/mois</span>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Jusqu'à 100 colis/mois</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Gestion des expéditions</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Étiquettes code-barres</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Scan des colis</span>
+                            </li>
+                            <li class="flex items-center text-gray-400">
+                                <i class="fas fa-times text-red-400 mr-2"></i>
+                                <span>Statistiques avancées</span>
+                            </li>
+                            <li class="flex items-center text-gray-400">
+                                <i class="fas fa-times text-red-400 mr-2"></i>
+                                <span>Utilisateurs secondaires</span>
+                            </li>
+                        </ul>
+                        <button class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition duration-300">
+                            Choisir ce plan
+                        </button>
+                    </div>
+                    
+                    <!-- Pro Plan (Featured) -->
+                    <div class="bg-yellow-50 border-2 border-yellow-400 p-8 rounded-xl shadow-custom transform scale-105">
+                        <div class="text-center mb-6">
+                            <div class="bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">
+                                POPULAIRE
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Pro</h3>
+                            <p class="text-gray-600 mb-4">Pour les entreprises en croissance</p>
+                            <div class="flex justify-center items-baseline">
+                                <span class="text-4xl font-bold text-gray-800">79€</span>
+                                <span class="text-gray-500 ml-1">/mois</span>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Jusqu'à 500 colis/mois</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Gestion des expéditions</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Étiquettes code-barres</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Scan des colis</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Statistiques avancées</span>
+                            </li>
+                            <li class="flex items-center text-gray-400">
+                                <i class="fas fa-times text-red-400 mr-2"></i>
+                                <span>Utilisateurs secondaires</span>
+                            </li>
+                        </ul>
+                        <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-3 px-4 rounded-lg transition duration-300">
+                            Choisir ce plan
+                        </button>
+                    </div>
+                    
+                    <!-- Premium Plan -->
+                    <div class="bg-gray-50 p-8 rounded-xl shadow-custom">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Premium</h3>
+                            <p class="text-gray-600 mb-4">Pour les entreprises établies</p>
+                            <div class="flex justify-center items-baseline">
+                                <span class="text-4xl font-bold text-gray-800">149€</span>
+                                <span class="text-gray-500 ml-1">/mois</span>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Colis illimités</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Gestion des expéditions</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Étiquettes code-barres</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Scan des colis</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Statistiques avancées</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Utilisateurs secondaires</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                <span>Accès API</span>
+                            </li>
+                        </ul>
+                        <button class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition duration-300">
+                            Choisir ce plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="gradient-bg py-16">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Prêt à simplifier votre gestion logistique ?</h2>
+                <p class="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">Essayez MM Yellow Colis gratuitement pendant 14 jours. Aucune carte de crédit requise.</p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-3 px-8 rounded-lg transition duration-300">
+                        Démarrer l'essai gratuit
+                    </button>
+                    <button class="bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-8 rounded-lg transition duration-300">
+                        Nous contacter
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-box text-white text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold">MM Yellow Colis</span>
+                        </div>
+                        <p class="text-gray-400">Solution tout-en-un pour la gestion et le suivi de colis pour les PME logistiques.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Produit</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Fonctionnalités</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Tarifs</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Documentation</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Entreprise</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">À propos</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Carrières</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Partenaires</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Contact</h4>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                                <span class="text-gray-400">contact@mmyellowcolis.com</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-phone text-gray-400 mr-2"></i>
+                                <span class="text-gray-400">+33 1 23 45 67 89</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                                <span class="text-gray-400">Paris, France</span>
+                            </li>
+                        </ul>
+                        <div class="flex space-x-4 mt-4">
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 mb-4 md:mb-0">© 2023 MM Yellow Colis. Tous droits réservés.</p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">Mentions légales</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">CGU</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">Politique de confidentialité</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            mounted() {
+                // Initialize FullCalendar
+                const calendarEl = document.getElementById('calendar');
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    events: [
+                        {
+                            title: 'Livraison Amazon',
+                            start: new Date(),
+                            color: '#f59e0b'
+                        },
+                        {
+                            title: 'Réunion client',
+                            start: new Date(new Date().setDate(new Date().getDate() + 2)),
+                            color: '#3b82f6'
+                        },
+                        {
+                            title: 'Formation équipe',
+                            start: new Date(new Date().setDate(new Date().getDate() + 5)),
+                            end: new Date(new Date().setDate(new Date().getDate() + 7)),
+                            color: '#10b981'
+                        }
+                    ]
+                });
+                calendar.render();
+                
+                // Mobile menu toggle
+                $('.mobile-menu-button').click(function() {
+                    $('.mobile-menu').toggleClass('hidden');
+                });
+                
+                // Smooth scrolling for anchor links
+                $('a[href*="#"]').on('click', function(e) {
+                    e.preventDefault();
+                    
+                    $('html, body').animate(
+                        {
+                            scrollTop: $($(this).attr('href')).offset().top,
+                        },
+                        500,
+                        'linear'
+                    );
+                });
+            }
+        }).use(BootstrapVue).mount('#app');
+    </script>
+</body>
+</html>

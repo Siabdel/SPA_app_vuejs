@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M Colibar Logistique - Gestion de Colis pour PME</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+        }
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://via.placeholder.com/1920x1080.png?text=Warehouse+Background') no-repeat center center/cover;
+            color: white;
+            padding: 120px 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-weight: 700;
+            font-size: 3rem;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+        }
+        .section {
+            padding: 80px 0;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 600;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            color: #0d6efd;
+        }
+        .pricing-table .card {
+            transition: transform 0.3s;
+        }
+        .pricing-table .card:hover {
+            transform: translateY(-10px);
+        }
+        .workflow-step {
+            text-align: center;
+            padding: 20px;
+        }
+        .workflow-step .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #0d6efd;
+        }
+        .testimonial {
+            text-align: center;
+            padding: 20px;
+        }
+        .testimonial img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+        .cta-section {
+            background-color: #0d6efd;
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+        .cta-section h2 {
+            font-weight: 700;
+        }
+
+        /* Vue.js animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">M Colibar Logistique</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pourquoi-nous">Pourquoi nous choisir ?</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#fonctionnalites">Fonctionnalités</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#tarification">Tarification</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-lg-3" href="#cta">Démarrer mon essai gratuit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <h1 class="display-4">Simplifiez la gestion de vos colis avec notre solution SaaS tout-en-un</h1>
+            <p class="lead">Digitalisez votre chaîne logistique, gagnez en efficience et maîtrisez vos coûts avec une plateforme pensée pour les PME, transporteurs locaux et e-commerçants.</p>
+            <h3 class="fw-light">Votre logistique, simple, rapide et connectée.</h3>
+            <a href="#cta" class="btn btn-primary btn-lg mt-4">Testez gratuitement pendant 14 jours</a>
+        </div>
+    </header>
+
+    <div id="app">
+        <!-- Pourquoi choisir notre solution ? -->
+        <section id="pourquoi-nous" class="section">
+            <div class="container">
+                <h2 class="section-title">Pourquoi choisir notre solution ?</h2>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card p-4 text-center w-100 fade-in">
+                            <h5 class="card-title fw-bold">Conçue pour les PME</h5>
+                            <p class="card-text">Une solution pensée pour les petites et moyennes entreprises logistiques.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card p-4 text-center w-100 fade-in">
+                            <h5 class="card-title fw-bold">Alternative économique</h5>
+                            <p class="card-text">Une option abordable face aux solutions complexes des grands groupes.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card p-4 text-center w-100 fade-in">
+                            <h5 class="card-title fw-bold">Plateforme cloud sécurisée</h5>
+                            <p class="card-text">Accessible partout, à tout moment et en toute sécurité.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card p-4 text-center w-100 fade-in">
+                            <h5 class="card-title fw-bold">Compatibilité matérielle</h5>
+                            <p class="card-text">Fonctionne avec imprimantes thermiques, scanners mobiles et douchettes.</p>
+                        </div>
+                    </div>
+                     <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card p-4 text-center w-100 fade-in">
+                            <h5 class="card-title fw-bold">Support technique dédié</h5>
+                            <p class="card-text">Nous vous accompagnons avec un support réactif et des formations personnalisées.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fonctionnalités clés -->
+        <section id="fonctionnalites" class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Fonctionnalités clés</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center pricing-table">
+                        <thead>
+                            <tr class="table-dark">
+                                <th scope="col">Offre</th>
+                                <th scope="col">Starter</th>
+                                <th scope="col">Pro</th>
+                                <th scope="col">Premium</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Gestion expéditions</th>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Génération étiquettes PDF</th>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                             <tr>
+                                <th scope="row">Scan colis (mobile/douchette)</th>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Suivi en temps réel</th>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Impression automatique</th>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Intégrations API</th>
+                                <td>❌</td>
+                                <td>Shopify, WooCommerce, autres</td>
+                                <td>API ouverte, connecteurs sur demande</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Statistiques avancées</th>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                             <tr>
+                                <th scope="row">Géolocalisation & signature électronique</th>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                             <tr>
+                                <th scope="row">Support prioritaire</th>
+                                <td>❌</td>
+                                <td>✔️</td>
+                                <td>✔️</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+         <!-- Logiciel & Technologie -->
+        <section id="technologie" class="section">
+            <div class="container">
+                <h2 class="section-title">Logiciel & Technologie</h2>
+                 <div class="row g-4 text-center">
+                    <div class="col-lg-3 col-md-6 fade-in">
+                        <div class="card h-100 p-3">
+                            <h5 class="fw-bold">Backend Robuste</h5>
+                            <p>Développé avec Django & DRF pour une performance et une sécurité maximales.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 fade-in">
+                         <div class="card h-100 p-3">
+                            <h5 class="fw-bold">Interface Moderne</h5>
+                            <p>Une expérience utilisateur fluide et mobile-friendly grâce à Vue.js & Axios.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 fade-in">
+                         <div class="card h-100 p-3">
+                            <h5 class="fw-bold">Hébergement Cloud</h5>
+                            <p>Infrastructure cloud sécurisée et conforme aux normes RGPD.</p>
+                        </div>
+                    </div>
+                     <div class="col-lg-3 col-md-6 fade-in">
+                         <div class="card h-100 p-3">
+                            <h5 class="fw-bold">Intégrations Fluides</h5>
+                            <p>Connectez facilement la plateforme à votre écosystème digital existant.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workflow simplifié -->
+        <section id="workflow" class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Workflow simplifié</h2>
+                <div class="row">
+                    <div class="col-md-4 workflow-step fade-in">
+                        <div class="icon">📦</div>
+                        <h5>1. Créez vos expéditions</h5>
+                        <p>Enregistrez vos envois en quelques clics seulement.</p>
+                    </div>
+                    <div class="col-md-4 workflow-step fade-in">
+                        <div class="icon">🖨️</div>
+                        <h5>2. Imprimez vos étiquettes</h5>
+                        <p>Générez et imprimez automatiquement vos étiquettes avec codes-barres QR.</p>
+                    </div>
+                    <div class="col-md-4 workflow-step fade-in">
+                        <div class="icon">📱</div>
+                        <h5>3. Scannez les colis</h5>
+                        <p>Mettez à jour le statut instantanément via smartphone ou douchette.</p>
+                    </div>
+                     <div class="col-md-6 workflow-step fade-in">
+                        <div class="icon">🚚</div>
+                        <h5>4. Suivez en temps réel</h5>
+                        <p>Suivez la livraison grâce à un tableau de bord intuitif.</p>
+                    </div>
+                     <div class="col-md-6 workflow-step fade-in">
+                        <div class="icon">🔔</div>
+                        <h5>5. Recevez des notifications</h5>
+                        <p>Des alertes automatisées vous informent à chaque étape clé.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tarification -->
+        <section id="tarification" class="section">
+            <div class="container">
+                <h2 class="section-title">Une tarification adaptée à vos besoins</h2>
+                <div class="row g-4 pricing-table">
+                    <div class="col-lg-4 d-flex">
+                        <div class="card text-center w-100 fade-in">
+                            <div class="card-header">
+                                <h4 class="fw-normal">Starter</h4>
+                            </div>
+                            <div class="card-body">
+                                <h1 class="card-title pricing-card-title">29€<small class="text-muted fw-light">/mois</small></h1>
+                                <p>(ou 300 MAD)</p>
+                                <ul class="list-unstyled mt-3 mb-4">
+                                    <li>Jusqu'à 100 colis</li>
+                                    <li>Fonctionnalités de base</li>
+                                </ul>
+                                <button type="button" class="w-100 btn btn-lg btn-outline-primary">Choisir Starter</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 d-flex">
+                        <div class="card text-center w-100 border-primary fade-in">
+                             <div class="card-header bg-primary text-white">
+                                <h4 class="fw-normal">Pro</h4>
+                            </div>
+                            <div class="card-body">
+                                <h1 class="card-title pricing-card-title">79€<small class="text-muted fw-light">/mois</small></h1>
+                                <p>(ou 800 MAD)</p>
+                                <ul class="list-unstyled mt-3 mb-4">
+                                    <li>Jusqu'à 1 000 colis</li>
+                                    <li>Impressions automatiques</li>
+                                    <li>Intégrations API</li>
+                                </ul>
+                                <button type="button" class="w-100 btn btn-lg btn-primary">Choisir Pro</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 d-flex">
+                        <div class="card text-center w-100 fade-in">
+                             <div class="card-header">
+                                <h4 class="fw-normal">Premium</h4>
+                            </div>
+                            <div class="card-body">
+                                <h1 class="card-title pricing-card-title">149€<small class="text-muted fw-light">/mois</small></h1>
+                                <p>(ou 1 500 MAD)</p>
+                                <ul class="list-unstyled mt-3 mb-4">
+                                    <li>Volume illimité</li>
+                                    <li>Personnalisation</li>
+                                    <li>Support dédié</li>
+                                </ul>
+                                <button type="button" class="w-100 btn btn-lg btn-outline-primary">Choisir Premium</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <p class="lead">Offre "pay-per-use" possible pour les très petits volumes (0,1€/colis).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Témoignages -->
+        <section id="temoignages" class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Ils nous font confiance</h2>
+                <div class="row">
+                    <div class="col-md-4 testimonial fade-in">
+                        <img src="https://via.placeholder.com/100" alt="Logo PME locale 1">
+                        <p>"Cette solution a transformé notre gestion logistique. Simple, efficace et économique."</p>
+                        <cite>– PME locale 1</cite>
+                    </div>
+                    <div class="col-md-4 testimonial fade-in">
+                         <img src="https://via.placeholder.com/100" alt="Logo Transporteur indépendant 2">
+                        <p>"Le suivi en temps réel et la facilité d'utilisation ont été de vrais atouts pour mon activité."</p>
+                        <cite>– Transporteur indépendant 2</cite>
+                    </div>
+                    <div class="col-md-4 testimonial fade-in">
+                         <img src="https://via.placeholder.com/100" alt="Logo boutique e-commerce 3">
+                        <p>"L'intégration avec notre boutique e-commerce a été un jeu d'enfant. Un gain de temps considérable !</p>
+                        <cite>– Boutique e-commerce 3</cite>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section id="cta" class="cta-section">
+            <div class="container">
+                <h2>Prêt à optimiser votre logistique ?</h2>
+                <p class="lead">Rejoignez les entreprises qui ont choisi la simplicité et l'efficacité.</p>
+                <a href="#" class="btn btn-light btn-lg">Testez gratuitement pendant 14 jours</a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2025 M Colibar Logistique. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3"></script>
+
+    <script>
+        // Simple animation on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            });
+
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach(el => observer.observe(el));
+        });
+
+        // Vue app (can be expanded)
+        Vue.createApp({
+            data() {
+                return {
+                    message: 'Hello from Vue!'
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>```

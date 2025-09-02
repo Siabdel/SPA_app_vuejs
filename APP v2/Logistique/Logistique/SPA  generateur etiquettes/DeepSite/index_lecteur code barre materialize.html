@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventaire Pro - Scanner PWA</title>
+  <!-- Material Design Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Material Design Components -->
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3.2.47/dist/vue.global.js"></script>
+  <!-- Barcode Scanner -->
+  <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+  <!-- Axios for API calls -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    :root {
+      --mdc-theme-primary: #6200ee;
+      --mdc-theme-secondary: #03dac6;
+      --mdc-theme-background: #ffffff;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    .scanner-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 200px;
+      border: 4px solid #6200ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    
+    .scanner-line {
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      background-color: #6200ee;
+      animation: scan 2s infinite linear;
+    }
+    
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    
+    .product-card {
+      transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    .drawer-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .drawer-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+    
+    .api-url-input {
+      width: 100%;
+      padding: 8px;
+    }
+    
+    .snackbar {
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- App Bar -->
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+          <button @click="drawer.open = !drawer.open" class="mdc-icon-button material-icons mdc-top-app-bar__navigation-icon">menu</button>
+          <span class="mdc-top-app-bar__title">Inventaire Pro</span>
+        </section>
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+          <button @click="toggleScanner" class="mdc-icon-button material-icons" aria-label="Scanner">
+            {{ scannerActive ? 'stop' : 'qr_code_scanner' }}
+          </button>
+        </section>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mdc-top-app-bar--fixed-adjust">
+      <!-- Scanner View -->
+      <div v-if="scannerActive" class="scanner-view">
+        <div id="scanner-container" style="width:100%; height:100%; position:relative; background:black;">
+          <div class="scanner-overlay">
+            <div class="scanner-line"></div>
+            <span class="mdc-typography--subtitle1" style="color:white;">Alignez le code-barres</span>
+          </div>
+        </div>
+        
+        <div class="mdc-card" style="margin:16px;">
+          <div class="mdc-card__content">
+            <div class="mdc-text-field mdc-text-field--outlined" style="width:100%;">
+              <input v-model="manualBarcode" @keyup.enter="processBarcode(manualBarcode)" 
+                     type="text" class="mdc-text-field__input" id="manual-barcode">
+              <div class="mdc-notched-outline">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label for="manual-barcode" class="mdc-floating-label">Code-barres manuel</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product View -->
+      <div v-if="currentProduct" class="product-view" style="padding:16px;">
+        <div class="mdc-card product-card">
+          <div class="mdc-card__primary-action" tabindex="0">
+            <div style="padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 class="mdc-typography--headline6">{{ currentProduct.name }}</h2>
+                <span class="mdc-chip">
+                  <span class="mdc-chip__text">{{ currentProduct.barcode }}</span>
+                </span>
+              </div>
+              <p class="mdc-typography--body1" style="color:rgba(0,0,0,0.6);">{{ currentProduct.description }}</p>
+            </div>
+          </div>
+          
+          <div class="mdc-card__actions">
+            <div class="mdc-card__action-buttons">
+              <div style="display:flex; justify-content:space-between; width:100%; padding:8px 16px;">
+                <div>
+                  <span class="mdc-typography--subtitle2">Stock:</span>
+                  <span class="mdc-typography--subtitle1" style="margin-left:8px;">{{ currentProduct.stock }}</span>
+                </div>
+                <div>
+                  <span class="mdc-typography--subtitle2">Prix:</span>
+                  <span class="mdc-typography--subtitle1" style="margin-left:8px;">{{ currentProduct.price }} €</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock Update Form -->
+        <div class="mdc-card" style="margin-top:16px;">
+          <div class="mdc-card__content">
+            <h3 class="mdc-typography--subtitle1">Mise à jour du stock</h3>
+            
+            <div style="display:flex; align-items:center; margin-top:16px;">
+              <button @click="updateStock(-1)" class="mdc-icon-button material-icons" style="color:red;">
+                remove
+              </button>
+              
+              <div class="mdc-text-field mdc-text-field--outlined" style="width:100px; margin:0 8px;">
+                <input v-model.number="stockUpdateValue" type="number" class="mdc-text-field__input">
+                <div class="mdc-notched-outline">
+                  <div class="mdc-notched-outline__leading"></div>
+                  <div class="mdc-notched-outline__notch"></div>
+                  <div class="mdc-notched-outline__trailing"></div>
+                </div>
+              </div>
+              
+              <button @click="updateStock(1)" class="mdc-icon-button material-icons" style="color:green;">
+                add
+              </button>
+              
+              <button @click="submitStockUpdate" :disabled="isUpdating" 
+                      class="mdc-button mdc-button--raised" style="margin-left:16px;">
+                <span class="mdc-button__label">
+                  <span v-if="isUpdating" class="mdc-circular-progress mdc-circular-progress--small">
+                    <div class="mdc-circular-progress__determinate-container">
+                      <svg class="mdc-circular-progress__determinate-circle-graphic" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="mdc-circular-progress__determinate-track" cx="12" cy="12" r="8.75" stroke-width="2.5"/>
+                        <circle class="mdc-circular-progress__determinate-circle" cx="12" cy="12" r="8.75" stroke-dasharray="54.978" stroke-dashoffset="54.978" stroke-width="2.5"/>
+                      </svg>
+                    </div>
+                  </span>
+                  {{ isUpdating ? 'Enregistrement...' : 'Enregistrer' }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-if="!scannerActive && !currentProduct" class="empty-state" style="padding:16px; text-align:center;">
+        <div class="mdc-card" style="padding:32px 16px;">
+          <span class="material-icons" style="font-size:72px; color:rgba(0,0,0,0.38);">inventory_2</span>
+          <h2 class="mdc-typography--headline6" style="margin-top:16px;">Aucun produit sélectionné</h2>
+          <p class="mdc-typography--body1" style="color:rgba(0,0,0,0.6);">
+            Scannez un code-barres pour commencer à gérer votre inventaire
+          </p>
+          <button @click="toggleScanner" class="mdc-button mdc-button--raised" style="margin-top:24px;">
+            <span class="mdc-button__label">Scanner un produit</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Scans -->
+      <div v-if="scannedProducts.length > 0" class="recent-scans" style="padding:16px;">
+        <h3 class="mdc-typography--subtitle1" style="margin-bottom:16px;">Produits récents</h3>
+        
+        <div class="mdc-layout-grid">
+          <div class="mdc-layout-grid__inner">
+            <div v-for="product in scannedProducts" :key="product.barcode" 
+                 class="mdc-layout-grid__cell" @click="selectProduct(product)">
+              <div class="mdc-card product-card">
+                <div class="mdc-card__primary-action" tabindex="0">
+                  <div style="padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <h4 class="mdc-typography--subtitle2">{{ product.name }}</h4>
+                      <span class="mdc-chip mdc-chip--small">
+                        <span class="mdc-chip__text">{{ product.barcode }}</span>
+                      </span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                      <span class="mdc-typography--caption">Stock: {{ product.stock }}</span>
+                      <span class="mdc-typography--caption">{{ product.price }} €</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <aside class="mdc-drawer mdc-drawer--modal" :class="{ 'mdc-drawer--open': drawer.open }">
+      <div class="mdc-drawer__header">
+        <h3 class="mdc-drawer__title">Inventaire Pro</h3>
+        <h6 class="mdc-drawer__subtitle">Gestion d'inventaire</h6>
+      </div>
+      <div class="mdc-drawer__content">
+        <nav class="mdc-list">
+          <a class="mdc-list-item mdc-list-item--activated" href="#" aria-current="page" @click="drawer.open = false">
+            <span class="mdc-list-item__ripple"></span>
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true">inventory</i>
+            <span class="mdc-list-item__text">Inventaire</span>
+          </a>
+          <a class="mdc-list-item" href="#" @click="showSettings = true; drawer.open = false">
+            <span class="mdc-list-item__ripple"></span>
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true">settings</i>
+            <span class="mdc-list-item__text">Paramètres</span>
+          </a>
+          <a class="mdc-list-item" href="#" @click="showHelp = true; drawer.open = false">
+            <span class="mdc-list-item__ripple"></span>
+            <i class="material-icons mdc-list-item__graphic" aria-hidden="true">help</i>
+            <span class="mdc-list-item__text">Aide</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+    <div class="mdc-drawer-scrim" v-if="drawer.open" @click="drawer.open = false"></div>
+
+    <!-- Settings Dialog -->
+    <div class="mdc-dialog" :class="{ 'mdc-dialog--open': showSettings }">
+      <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface">
+          <h2 class="mdc-dialog__title">Paramètres</h2>
+          <div class="mdc-dialog__content">
+            <div class="mdc-text-field mdc-text-field--outlined" style="width:100%;">
+              <input v-model="apiConfig.url" type="text" class="mdc-text-field__input" id="api-url">
+              <div class="mdc-notched-outline">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label for="api-url" class="mdc-floating-label">URL de l'API</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+            <div class="mdc-text-field mdc-text-field--outlined" style="width:100%; margin-top:16px;">
+              <input v-model="apiConfig.key" type="text" class="mdc-text-field__input" id="api-key">
+              <div class="mdc-notched-outline">
+                <div class="mdc-notched-outline__leading"></div>
+                <div class="mdc-notched-outline__notch">
+                  <label for="api-key" class="mdc-floating-label">Clé API</label>
+                </div>
+                <div class="mdc-notched-outline__trailing"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mdc-dialog__actions">
+            <button type="button" class="mdc-button mdc-dialog__button" @click="showSettings = false">
+              <span class="mdc-button__label">Annuler</span>
+            </button>
+            <button type="button" class="mdc-button mdc-dialog__button" @click="saveSettings">
+              <span class="mdc-button__label">Enregistrer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Dialog -->
+    <div class="mdc-dialog" :class="{ 'mdc-dialog--open': showHelp }">
+      <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface">
+          <h2 class="mdc-dialog__title">Aide</h2>
+          <div class="mdc-dialog__content">
+            <p class="mdc-typography--body1">
+              <strong>Comment scanner un produit:</strong><br>
+              1. Cliquez sur l'icône scanner en haut à droite<br>
+              2. Alignez le code-barres dans le cadre<br>
+              3. Le produit sera automatiquement détecté
+            </p>
+            <p class="mdc-typography--body1" style="margin-top:16px;">
+              <strong>Mise à jour du stock:</strong><br>
+              - Utilisez les boutons + et - pour ajuster la quantité<br>
+              - Cliquez sur "Enregistrer" pour sauvegarder les modifications
+            </p>
+          </div>
+          <div class="mdc-dialog__actions">
+            <button type="button" class="mdc-button mdc-dialog__button" @click="showHelp = false">
+              <span class="mdc-button__label">Fermer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Snackbar for notifications -->
+    <div class="mdc-snackbar snackbar">
+      <div class="mdc-snackbar__surface">
+        <div class="mdc-snackbar__label"
+             role="status"
+             aria-live="polish">
+          {{ notification.message }}
+        </div>
+        <div class="mdc-snackbar__actions">
+          <button type="button" class="mdc-button mdc-snackbar__action">
+            <div class="mdc-button__ripple"></div>
+            <span class="mdc-button__label">OK</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted, onBeforeUnmount } = Vue;
+    
+    // Mock API service
+    const apiService = {
+      async getProduct(barcode, apiConfig) {
+        // In a real app, this would be an actual API call
+        console.log(`Fetching product ${barcode} from ${apiConfig.url}`);
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Mock database
+        const mockProducts = [
+          {
+            barcode: '123456789012',
+            name: 'Smartphone Premium',
+            description: 'Smartphone haut de gamme avec écran AMOLED 6.7"',
+            stock: 42,
+            price: 899.99,
+            lastUpdated: new Date(),
+            category: 'Électronique'
+          },
+          {
+            barcode: '987654321098',
+            name: 'Casque Bluetooth',
+            description: 'Casque sans fil avec réduction de bruit active',
+            stock: 15,
+            price: 199.99,
+            lastUpdated: new Date(),
+            category: 'Audio'
+          },
+          {
+            barcode: '456789012345',
+            name: 'Chargeur USB-C',
+            description: 'Chargeur rapide 65W compatible avec la plupart des appareils',
+            stock: 87,
+            price: 29.99,
+            lastUpdated: new Date(),
+            category: 'Accessoires'
+          }
+        ];
+        
+        return mockProducts.find(p => p.barcode === barcode) || null;
+      },
+      
+      async updateStock(product, apiConfig) {
+        // In a real app, this would be an actual API call
+        console.log(`Updating stock for ${product.barcode} via ${apiConfig.url}`);
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        
+        return { success: true, updatedProduct: product };
+      }
+    };
+
+    createApp({
+      setup() {
+        // State
+        const scannerActive = ref(false);
+        const manualBarcode = ref('');
+        const currentProduct = ref(null);
+        const scannedProducts = ref([]);
+        const stockUpdateValue = ref(1);
+        const isUpdating = ref(false);
+        
+        // UI State
+        const drawer = ref({ open: false });
+        const showSettings = ref(false);
+        const showHelp = ref(false);
+        
+        // Configuration
+        const apiConfig = ref({
+          url: localStorage.getItem('apiUrl') || 'https://api.inventaire-pro.com/v1',
+          key: localStorage.getItem('apiKey') || ''
+        });
+        
+        // Notification
+        const notification = ref({
+          message: '',
+          show: false
+        });
+        
+        // Methods
+        const toggleScanner = () => {
+          scannerActive.value = !scannerActive.value;
+          
+          if (scannerActive.value) {
+            startScanner();
+          } else {
+            stopScanner();
+          }
+        };
+        
+        const startScanner = () => {
+          Quagga.init({
+            inputStream: {
+              name: "Live",
+              type: "LiveStream",
+              target: document.querySelector('#scanner-container'),
+              constraints: {
+                width: 480,
+                height: 320,
+                facingMode: "environment"
+              },
+            },
+            decoder: {
+              readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"]
+            },
+            locate: true,
+          }, function(err) {
+            if (err) {
+              showNotification("Erreur lors de l'initialisation du scanner");
+              return;
+            }
+            Quagga.start();
+          });
+
+          Quagga.onDetected(handleBarcodeDetection);
+        };
+        
+        const stopScanner = () => {
+          if (Quagga) {
+            Quagga.offDetected(handleBarcodeDetection);
+            Quagga.stop();
+          }
+        };
+        
+        const handleBarcodeDetection = (result) => {
+          const code = result.codeResult.code;
+          processBarcode(code);
+          
+          // Pause scanning briefly
+          Quagga.pause();
+          setTimeout(() => {
+            Quagga.onDetected(handleBarcodeDetection);
+            Quagga.start();
+          }, 1000);
+        };
+        
+        const processBarcode = async (barcode) => {
+          try {
+            const product = await apiService.getProduct(barcode, apiConfig.value);
+            
+            if (product) {
+              currentProduct.value = {...product};
+              addToScannedProducts(product);
+              showNotification("Produit trouvé");
+            } else {
+              showNotification("Produit non trouvé");
+            }
+            
+            manualBarcode.value = '';
+          } catch (error) {
+            showNotification("Erreur de connexion à l'API");
+            console.error(error);
+          }
+        };
+        
+        const addToScannedProducts = (product) => {
+          const existingIndex = scannedProducts.value.findIndex(p => p.barcode === product.barcode);
+          
+          if (existingIndex >= 0) {
+            scannedProducts.value[existingIndex] = {...product};
+          } else {
+            scannedProducts.value = [product, ...scannedProducts.value].slice(0, 6);
+          }
+        };
+        
+        const selectProduct = (product) => {
+          currentProduct.value = {...product};
+          scannerActive.value = false;
+          stopScanner();
+        };
+        
+        const updateStock = (direction) => {
+          const change = direction * stockUpdateValue.value;
+          currentProduct.value.stock += change;
+          
+          if (currentProduct.value.stock < 0) {
+            currentProduct.value.stock = 0;
+          }
+        };
+        
+        const submitStockUpdate = async () => {
+          isUpdating.value = true;
+          
+          try {
+            const result = await apiService.updateStock(currentProduct.value, apiConfig.value);
+            
+            if (result.success) {
+              currentProduct.value = {...result.updatedProduct};
+              addToScannedProducts(result.updatedProduct);
+              showNotification("Stock mis à jour");
+            }
+          } catch (error) {
+            showNotification("Erreur de mise à jour");
+            console.error(error);
+          } finally {
+            isUpdating.value = false;
+          }
+        };
+        
+        const showNotification = (message) => {
+          notification.value.message = message;
+          notification.value.show = true;
+          
+          const snackbar = new mdc.snackbar.MDCSnackbar(document.querySelector('.mdc-snackbar'));
+          snackbar.open();
+        };
+        
+        const saveSettings = () => {
+          localStorage.setItem('apiUrl', apiConfig.value.url);
+          localStorage.setItem('apiKey', apiConfig.value.key);
+          showSettings.value = false;
+          showNotification("Paramètres enregistrés");
+        };
+        
+        // Initialize Material Components
+        onMounted(() => {
+          // Auto-initialize all MDC components
+          mdc.autoInit();
+        });
+        
+        onBeforeUnmount(() => {
+          stopScanner();
+        });
+        
+        return {
+          // State
+          scannerActive,
+          manualBarcode,
+          currentProduct,
+          scannedProducts,
+          stockUpdateValue,
+          isUpdating,
+          notification,
+          
+          // UI State
+          drawer,
+          showSettings,
+          showHelp,
+          
+          // Configuration
+          apiConfig,
+          
+          // Methods
+          toggleScanner,
+          processBarcode,
+          selectProduct,
+          updateStock,
+          submitStockUpdate,
+          saveSettings
+        };
+      }
+    }).mount('#app');
+    
+    // PWA setup
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('ServiceWorker registration successful');
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyndicPro - Tableau de Bord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .main-content {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: 70px;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 1000;
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-800 text-white w-64 flex-shrink-0 flex flex-col">
+            <div class="p-4 flex items-center border-b border-blue-700">
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                    <i class="fas fa-building text-xl"></i>
+                </div>
+                <div class="ml-3 logo-text">
+                    <h1 class="font-bold text-lg">SyndicPro</h1>
+                    <p class="text-xs text-blue-200">Gestion de copropriété</p>
+                </div>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto py-4">
+                <div class="px-4 mb-6">
+                    <div class="relative">
+                        <input type="text" placeholder="Rechercher..." class="w-full bg-blue-700 text-white placeholder-blue-300 rounded-md py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-blue-300"></i>
+                    </div>
+                </div>
+                
+                <nav>
+                    <div class="px-4 mb-2">
+                        <p class="text-xs uppercase text-blue-400 font-semibold tracking-wider">Navigation</p>
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#" class="nav-item flex items-center py-3 px-4 bg-blue-700 text-white">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span class="nav-text ml-3">Tableau de bord</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item flex items-center py-3 px-4 hover:bg-blue-700 text-blue-200">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="nav-text ml-3">Calendrier</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item flex items-center py-3 px-4 hover:bg-blue-700 text-blue-200">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                <span class="nav-text ml-3">Factures</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item flex items-center py-3 px-4 hover:bg-blue-700 text-blue-200">
+                                <i class="fas fa-users"></i>
+                                <span class="nav-text ml-3">Copropriétaires</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item flex items-center py-3 px-4 hover:bg-blue-700 text-blue-200">
+                                <i class="fas fa-envelope"></i>
+                                <span class="nav-text ml-3">Messagerie</span>
+                                <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item flex items-center py-3 px-4 hover:bg-blue-700 text-blue-200">
+                                <i class="fas fa-cog"></i>
+                                <span class="nav-text ml-3">Paramètres</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="px-4 mt-6 mb-2">
+                        <p class="text-xs uppercase text-blue-400 font-semibold tracking-wider">Espace</p>
+                    </div>
+                    <ul>
+                        <li>
+                            <a href="#" id="admin-space-btn" class="nav-item flex items-center py-3 px-4 bg-blue-900 text-white">
+                                <i class="fas fa-user-shield"></i>
+                                <span class="nav-text ml-3">Espace Admin</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id="client-space-btn" class="nav-item flex items-center py-3 px-4 hover:bg-blue-700 text-blue-200">
+                                <i class="fas fa-user"></i>
+                                <span class="nav-text ml-3">Espace Client</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="p-4 border-t border-blue-700">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">Admin User</p>
+                        <p class="text-xs text-blue-300">Administrateur</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content flex-1 overflow-auto ml-64">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="sidebar-toggle" class="mr-4 text-gray-500 focus:outline-none lg:hidden">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h2 class="text-xl font-semibold text-gray-800" id="space-title">Espace Admin</h2>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="text-gray-500 focus:outline-none">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="text-gray-500 focus:outline-none">
+                                <i class="fas fa-envelope text-xl"></i>
+                                <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="flex items-center focus:outline-none">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="ml-2 text-gray-700 hidden md:inline">Admin</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Admin Space Content -->
+            <div id="admin-space" class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-500">Copropriétaires</p>
+                                <p class="text-2xl font-semibold">142</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                <i class="fas fa-file-invoice-dollar text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-500">Factures ce mois</p>
+                                <p class="text-2xl font-semibold">€24,580</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                <i class="fas fa-exclamation-circle text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-500">Problèmes en cours</p>
+                                <p class="text-2xl font-semibold">8</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <i class="fas fa-calendar-check text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-500">Évènements à venir</p>
+                                <p class="text-2xl font-semibold">3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calendar and Quick Actions -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Calendrier des événements</h3>
+                            <div id="calendar" class="h-96"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white rounded-lg shadow p-6 h-full">
+                            <h3 class="text-lg font-semibold mb-4">Actions rapides</h3>
+                            <div class="space-y-3">
+                                <button class="w-full flex items-center justify-between p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition">
+                                    <span>Créer une facture</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                                <button class="w-full flex items-center justify-between p-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition">
+                                    <span>Envoyer un message</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                                <button class="w-full flex items-center justify-between p-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">
+                                    <span>Planifier un événement</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                                <button class="w-full flex items-center justify-between p-3 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition">
+                                    <span>Signaler un problème</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                                <button class="w-full flex items-center justify-between p-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition">
+                                    <span>Générer un rapport</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            
+                            <h3 class="text-lg font-semibold mt-6 mb-4">Statut des paiements</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm">Payés</span>
+                                    <span class="text-sm font-medium">78%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-sm">En retard</span>
+                                    <span class="text-sm font-medium">12%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-red-500 h-2 rounded-full" style="width: 12%"></div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-sm">En attente</span>
+                                    <span class="text-sm font-medium">10%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 10%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity and Documents -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Activité récente</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="p-2 bg-blue-100 text-blue-600 rounded-full mr-3">
+                                    <i class="fas fa-file-invoice"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Nouvelle facture créée</p>
+                                    <p class="text-sm text-gray-500">Facture #4587 pour M. Dupont</p>
+                                    <p class="text-xs text-gray-400">Il y a 2 heures</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="p-2 bg-green-100 text-green-600 rounded-full mr-3">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Paiement reçu</p>
+                                    <p class="text-sm text-gray-500">€450 de Mme. Leroy</p>
+                                    <p class="text-xs text-gray-400">Il y a 5 heures</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="p-2 bg-yellow-100 text-yellow-600 rounded-full mr-3">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Problème signalé</p>
+                                    <p class="text-sm text-gray-500">Ascenseur en panne par M. Martin</p>
+                                    <p class="text-xs text-gray-400">Il y a 1 jour</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="p-2 bg-purple-100 text-purple-600 rounded-full mr-3">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Événement ajouté</p>
+                                    <p class="text-sm text-gray-500">Assemblée générale le 15/06</p>
+                                    <p class="text-xs text-gray-400">Il y a 2 jours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Documents récents</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 text-blue-600 rounded mr-3">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Procès-verbal AG 2023</p>
+                                        <p class="text-xs text-gray-500">PDF • 2.4 MB</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 text-green-600 rounded mr-3">
+                                        <i class="fas fa-file-excel"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Budget prévisionnel</p>
+                                        <p class="text-xs text-gray-500">XLSX • 1.1 MB</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-red-100 text-red-600 rounded mr-3">
+                                        <i class="fas fa-file-word"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Règlement intérieur</p>
+                                        <p class="text-xs text-gray-500">DOCX • 356 KB</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-purple-100 text-purple-600 rounded mr-3">
+                                        <i class="fas fa-file-image"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Plan des parties communes</p>
+                                        <p class="text-xs text-gray-500">JPG • 4.2 MB</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Space Content (Hidden by default) -->
+            <div id="client-space" class="p-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="md:col-span-2">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Bienvenue, M. Dupont</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                    <div class="flex items-center">
+                                        <div class="p-3 bg-blue-100 text-blue-600 rounded-full mr-3">
+                                            <i class="fas fa-file-invoice-dollar"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Mes factures</p>
+                                            <p class="text-sm text-gray-500">Consulter et payer</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                    <div class="flex items-center">
+                                        <div class="p-3 bg-green-100 text-green-600 rounded-full mr-3">
+                                            <i class="fas fa-history"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Historique</p>
+                                            <p class="text-sm text-gray-500">Tous mes paiements</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                    <div class="flex items-center">
+                                        <div class="p-3 bg-purple-100 text-purple-600 rounded-full mr-3">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Messagerie</p>
+                                            <p class="text-sm text-gray-500">3 nouveaux messages</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                    <div class="flex items-center">
+                                        <div class="p-3 bg-yellow-100 text-yellow-600 rounded-full mr-3">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Support</p>
+                                            <p class="text-sm text-gray-500">Signaler un problème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6 mt-6">
+                            <h3 class="text-lg font-semibold mb-4">Mes dernières factures</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#4587</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/05/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">€450.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <a href="#" class="text-blue-600 hover:text-blue-900">Télécharger</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#4521</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/05/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">€450.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <a href="#" class="text-blue-600 hover:text-blue-900">Télécharger</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#4478</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/04/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">€450.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <a href="#" class="text-blue-600 hover:text-blue-900">Télécharger</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#4423</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/04/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">€450.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <a href="#" class="text-blue-600 hover:text-blue-900">Télécharger</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Mon compte</h3>
+                            <div class="flex items-center mb-6">
+                                <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-user text-2xl text-gray-400"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="font-medium">Jean Dupont</p>
+                                    <p class="text-sm text-gray-500">Appartement B12</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">Email</p>
+                                    <p class="font-medium">jean.dupont@example.com</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Téléphone</p>
+                                    <p class="font-medium">+33 6 12 34 56 78</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Date d'entrée</p>
+                                    <p class="font-medium">15/03/2018</p>
+                                </div>
+                            </div>
+                            
+                            <button class="mt-6 w-full py-2 px-4 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition">
+                                Modifier mes informations
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6 mt-6">
+                            <h3 class="text-lg font-semibold mb-4">Prochain paiement</h3>
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="font-medium">Charges de Juin</p>
+                                    <p class="font-bold text-blue-700">€450.00</p>
+                                </div>
+                                <p class="text-sm text-gray-500 mb-3">Date limite: 30/06/2023</p>
+                                <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    Payer maintenant
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6 mt-6">
+                            <h3 class="text-lg font-semibold mb-4">Événements à venir</h3>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-blue-500 pl-4 py-1">
+                                    <p class="font-medium">Assemblée générale</p>
+                                    <p class="text-sm text-gray-500">15/06/2023 • 18:00</p>
+                                </div>
+                                <div class="border-l-4 border-green-500 pl-4 py-1">
+                                    <p class="font-medium">Nettoyage des parties communes</p>
+                                    <p class="text-sm text-gray-500">20/06/2023 • Toute la journée</p>
+                                </div>
+                                <div class="border-l-4 border-purple-500 pl-4 py-1">
+                                    <p class="font-medium">Contrôle ascenseur</p>
+                                    <p class="text-sm text-gray-500">25/06/2023 • 09:00-12:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.min.js"></script>
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+        
+        // Switch between admin and client spaces
+        document.getElementById('admin-space-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('admin-space').classList.remove('hidden');
+            document.getElementById('client-space').classList.add('hidden');
+            document.getElementById('space-title').textContent = 'Espace Admin';
+            document.getElementById('admin-space-btn').classList.add('bg-blue-900', 'text-white');
+            document.getElementById('admin-space-btn').classList.remove('text-blue-200', 'hover:bg-blue-700');
+            document.getElementById('client-space-btn').classList.add('text-blue-200', 'hover:bg-blue-700');
+            document.getElementById('client-space-btn').classList.remove('bg-blue-900', 'text-white');
+        });
+        
+        document.getElementById('client-space-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('admin-space').classList.add('hidden');
+            document.getElementById('client-space').classList.remove('hidden');
+            document.getElementById('space-title').textContent = 'Espace Client';
+            document.getElementById('client-space-btn').classList.add('bg-blue-900', 'text-white');
+            document.getElementById('client-space-btn').classList.remove('text-blue-200', 'hover:bg-blue-700');
+            document.getElementById('admin-space-btn').classList.add('text-blue-200', 'hover:bg-blue-700');
+            document.getElementById('admin-space-btn').classList.remove('bg-blue-900', 'text-white');
+        });
+        
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: [
+                    {
+                        title: 'Assemblée générale',
+                        start: '2023-06-15T18:00:00',
+                        end: '2023-06-15T20:00:00',
+                        backgroundColor: '#4f46e5',
+                        borderColor: '#4f46e5'
+                    },
+                    {
+                        title: 'Nettoyage parties communes',
+                        start: '2023-06-20',
+                        allDay: true,
+                        backgroundColor: '#10b981',
+                        borderColor: '#10b981'
+                    },
+                    {
+                        title: 'Contrôle ascenseur',
+                        start: '2023-06-25T09:00:00',
+                        end: '2023-06-25T12:00:00',
+                        backgroundColor: '#8b5cf6',
+                        borderColor: '#8b5cf6'
+                    }
+                ]
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+</html>

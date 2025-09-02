@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agence Debord - Développement Web</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff;
+      color: #333;
+    }
+
+    .hero {
+      background: linear-gradient(to right, #0d6efd, #00aaff);
+      color: white;
+      padding: 100px 0;
+    }
+
+    .logo-carousel img {
+      max-height: 50px;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .logo-carousel img:hover {
+      opacity: 1;
+    }
+
+    .service-icon {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: 15px;
+    }
+
+    .testimonial-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    footer {
+      background-color: #f8f9fa;
+      padding: 40px 0;
+    }
+
+    .footer-link {
+      color: #555;
+      text-decoration: none;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="#">Agence Debord</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Réalisations</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Blog</a></li>
+          <li class="nav-item"><a class="nav-link btn btn-light text-primary" href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero text-center">
+    <div class="container">
+      <h1 class="display-5 fw-bold">Développons votre application web sur-mesure</h1>
+      <p class="lead mt-3">Performante et conçue pour durer</p>
+      <p class="mt-2">+100 clients depuis 2014</p>
+    </div>
+  </section>
+
+  <!-- Client Logos Carousel -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <div class="row logo-carousel text-center">
+        <div class="col-6 col-md-3 mb-4"><img src="https://api.agencedebord.com/wp-content/uploads/2023/10/artelia.svg?w=384" alt="Artelia" class="img-fluid"/></div>
+        <div class="col-6 col-md-3 mb-4"><img src="https://api.agencedebord.com/wp-content/uploads/2025/02/Logo_CDiscount_2024.svg?w=384" alt="CDiscount" class="img-fluid"/></div>
+        <div class="col-6 col-md-3 mb-4"><img src="https://api.agencedebord.com/wp-content/uploads/2023/10/uni_strasbourg.svg?w=384" alt="Université Strasbourg" class="img-fluid"/></div>
+        <div class="col-6 col-md-3 mb-4"><img src="https://api.agencedebord.com/wp-content/uploads/2023/10/acadomia.svg?w=384" alt="Acadomia" class="img-fluid"/></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="py-5">
+    <div class="container text-center">
+      <p class="lead">Votre projet mérite plus qu’un simple développement : il a besoin d’une solution performante, sur-mesure et pensée pour vos utilisateurs.</p>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-5">Nos services</h2>
+      <div class="row text-center">
+        <div class="col-md-3 mb-4">
+          <img src="https://api.agencedebord.com/wp-content/uploads/2025/02/service_logiciels.svg" alt="Logiciel sur-mesure" class="service-icon"/>
+          <h5>Logiciel sur-mesure</h5>
+          <p>Methode agile, Backend & Frontend, Suivi de projet</p>
+        </div>
+        <div class="col-md-3 mb-4">
+          <img src="https://api.agencedebord.com/wp-content/uploads/2025/02/service_e_commerce.svg" alt="Site e-commerce" class="service-icon"/>
+          <h5>Site e-commerce</h5>
+          <p>WooCommerce, Shopify, Rapidité, Sécurité</p>
+        </div>
+        <div class="col-md-3 mb-4">
+          <img src="https://api.agencedebord.com/wp-content/uploads/2025/02/service_ia_2.svg" alt="Développement IA" class="service-icon"/>
+          <h5>Développement IA</h5>
+          <p>IA générative, API, LLM</p>
+        </div>
+        <div class="col-md-3 mb-4">
+          <img src="https://api.agencedebord.com/wp-content/uploads/2025/02/service_sites.svg" alt="Site internet" class="service-icon"/>
+          <h5>Site internet</h5>
+          <p>Site institutionnel, WordPress, SEO, Ecoconception</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="py-5">
+    <div class="container">
+      <h2 class="text-center mb-5">Nos clients parlent de nous</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="d-flex align-items-start">
+            <img src="https://www.agencedebord.com/images/testimonials/jean-martel.jpg?w=3840" class="testimonial-img me-3" alt="Jean Martel"/>
+            <div>
+              <p><strong>Jean Martel</strong><br/><em>Directeur marketing - Rura</em></p>
+              <p>“Un partenaire fiable et réactif.”</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="d-flex align-items-start">
+            <img src="https://www.agencedebord.com/images/testimonials/lionel-nayral.jpg?w=3840" class="testimonial-img me-3" alt="Lionel Nayral"/>
+            <div>
+              <p><strong>Lionel Nayral</strong><br/><em>CEO - Garaulion</em></p>
+              <p>“Très bon accompagnement sur notre site web.”</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="d-flex align-items-start">
+            <img src="https://www.agencedebord.com/images/testimonials/charlotte-teyssier.jpg?w=3840" class="testimonial-img me-3" alt="Charlotte Teyssier"/>
+            <div>
+              <p><strong>Charlotte Teyssier</strong><br/><em>Dirigeante - El Smartgrid</em></p>
+              <p>“Équipe compétente et disponible.”</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technologies -->
+  <section class="py-5 bg-light text-center">
+    <div class="container">
+      <h2>Nos technos préférées</h2>
+      <p class="mt-3">React · Node.js · PHP · Laravel · Vue.js · TailwindCSS · Docker · PostgreSQL</p>
+    </div>
+  </section>
+
+  <!-- Blog Preview -->
+  <section class="py-5 text-center">
+    <div class="container">
+      <h2>Nos derniers articles</h2>
+      <p class="mt-3">💡 IA, Performance web, Conseils tech... Découvrez nos retours d'expérience.</p>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="py-5 bg-primary text-white text-center">
+    <div class="container">
+      <h2 class="mb-4">Discutons ensemble pour faire décoller votre projet</h2>
+      <a href="#" class="btn btn-light">Nous contacter</a> 
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 text-md-start text-center mb-3 mb-md-0">
+          &copy; 2025 Agence Debord. Tous droits réservés.
+        </div>
+        <div class="col-md-6 text-md-end text-center">
+          <a href="#" class="footer-link me-3">Mentions légales</a>
+          <a href="#" class="footer-link">Politique de confidentialité</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> 
+</body>
+</html>

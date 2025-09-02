@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Dashboard Yellow Colis - Administration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-vue@2.23.1/dist/bootstrap-vue.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <style>
+        .sidebar-link:hover {
+            background-color: rgba(255, 212, 59, 0.2);
+        }
+        .sidebar-link.active {
+            background-color: rgba(255, 212, 59, 0.3);
+            border-left: 4px solid #FFD43B;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .progress-bar-yellow {
+            background-color: #FFD43B;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-white border-r border-gray-200">
+                <div class="flex items-center justify-center h-16 px-4 bg-yellow-400">
+                    <div class="flex items-center">
+                        <i class="fas fa-box-open text-2xl text-black mr-2"></i>
+                        <span class="text-xl font-bold text-black">MM Yellow Colis</span>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow px-4 py-4 overflow-y-auto">
+                    <div class="flex items-center px-4 py-3 mb-4 bg-yellow-50 rounded-lg">
+                        <div class="relative w-10 h-10 overflow-hidden bg-yellow-100 rounded-full">
+                            <i class="absolute top-2 left-2 fas fa-user text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Admin</p>
+                            <p class="text-xs font-medium text-gray-500">Administrateur</p>
+                        </div>
+                    </div>
+                    
+                    <nav class="flex-1 space-y-1">
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link active">
+                            <i class="fas fa-tachometer-alt mr-3 text-yellow-600"></i>
+                            Tableau de bord
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-barcode mr-3 text-yellow-600"></i>
+                            Scan des colis
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-map-marked-alt mr-3 text-yellow-600"></i>
+                            Suivi Colis Live
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-tags mr-3 text-yellow-600"></i>
+                            Étiquettes
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-users mr-3 text-yellow-600"></i>
+                            Comptes utilisateurs
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-shipping-fast mr-3 text-yellow-600"></i>
+                            Expéditions
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-chart-line mr-3 text-yellow-600"></i>
+                            Statistiques
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-history mr-3 text-yellow-600"></i>
+                            Historique
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                            <i class="fas fa-cog mr-3 text-yellow-600"></i>
+                            Paramètres
+                        </a>
+                    </nav>
+                </div>
+                <div class="p-4 border-t border-gray-200">
+                    <button class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Déconnexion
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile sidebar -->
+        <div class="md:hidden fixed inset-0 z-40" v-if="mobileSidebarOpen" @click="mobileSidebarOpen = false">
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+        </div>
+        <div class="md:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out" 
+             :class="{'translate-x-0': mobileSidebarOpen, '-translate-x-full': !mobileSidebarOpen}">
+            <!-- Mobile sidebar content -->
+            <div class="flex items-center justify-center h-16 px-4 bg-yellow-400">
+                <div class="flex items-center">
+                    <i class="fas fa-box-open text-2xl text-black mr-2"></i>
+                    <span class="text-xl font-bold text-black">MM Yellow Colis</span>
+                </div>
+            </div>
+            <div class="flex flex-col flex-grow px-4 py-4 overflow-y-auto">
+                <div class="flex items-center px-4 py-3 mb-4 bg-yellow-50 rounded-lg">
+                    <div class="relative w-10 h-10 overflow-hidden bg-yellow-100 rounded-full">
+                        <i class="absolute top-2 left-2 fas fa-user text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Admin</p>
+                        <p class="text-xs font-medium text-gray-500">Administrateur</p>
+                    </div>
+                </div>
+                
+                <nav class="flex-1 space-y-1">
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link active">
+                        <i class="fas fa-tachometer-alt mr-3 text-yellow-600"></i>
+                        Tableau de bord
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-barcode mr-3 text-yellow-600"></i>
+                        Scan des colis
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-map-marked-alt mr-3 text-yellow-600"></i>
+                        Suivi Colis Live
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-tags mr-3 text-yellow-600"></i>
+                        Étiquettes
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-users mr-3 text-yellow-600"></i>
+                        Comptes utilisateurs
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-shipping-fast mr-3 text-yellow-600"></i>
+                        Expéditions
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-chart-line mr-3 text-yellow-600"></i>
+                        Statistiques
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-history mr-3 text-yellow-600"></i>
+                        Historique
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-gray-900 rounded-lg sidebar-link">
+                        <i class="fas fa-cog mr-3 text-yellow-600"></i>
+                        Paramètres
+                    </a>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <button class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Déconnexion
+                </button>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Top navigation -->
+            <div class="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
+                <div class="flex items-center">
+                    <button @click="mobileSidebarOpen = !mobileSidebarOpen" class="md:hidden mr-4 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-lg font-semibold text-gray-900">Tableau de bord</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-500 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500"></span>
+                    </button>
+                    <button class="p-2 text-gray-500 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                    <div class="relative">
+                        <button @click="profileDropdownOpen = !profileDropdownOpen" class="flex items-center text-sm text-gray-700 rounded-full focus:outline-none">
+                            <div class="relative w-8 h-8 overflow-hidden bg-yellow-100 rounded-full">
+                                <i class="absolute top-1 left-1.5 fas fa-user text-yellow-600"></i>
+                            </div>
+                        </button>
+                        <div v-if="profileDropdownOpen" @click.away="profileDropdownOpen = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Votre profil</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Déconnexion</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-auto p-4 bg-gray-100">
+                <!-- Stats cards -->
+                <div class="grid grid-cols-1 gap-5 mt-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 truncate">Colis aujourd'hui</div>
+                                <div class="mt-1 text-3xl font-semibold text-gray-900">124</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                                <i class="fas fa-box-open text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-semibold">+12%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs hier</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 truncate">En transit</div>
+                                <div class="mt-1 text-3xl font-semibold text-gray-900">56</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                                <i class="fas fa-truck text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-yellow-600 text-sm font-semibold">+5%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs hier</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 truncate">Livrés</div>
+                                <div class="mt-1 text-3xl font-semibold text-gray-900">89</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-green-600 text-sm font-semibold">+18%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs hier</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 truncate">Retours</div>
+                                <div class="mt-1 text-3xl font-semibold text-gray-900">7</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                                <i class="fas fa-undo text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-red-600 text-sm font-semibold">-2%</span>
+                            <span class="text-gray-500 text-sm ml-2">vs hier</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and tracking -->
+                <div class="grid grid-cols-1 gap-5 mt-6 lg:grid-cols-3">
+                    <!-- Shipment status chart -->
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-900">Statut des expéditions</h2>
+                            <div class="relative">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md bg-gray-100">
+                                    <option>7 derniers jours</option>
+                                    <option>30 derniers jours</option>
+                                    <option>Ce mois-ci</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <!-- Chart placeholder - would be replaced with actual chart in implementation -->
+                            <div class="flex items-center justify-center h-full bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-bar text-4xl text-yellow-500 mb-2"></i>
+                                    <p class="text-gray-500">Graphique des statuts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Live tracking -->
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-900">Suivi en direct</h2>
+                            <button class="p-1 text-gray-500 rounded-full hover:bg-gray-100">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">Colis #YT78542</p>
+                                    <p class="text-sm text-gray-500">En route vers Paris</p>
+                                    <div class="mt-1 flex items-center text-xs text-gray-500">
+                                        <span>14:25 - 12/06/2023</span>
+                                        <span class="mx-1">•</span>
+                                        <span>5 min ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">Colis #YT78541</p>
+                                    <p class="text-sm text-gray-500">Livré avec succès</p>
+                                    <div class="mt-1 flex items-center text-xs text-gray-500">
+                                        <span>13:48 - 12/06/2023</span>
+                                        <span class="mx-1">•</span>
+                                        <span>42 min ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
+                                        <i class="fas fa-warehouse"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">Colis #YT78540</p>
+                                    <p class="text-sm text-gray-500">En préparation</p>
+                                    <div class="mt-1 flex items-center text-xs text-gray-500">
+                                        <span>11:20 - 12/06/2023</span>
+                                        <span class="mx-1">•</span>
+                                        <span>3h 10m ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">Colis #YT78539</p>
+                                    <p class="text-sm text-gray-500">En route vers Lyon</p>
+                                    <div class="mt-1 flex items-center text-xs text-gray-500">
+                                        <span>09:15 - 12/06/2023</span>
+                                        <span class="mx-1">•</span>
+                                        <span>5h 15m ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <a href="#" class="text-sm font-medium text-yellow-600 hover:text-yellow-700">Voir tout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent shipments and calendar -->
+                <div class="grid grid-cols-1 gap-5 mt-6 lg:grid-cols-3">
+                    <!-- Recent shipments -->
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-900">Expéditions récentes</h2>
+                            <a href="#" class="text-sm font-medium text-yellow-600 hover:text-yellow-700">Voir tout</a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Colis</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">YT78542</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Amazon FR</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Paris, France</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">En transit</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-eye"></i></button>
+                                            <button class="text-yellow-600 hover:text-yellow-900"><i class="fas fa-print"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">YT78541</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Fnac</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Lyon, France</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Livré</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-eye"></i></button>
+                                            <button class="text-yellow-600 hover:text-yellow-900"><i class="fas fa-print"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">YT78540</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Darty</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Marseille, France</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">En préparation</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-eye"></i></button>
+                                            <button class="text-yellow-600 hover:text-yellow-900"><i class="fas fa-print"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">YT78539</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Boulanger</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Lille, France</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">En transit</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-eye"></i></button>
+                                            <button class="text-yellow-600 hover:text-yellow-900"><i class="fas fa-print"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">YT78538</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Cdiscount</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Toulouse, France</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Retour</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-eye"></i></button>
+                                            <button class="text-yellow-600 hover:text-yellow-900"><i class="fas fa-print"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar -->
+                    <div class="p-5 bg-white rounded-lg shadow card-hover transition-all duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-900">Calendrier</h2>
+                            <div class="flex space-x-2">
+                                <button class="p-1 text-gray-500 rounded-full hover:bg-gray-100">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="p-1 text-gray-500 rounded-full hover:bg-gray-100">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="calendar"></div>
+                        <div class="mt-4">
+                            <h3 class="text-sm font-medium text-gray-900 mb-2">Événements à venir</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 text-xs">
+                                            <i class="fas fa-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-gray-900">Livraison importante</p>
+                                        <p class="text-xs text-gray-500">14 juin - 09:00</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">
+                                            <i class="fas fa-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-gray-900">Réunion avec client</p>
+                                        <p class="text-xs text-gray-500">15 juin - 14:30</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-600 text-xs">
+                                            <i class="fas fa-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-gray-900">Maintenance système</p>
+                                        <p class="text-xs text-gray-500">16 juin - 23:00</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <button class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow card-hover transition-all duration-300 hover:bg-yellow-50">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mb-3">
+                            <i class="fas fa-barcode text-xl"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Scanner colis</h3>
+                        <p class="text-xs text-gray-500 text-center">Scanner un colis pour mise à jour du statut</p>
+                    </button>
+                    
+                    <button class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow card-hover transition-all duration-300 hover:bg-yellow-50">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mb-3">
+                            <i class="fas fa-tags text-xl"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Générer étiquette</h3>
+                        <p class="text-xs text-gray-500 text-center">Créer une étiquette pour un nouveau colis</p>
+                    </button>
+                    
+                    <button class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow card-hover transition-all duration-300 hover:bg-yellow-50">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mb-3">
+                            <i class="fas fa-shipping-fast text-xl"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Nouvelle expédition</h3>
+                        <p class="text-xs text-gray-500 text-center">Créer une nouvelle expédition</p>
+                    </button>
+                    
+                    <button class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow card-hover transition-all duration-300 hover:bg-yellow-50">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mb-3 pulse-animation">
+                            <i class="fas fa-user-plus text-xl"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">Ajouter utilisateur</h3>
+                        <p class="text-xs text-gray-500 text-center">Créer un nouveau compte utilisateur</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-vue@2.23.1/dist/bootstrap-vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.27.2/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.min.js"></script>
+    
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    mobileSidebarOpen: false,
+                    profileDropdownOpen: false
+                }
+            },
+            mounted() {
+                // Initialize calendar
+                const calendarEl = document.getElementById('calendar');
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'fr',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: ''
+                    },
+                    height: 'auto',
+                    events: [
+                        {
+                            title: 'Livraison importante',
+                            start: '2023-06-14',
+                            color: '#FFD43B'
+                        },
+                        {
+                            title: 'Réunion client',
+                            start: '2023-06-15',
+                            color: '#3B82F6'
+                        },
+                        {
+                            title: 'Maintenance',
+                            start: '2023-06-16',
+                            color: '#10B981'
+                        }
+                    ]
+                });
+                calendar.render();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

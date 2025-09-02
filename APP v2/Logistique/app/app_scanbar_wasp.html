@@ -1,0 +1,83 @@
+<template>
+  <div class="container mt-4">
+    <h2 class="mb-4">Scanner de code à barres</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="barcode">Code à barres</label>
+          <input
+            type="text"
+            id="barcode"
+            class="form-control"
+            v-model="barcode"
+            @keyup.enter="checkBarcode"
+            ref="barcodeInput"
+            autofocus
+          />
+        </div>
+        <button class="btn btn-primary mt-2" @click="checkBarcode">
+          Vérifier
+        </button>
+      </div>
+    </div>
+    <div class="mt-4">
+      <div v-if="productFound">
+        <h4>Produit trouvé</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Attribut</th>
+              <th>Valeur</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(value, key) in productFound" :key="key">
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-else-if="barcodeChecked">
+        <div class="alert alert-danger">
+          Produit non trouvé.
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+    export default {
+        data() {
+        return {
+        barcode: '',
+        productFound: null,
+        barcodeChecked: false,
+        // Base de données fictive
+        fakeBase: [
+            { code: '123456789012', nom: 'Produit A', prix: 9.99, stock: 10 },
+            { code: '987654321098', nom: 'Produit B', prix: 19.99, stock: 5 }
+        ]
+        }
+        },
+        methods: {
+            checkBarcode() {
+            this.productFound = null;
+            this.barcodeChecked = true;
+            const product = this.fakeBase.find(p => p.code === this.barcode);
+            if (product) {
+                this.productFound = product;
+            }
+            // Réinitialiser le champ après vérification
+            this.barcode = '';
+            // Remettre le focus sur le champ pour le prochain scan
+            this.$refs.barcodeInput.focus();
+            }
+        }
+    }
+</script>
+
+<style>
+/* Bootstrap est inclus via CDN ou installé */
+</style>
