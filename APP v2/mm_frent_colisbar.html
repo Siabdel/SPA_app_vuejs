@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Frent Colibar - Traçabilité Colis</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #e30613;
+            --secondary-color: #000000;
+            --light-color: #ffffff;
+            --gray-color: #f5f5f5;
+            --dark-gray: #333333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gray-color);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--light-color) !important;
+        }
+        
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+        }
+        
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 50px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary-color);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -38px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 3px solid var(--light-color);
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-failed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-transit {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .proof-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .proof-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .action-btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .action-btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .timeline {
+                padding-left: 30px;
+            }
+            
+            .timeline-item::before {
+                left: -28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-box-seam me-2"></i>MM Frent Colibar
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="bi bi-box me-1"></i> Colis</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="bi bi-gear me-1"></i> Paramètres</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="bi bi-power me-1"></i> Déconnexion</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container-fluid mt-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Package Info Card -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Détails du Colis <strong>#{{ package.tracking_number }}</strong></span>
+                            <span class="status-badge" :class="'status-' + package.status">
+                                {{ getStatusText(package.status) }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="text-primary mb-3">Informations du Colis</h5>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th>Numéro de suivi:</th>
+                                                <td>{{ package.tracking_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Poids:</th>
+                                                <td>{{ package.weight }} kg</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Dimensions:</th>
+                                                <td>{{ package.dimensions }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Valeur déclarée:</th>
+                                                <td>{{ package.declared_value }} €</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Contenu:</th>
+                                                <td>{{ package.content_description }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Date d'expédition:</th>
+                                                <td>{{ formatDate(package.shipping_date) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Date estimée:</th>
+                                                <td>{{ formatDate(package.estimated_delivery) }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="text-primary mb-3">Livraison</h5>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th>Transporteur:</th>
+                                                <td>{{ package.carrier }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Service:</th>
+                                                <td>{{ package.shipping_service }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Mode de paiement:</th>
+                                                <td>{{ package.payment_method }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Frais de livraison:</th>
+                                                <td>{{ package.shipping_cost }} €</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client & Recipient Info -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            Informations du Client & Destinataire
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Expéditeur</h6>
+                                    <p>
+                                        <strong>{{ package.sender.name }}</strong><br>
+                                        {{ package.sender.address }}<br>
+                                        {{ package.sender.city }}, {{ package.sender.postal_code }}<br>
+                                        {{ package.sender.country }}<br>
+                                        <i class="bi bi-telephone"></i> {{ package.sender.phone }}<br>
+                                        <i class="bi bi-envelope"></i> {{ package.sender.email }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Destinataire</h6>
+                                    <p>
+                                        <strong>{{ package.recipient.name }}</strong><br>
+                                        {{ package.recipient.address }}<br>
+                                        {{ package.recipient.city }}, {{ package.recipient.postal_code }}<br>
+                                        {{ package.recipient.country }}<br>
+                                        <i class="bi bi-telephone"></i> {{ package.recipient.phone }}<br>
+                                        <i class="bi bi-envelope"></i> {{ package.recipient.email }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Proof -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            Preuves de Livraison
+                        </div>
+                        <div class="card-body">
+                            <div v-if="package.delivery_proofs.length > 0" class="row">
+                                <div class="col-md-4 mb-3" v-for="(proof, index) in package.delivery_proofs" :key="index">
+                                    <img :src="proof.image" class="proof-image" @click="showImageModal(proof.image)">
+                                    <div class="mt-2">
+                                        <small class="text-muted">{{ formatDate(proof.timestamp) }}</small>
+                                        <p class="mb-1"><strong>{{ proof.type }}</strong></p>
+                                        <p v-if="proof.notes" class="small">{{ proof.notes }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="text-center py-4">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Aucune preuve de livraison disponible</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Package History -->
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            Historique du Colis
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item" v-for="(event, index) in package.history" :key="index">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">{{ event.status }}</h6>
+                                        <small class="text-muted">{{ formatDateTime(event.timestamp) }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ event.location }}</p>
+                                    <p class="small text-muted mb-1" v-if="event.user">Par: {{ event.user }}</p>
+                                    <p class="small" v-if="event.notes">{{ event.notes }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Actions -->
+                <div class="col-md-4">
+                    <!-- Quick Actions -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            Actions Rapides
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-primary action-btn" @click="updateStatus('in_transit')">
+                                <i class="bi bi-truck"></i> Prendre en charge
+                            </button>
+                            <button class="btn btn-success action-btn" @click="updateStatus('delivered')">
+                                <i class="bi bi-check-circle"></i> Marquer comme livré
+                            </button>
+                            <button class="btn btn-warning action-btn" @click="updateStatus('delivery_failed')">
+                                <i class="bi bi-exclamation-triangle"></i> Échec de livraison
+                            </button>
+                            <button class="btn btn-danger action-btn" @click="updateStatus('lost')">
+                                <i class="bi bi-exclamation-octagon"></i> Colis perdu
+                            </button>
+                            <button class="btn btn-outline-primary action-btn" @click="showScanModal">
+                                <i class="bi bi-upc-scan"></i> Scanner code-barres
+                            </button>
+                            <button class="btn btn-outline-secondary action-btn" @click="printBarcode">
+                                <i class="bi bi-printer"></i> Imprimer code-barres
+                            </button>
+                            <button class="btn btn-outline-dark action-btn" @click="sendNotification">
+                                <i class="bi bi-bell"></i> Envoyer notification
+                            </button>
+                            <button class="btn btn-outline-danger action-btn" @click="reportIssue">
+                                <i class="bi bi-bug"></i> Signaler anomalie
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            Documents
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-outline-primary action-btn">
+                                <i class="bi bi-file-earmark-text"></i> Étiquette colis
+                            </button>
+                            <button class="btn btn-outline-primary action-btn">
+                                <i class="bi bi-receipt"></i> Bordereau de livraison
+                            </button>
+                            <button class="btn btn-outline-primary action-btn">
+                                <i class="bi bi-file-pdf"></i> Facture
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Status Update -->
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            Mettre à jour le statut
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Nouveau statut</label>
+                                <select class="form-select" v-model="newStatus">
+                                    <option value="registered">Enregistré</option>
+                                    <option value="in_transit">En transit</option>
+                                    <option value="out_for_delivery">En livraison</option>
+                                    <option value="delivered">Livré</option>
+                                    <option value="delivery_failed">Échec de livraison</option>
+                                    <option value="returned">Retourné</option>
+                                    <option value="lost">Perdu</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Localisation</label>
+                                <input type="text" class="form-control" v-model="statusLocation" placeholder="Entrez la localisation">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" v-model="statusNotes" rows="3"></textarea>
+                            </div>
+                            <button class="btn btn-primary w-100" @click="addStatusUpdate">
+                                <i class="bi bi-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Modal -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Preuve de livraison</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img :src="modalImage" class="img-fluid" style="max-height: 70vh;">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scan Modal -->
+        <div class="modal fade" id="scanModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Scanner code-barres</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="scanner-container" style="width: 100%; height: 300px; background-color: #eee; margin-bottom: 20px;"></div>
+                        <p class="text-muted">Placez le code-barres dans le cadre pour le scanner</p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Ou saisissez manuellement" v-model="manualBarcode">
+                            <button class="btn btn-primary" type="button" @click="processManualBarcode">
+                                <i class="bi bi-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    package: {
+                        tracking_number: "MMFR123456789",
+                        status: "in_transit",
+                        weight: 2.5,
+                        dimensions: "30x20x15 cm",
+                        declared_value: 89.99,
+                        content_description: "Vêtements et accessoires",
+                        shipping_date: "2023-05-15T08:30:00",
+                        estimated_delivery: "2023-05-20T00:00:00",
+                        carrier: "MM Fret Express",
+                        shipping_service: "Livraison standard",
+                        payment_method: "Paiement à la livraison",
+                        shipping_cost: 7.99,
+                        sender: {
+                            name: "Boutique Fashion",
+                            address: "123 Rue de la Mode",
+                            city: "Paris",
+                            postal_code: "75001",
+                            country: "France",
+                            phone: "+33 1 23 45 67 89",
+                            email: "contact@boutique-fashion.fr"
+                        },
+                        recipient: {
+                            name: "Jean Dupont",
+                            address: "45 Avenue des Champs",
+                            city: "Lyon",
+                            postal_code: "69002",
+                            country: "France",
+                            phone: "+33 6 12 34 56 78",
+                            email: "jean.dupont@email.com"
+                        },
+                        delivery_proofs: [
+                            {
+                                type: "Signature",
+                                image: "https://via.placeholder.com/600x400?text=Signature",
+                                timestamp: "2023-05-19T16:45:00",
+                                notes: "Signature du destinataire"
+                            },
+                            {
+                                type: "Photo",
+                                image: "https://via.placeholder.com/600x400?text=Photo+Preuve",
+                                timestamp: "2023-05-19T16:45:30",
+                                notes: "Photo du colis devant la porte"
+                            }
+                        ],
+                        history: [
+                            {
+                                status: "Enregistré",
+                                location: "Entrepôt Paris Nord",
+                                timestamp: "2023-05-15T08:30:00",
+                                user: "Pierre Martin",
+                                notes: "Colis enregistré dans le système"
+                            },
+                            {
+                                status: "En transit",
+                                location: "Centre de tri Paris",
+                                timestamp: "2023-05-15T14:15:00",
+                                user: "Système automatique",
+                                notes: "Scanné pour le tri"
+                            },
+                            {
+                                status: "En transit",
+                                location: "Centre de tri Lyon",
+                                timestamp: "2023-05-17T09:30:00",
+                                user: "Système automatique",
+                                notes: "Arrivé au centre de tri régional"
+                            },
+                            {
+                                status: "En livraison",
+                                location: "Lyon 2ème",
+                                timestamp: "2023-05-19T08:00:00",
+                                user: "Thomas Leroy",
+                                notes: "Chargé dans le véhicule de livraison"
+                            },
+                            {
+                                status: "Livré",
+                                location: "45 Avenue des Champs, Lyon",
+                                timestamp: "2023-05-19T16:45:00",
+                                user: "Thomas Leroy",
+                                notes: "Remis au destinataire"
+                            }
+                        ]
+                    },
+                    newStatus: "in_transit",
+                    statusLocation: "",
+                    statusNotes: "",
+                    modalImage: "",
+                    manualBarcode: "",
+                    daysInTransit: 0
+                }
+            },
+            created() {
+                this.calculateDaysInTransit();
+            },
+            methods: {
+                getStatusText(status) {
+                    const statusMap = {
+                        'registered': 'Enregistré',
+                        'in_transit': 'En transit',
+                        'out_for_delivery': 'En livraison',
+                        'delivered': 'Livré',
+                        'delivery_failed': 'Échec de livraison',
+                        'returned': 'Retourné',
+                        'lost': 'Perdu'
+                    };
+                    return statusMap[status] || status;
+                },
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('fr-FR');
+                },
+                formatDateTime(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleString('fr-FR');
+                },
+                calculateDaysInTransit() {
+                    if (!this.package.shipping_date) return 0;
+                    const shippingDate = new Date(this.package.shipping_date);
+                    const today = new Date();
+                    const diffTime = today - shippingDate;
+                    this.daysInTransit = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                },
+                showImageModal(imageUrl) {
+                    this.modalImage = imageUrl;
+                    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+                    modal.show();
+                },
+                showScanModal() {
+                    const modal = new bootstrap.Modal(document.getElementById('scanModal'));
+                    modal.show();
+                    // In a real app, you would initialize the barcode scanner here
+                },
+                processManualBarcode() {
+                    if (this.manualBarcode) {
+                        alert(`Code-barres saisi: ${this.manualBarcode}`);
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('scanModal'));
+                        modal.hide();
+                    }
+                },
+                updateStatus(newStatus) {
+                    this.newStatus = newStatus;
+                    this.statusLocation = "";
+                    this.statusNotes = "";
+                    // In a real app, you would show a confirmation dialog here
+                },
+                addStatusUpdate() {
+                    if (!this.statusLocation) {
+                        alert("Veuillez entrer une localisation");
+                        return;
+                    }
+                    
+                    const newEvent = {
+                        status: this.getStatusText(this.newStatus),
+                        location: this.statusLocation,
+                        timestamp: new Date().toISOString(),
+                        user: "Vous",
+                        notes: this.statusNotes
+                    };
+                    
+                    this.package.history.push(newEvent);
+                    this.package.status = this.newStatus;
+                    
+                    // In a real app, you would send this to your API
+                    console.log("Status updated:", newEvent);
+                    
+                    // Reset form
+                    this.statusLocation = "";
+                    this.statusNotes = "";
+                    
+                    alert("Statut mis à jour avec succès");
+                },
+                printBarcode() {
+                    // In a real app, this would trigger the print dialog for the barcode
+                    alert("Impression du code-barres #" + this.package.tracking_number);
+                },
+                sendNotification() {
+                    // In a real app, this would send a notification to the recipient
+                    alert("Notification envoyée au destinataire");
+                },
+                reportIssue() {
+                    // In a real app, this would open an issue reporting form
+                    alert("Signalement d'anomalie pour le colis #" + this.package.tracking_number);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+
+<!-- 
+This responsive Vue.js dashboard includes:
+
+1. A clean red, white, and black theme
+2. Comprehensive package tracking information
+3. Client and recipient details
+4. Delivery proof section with image modal
+5. Package history timeline
+6. Quick action buttons for common operations
+7. Status update form
+8. Document access section
+9. Barcode scanning functionality (simulated)
+10. Responsive design that works on mobile devices
+
+The dashboard connects to a simulated API (in a real implementation, you would replace the static data with Axios calls to your Django REST Framework backend). The interface includes all requested features like package details, delivery proofs, history timeline, and quick action buttons.
+
+The design is fully responsive and includes animations and transitions for a smooth user experience. The color scheme follows the requested red, white, and black theme with appropriate contrast for readability.
+-->

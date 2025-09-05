@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiConnect | Digitalisation des processus logistiques pour PME</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .nav-scrolled {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .process-step::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            left: -40px;
+            top: 5px;
+        }
+        .process-connector {
+            position: absolute;
+            left: -30px;
+            top: 25px;
+            bottom: -25px;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="fixed w-full z-50 transition-all duration-300" :class="{'nav-scrolled': isScrolled}">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <a href="#" class="text-2xl font-bold text-blue-600 flex items-center">
+                            <i class="fas fa-boxes mr-2"></i>
+                            <span>Logi<span class="text-blue-800">Connect</span></span>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#solutions" class="text-gray-700 hover:text-blue-600 font-medium">Solutions</a>
+                        <a href="#avantages" class="text-gray-700 hover:text-blue-600 font-medium">Avantages</a>
+                        <a href="#processus" class="text-gray-700 hover:text-blue-600 font-medium">Processus</a>
+                        <a href="#temoignages" class="text-gray-700 hover:text-blue-600 font-medium">Témoignages</a>
+                        <a href="#contact" class="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
+                    </div>
+                    <div class="md:hidden">
+                        <button @click="toggleMenu" class="text-gray-700 focus:outline-none">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile menu -->
+            <div v-if="mobileMenuOpen" class="md:hidden bg-white py-4 px-4 shadow-lg">
+                <a href="#solutions" class="block py-2 text-gray-700 hover:text-blue-600" @click="toggleMenu">Solutions</a>
+                <a href="#avantages" class="block py-2 text-gray-700 hover:text-blue-600" @click="toggleMenu">Avantages</a>
+                <a href="#processus" class="block py-2 text-gray-700 hover:text-blue-600" @click="toggleMenu">Processus</a>
+                <a href="#temoignages" class="block py-2 text-gray-700 hover:text-blue-600" @click="toggleMenu">Témoignages</a>
+                <a href="#contact" class="block py-2 text-gray-700 hover:text-blue-600" @click="toggleMenu">Contact</a>
+                <a href="#contact" class="block mt-4 py-2 px-4 bg-blue-600 text-white rounded-lg text-center font-medium hover:bg-blue-700 transition">Demander un devis</a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-gradient text-white pt-32 pb-20">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-10 md:mb-0">
+                        <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Optimisez votre logistique avec nos solutions digitales</h1>
+                        <p class="text-xl mb-8 text-blue-100">Découvrez comment digitaliser vos processus logistiques pour gagner en efficacité et réduire vos coûts.</p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="#contact" class="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg text-center transition">Demander un audit gratuit</a>
+                            <a href="#solutions" class="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-bold py-3 px-6 rounded-lg text-center transition">Découvrir nos solutions</a>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Logistique digitale" class="rounded-xl shadow-2xl">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients Logo -->
+        <section class="py-12 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <h3 class="text-center text-gray-500 mb-10">Ils nous font confiance</h3>
+                <div class="flex flex-wrap justify-center items-center gap-10 md:gap-16 opacity-70">
+                    <img src="https://via.placeholder.com/120x60?text=Client+1" alt="Client 1" class="h-8 md:h-10">
+                    <img src="https://via.placeholder.com/120x60?text=Client+2" alt="Client 2" class="h-8 md:h-10">
+                    <img src="https://via.placeholder.com/120x60?text=Client+3" alt="Client 3" class="h-8 md:h-10">
+                    <img src="https://via.placeholder.com/120x60?text=Client+4" alt="Client 4" class="h-8 md:h-10">
+                    <img src="https://via.placeholder.com/120x60?text=Client+5" alt="Client 5" class="h-8 md:h-10">
+                </div>
+            </div>
+        </section>
+
+        <!-- Solutions Section -->
+        <section id="solutions" class="py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <span class="text-blue-600 font-bold uppercase tracking-wider">Solutions</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Nos solutions pour votre supply chain</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Nous proposons des outils sur mesure pour digitaliser et optimiser chaque étape de votre chaîne logistique.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="feature-card bg-white p-8 rounded-xl shadow-md transition duration-300">
+                        <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                            <i class="fas fa-warehouse text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Gestion d'entrepôt</h3>
+                        <p class="text-gray-600 mb-4">Système de gestion d'entrepôt (WMS) pour optimiser vos stocks et réduire les erreurs de préparation.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <div class="feature-card bg-white p-8 rounded-xl shadow-md transition duration-300">
+                        <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                            <i class="fas fa-truck text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Transport & Livraison</h3>
+                        <p class="text-gray-600 mb-4">Optimisation des tournées de livraison et suivi en temps réel pour améliorer votre service client.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <div class="feature-card bg-white p-8 rounded-xl shadow-md transition duration-300">
+                        <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                            <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Analytics & Reporting</h3>
+                        <p class="text-gray-600 mb-4">Tableaux de bord personnalisés pour piloter votre performance logistique avec des indicateurs clés.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <div class="feature-card bg-white p-8 rounded-xl shadow-md transition duration-300">
+                        <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                            <i class="fas fa-robot text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Automatisation</h3>
+                        <p class="text-gray-600 mb-4">Intégration de robots et automates pour accélérer vos processus et réduire les coûts.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <div class="feature-card bg-white p-8 rounded-xl shadow-md transition duration-300">
+                        <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                            <i class="fas fa-exchange-alt text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">EDI & API</h3>
+                        <p class="text-gray-600 mb-4">Interfaces pour connecter vos systèmes avec ceux de vos partenaires et clients.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                    
+                    <div class="feature-card bg-white p-8 rounded-xl shadow-md transition duration-300">
+                        <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                            <i class="fas fa-mobile-alt text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Applications mobiles</h3>
+                        <p class="text-gray-600 mb-4">Solutions mobiles pour vos équipes en entrepôt, transporteurs et livreurs.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="fas fa-arrow-right ml-2"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Avantages Section -->
+        <section id="avantages" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <span class="text-blue-600 font-bold uppercase tracking-wider">Avantages</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Les bénéfices pour votre PME</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Découvrez comment la digitalisation peut transformer votre logistique et booster votre compétitivité.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="text-blue-600 text-4xl mb-4">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Réduction des coûts</h3>
+                        <p class="text-gray-600">Jusqu'à 30% de réduction sur vos coûts logistiques grâce à l'optimisation des processus et la réduction des erreurs.</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="text-blue-600 text-4xl mb-4">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Gain de productivité</h3>
+                        <p class="text-gray-600">Augmentation de 40% de la productivité de vos équipes avec des outils adaptés et des processus fluidifiés.</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="text-blue-600 text-4xl mb-4">
+                            <i class="fas fa-smile"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Satisfaction client</h3>
+                        <p class="text-gray-600">Amélioration notable de la satisfaction client grâce à des livraisons plus rapides et un suivi en temps réel.</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="text-blue-600 text-4xl mb-4">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Data-driven</h3>
+                        <p class="text-gray-600">Pilotage de votre logistique basé sur des données précises et des indicateurs pertinents.</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="text-blue-600 text-4xl mb-4">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Sécurité</h3>
+                        <p class="text-gray-600">Protection de vos données et conformité avec les réglementations en vigueur.</p>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="text-blue-600 text-4xl mb-4">
+                            <i class="fas fa-expand"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Scalabilité</h3>
+                        <p class="text-gray-600">Solutions évolutives qui s'adaptent à la croissance de votre entreprise.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Processus Section -->
+        <section id="processus" class="py-20">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <span class="text-blue-600 font-bold uppercase tracking-wider">Notre méthode</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Comment digitaliser votre logistique ?</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Un accompagnement sur mesure en 4 étapes clés pour une transformation digitale réussie.</p>
+                </div>
+                
+                <div class="max-w-3xl mx-auto relative">
+                    <div class="relative pl-16 mb-12">
+                        <div class="process-connector"></div>
+                        <div class="process-step relative">
+                            <h3 class="text-xl font-bold mb-2">1. Audit & Diagnostic</h3>
+                            <p class="text-gray-600">Analyse approfondie de vos processus actuels et identification des axes d'amélioration.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative pl-16 mb-12">
+                        <div class="process-connector"></div>
+                        <div class="process-step relative">
+                            <h3 class="text-xl font-bold mb-2">2. Solution sur mesure</h3>
+                            <p class="text-gray-600">Conception d'une solution adaptée à vos besoins spécifiques et à votre budget.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative pl-16 mb-12">
+                        <div class="process-connector"></div>
+                        <div class="process-step relative">
+                            <h3 class="text-xl font-bold mb-2">3. Déploiement & Formation</h3>
+                            <p class="text-gray-600">Mise en œuvre progressive des outils et formation complète de vos équipes.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative pl-16">
+                        <div class="process-step relative">
+                            <h3 class="text-xl font-bold mb-2">4. Suivi & Amélioration</h3>
+                            <p class="text-gray-600">Accompagnement continu et ajustements pour maximiser les bénéfices de la digitalisation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Témoignages Section -->
+        <section id="temoignages" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <span class="text-blue-600 font-bold uppercase tracking-wider">Ils témoignent</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Nos clients parlent de nous</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Découvrez ce que nos clients disent de notre accompagnement.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="text-yellow-400 mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm">5/5</span>
+                        </div>
+                        <p class="text-gray-700 mb-6 italic">"La digitalisation de notre entrepôt avec LogiConnect a révolutionné notre productivité. Les erreurs de préparation ont chuté de 90% et nos clients sont ravis."</p>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Pierre Martin</h4>
+                                <p class="text-gray-500 text-sm">Directeur Logistique, DistriPlus</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="text-yellow-400 mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm">5/5</span>
+                        </div>
+                        <p class="text-gray-700 mb-6 italic">"L'accompagnement de LogiConnect a été clé dans notre transformation digitale. Leur solution de tracking des livraisons a boosté notre image de marque."</p>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Sophie Lambert</h4>
+                                <p class="text-gray-500 text-sm">Directrice Générale, BioNature</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="text-yellow-400 mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm">4.5/5</span>
+                        </div>
+                        <p class="text-gray-700 mb-6 italic">"Nous avons réduit nos coûts logistiques de 25% grâce aux solutions de LogiConnect. Leur réactivité et expertise font toute la différence."</p>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Client" class="w-12 h-12 rounded-full mr-4">
+                            <div>
+                                <h4 class="font-bold">Thomas Dubois</h4>
+                                <p class="text-gray-500 text-sm">Responsable Supply Chain, TechParts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-16 bg-blue-600 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">Prêt à digitaliser votre logistique ?</h2>
+                <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Prenez rendez-vous pour un audit gratuit de vos processus logistiques.</p>
+                <a href="#contact" class="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg inline-block transition">Demander un audit</a>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20">
+            <div class="container mx-auto px-4">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <span class="text-blue-600 font-bold uppercase tracking-wider">Contact</span>
+                        <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-6">Parlons de votre projet</h2>
+                        <p class="text-gray-600 mb-8">Remplissez ce formulaire et nous vous recontacterons sous 24h pour échanger sur vos besoins en digitalisation logistique.</p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="text-blue-600 mt-1 mr-4">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Téléphone</h4>
+                                    <p class="text-gray-600">01 23 45 67 89</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="text-blue-600 mt-1 mr-4">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Email</h4>
+                                    <p class="text-gray-600">contact@logiconnect.fr</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="text-blue-600 mt-1 mr-4">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Adresse</h4>
+                                    <p class="text-gray-600">15 Rue de la Logistique, 75010 Paris</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-xl shadow-md">
+                        <form @submit.prevent="submitForm" class="space-y-6">
+                            <div>
+                                <label for="name" class="block text-gray-700 font-medium mb-2">Votre nom *</label>
+                                <input type="text" id="name" v-model="form.name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label for="company" class="block text-gray-700 font-medium mb-2">Votre entreprise *</label>
+                                <input type="text" id="company" v-model="form.company" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-gray-700 font-medium mb-2">Votre email *</label>
+                                <input type="email" id="email" v-model="form.email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label for="phone" class="block text-gray-700 font-medium mb-2">Votre téléphone</label>
+                                <input type="tel" id="phone" v-model="form.phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label for="message" class="block text-gray-700 font-medium mb-2">Votre message *</label>
+                                <textarea id="message" v-model="form.message" rows="4" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                                <span v-if="!form.submitting">Envoyer le message</span>
+                                <span v-else class="flex items-center justify-center">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Envoi en cours...
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div>
+                        <a href="#" class="text-2xl font-bold text-white flex items-center mb-6">
+                            <i class="fas fa-boxes mr-2"></i>
+                            <span>Logi<span class="text-blue-400">Connect</span></span>
+                        </a>
+                        <p class="text-gray-400 mb-4">Experts en digitalisation des processus logistiques pour les PME.</p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-bold mb-6">Solutions</h4>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Gestion d'entrepôt</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Transport & Livraison</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Analytics & Reporting</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Automatisation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-bold mb-6">Ressources</h4>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Guides pratiques</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Témoignages</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-bold mb-6">Légal</h4>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Mentions légales</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Politique de confidentialité</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">CGV</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">CGU</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 mb-4 md:mb-0">© 2023 LogiConnect. Tous droits réservés.</p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">Plan du site</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Accessibilité</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+        
+        createApp({
+            setup() {
+                const isScrolled = ref(false);
+                const mobileMenuOpen = ref(false);
+                const form = ref({
+                    name: '',
+                    company: '',
+                    email: '',
+                    phone: '',
+                    message: '',
+                    submitting: false
+                });
+                
+                const handleScroll = () => {
+                    isScrolled.value = window.scrollY > 50;
+                };
+                
+                const toggleMenu = () => {
+                    mobileMenuOpen.value = !mobileMenuOpen.value;
+                };
+                
+                const submitForm = () => {
+                    form.value.submitting = true;
+                    // Simulate form submission
+                    setTimeout(() => {
+                        alert('Merci pour votre message ! Nous vous recontacterons rapidement.');
+                        form.value = {
+                            name: '',
+                            company: '',
+                            email: '',
+                            phone: '',
+                            message: '',
+                            submitting: false
+                        };
+                    }, 1500);
+                };
+                
+                // Initialize scroll event listener
+                window.addEventListener('scroll', handleScroll);
+                
+                return {
+                    isScrolled,
+                    mobileMenuOpen,
+                    form,
+                    toggleMenu,
+                    submitForm
+                };
+            }
+        }).mount('#app');
+
+        // Smooth scrolling for anchor links
+        $(document).ready(function(){
+            $('a[href^="#"]').on('click', function(e) {
+                e.preventDefault();
+                
+                var target = this.hash;
+                var $target = $(target);
+                
+                $('html, body').stop().animate({
+                    'scrollTop': $target.offset().top - 80
+                }, 900, 'swing');
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

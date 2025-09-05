@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Frent Colibar Scan - Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            width: 16rem;
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none !important;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none !important;
+        }
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .status-in-transit {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+        .status-delivered {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-failed {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: rgba(254, 215, 189, 0.5) !important;
+            color: #fd7e14 !important;
+        }
+        .badge-status {
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 500;
+            border-radius: 0.25rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 1000;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+        .stat-card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+        }
+        .table-responsive {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #fd7e14;
+            border-color: #fd7e14;
+            color: white;
+        }
+        .pagination .page-link {
+            color: #6c757d;
+        }
+        .pagination .page-link:hover {
+            color: #fd7e14;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white border-end d-flex flex-column">
+            <!-- Logo -->
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="bg-orange rounded d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                        <i class="fas fa-box-open text-white"></i>
+                    </div>
+                    <span class="logo-text fw-bold fs-5 text-dark">Colibar Scan</span>
+                </div>
+                <button id="toggleSidebar" class="btn btn-sm text-secondary">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-grow-1 overflow-auto py-3">
+                <div class="px-3">
+                    <a href="#" class="nav-link active mb-2 rounded">
+                        <i class="fas fa-tachometer-alt text-orange me-3"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-link text-dark mb-2 rounded">
+                        <i class="fas fa-boxes text-primary me-3"></i>
+                        <span class="sidebar-text">Colis</span>
+                    </a>
+                    <a href="#" class="nav-link text-dark mb-2 rounded">
+                        <i class="fas fa-truck text-primary me-3"></i>
+                        <span class="sidebar-text">Transporteurs</span>
+                    </a>
+                    <a href="#" class="nav-link text-dark mb-2 rounded">
+                        <i class="fas fa-users text-primary me-3"></i>
+                        <span class="sidebar-text">Clients</span>
+                    </a>
+                    <a href="#" class="nav-link text-dark mb-2 rounded">
+                        <i class="fas fa-map-marker-alt text-primary me-3"></i>
+                        <span class="sidebar-text">Points Relais</span>
+                    </a>
+                    <a href="#" class="nav-link text-dark mb-2 rounded">
+                        <i class="fas fa-chart-line text-primary me-3"></i>
+                        <span class="sidebar-text">Rapports</span>
+                    </a>
+                </div>
+                
+                <div class="mt-4 px-3">
+                    <h6 class="px-2 text-uppercase text-secondary sidebar-text">
+                        Filtres rapides
+                    </h6>
+                    <div class="mt-2">
+                        <a href="#" class="nav-link text-dark mb-1 rounded">
+                            <i class="fas fa-clock text-primary me-3"></i>
+                            <span class="sidebar-text">En cours</span>
+                        </a>
+                        <a href="#" class="nav-link text-dark mb-1 rounded">
+                            <i class="fas fa-calendar-day text-primary me-3"></i>
+                            <span class="sidebar-text">À livrer aujourd'hui</span>
+                        </a>
+                        <a href="#" class="nav-link text-dark mb-1 rounded">
+                            <i class="fas fa-exclamation-circle text-primary me-3"></i>
+                            <span class="sidebar-text">Échoués</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- User profile -->
+            <div class="p-3 border-top">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <img class="rounded-circle" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" width="32" height="32" alt="">
+                    </div>
+                    <div class="flex-grow-1 ms-3 sidebar-text">
+                        <p class="mb-0 small fw-medium text-dark">John Doe</p>
+                        <p class="mb-0 small text-muted">Administrateur</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="main-content flex-grow-1 overflow-auto" style="margin-left: 16rem;">
+            <!-- Mobile header -->
+            <div class="d-md-none bg-white shadow-sm">
+                <div class="d-flex align-items-center justify-content-between px-3 py-2">
+                    <button id="mobileMenuButton" class="btn text-secondary">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="fw-semibold text-dark">Dashboard</div>
+                    <div style="width: 32px;"></div> <!-- Spacer -->
+                </div>
+            </div>
+            
+            <!-- Content header -->
+            <div class="bg-white shadow-sm">
+                <div class="container-fluid px-4 py-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div class="flex-grow-1 mb-3 mb-md-0">
+                            <h1 class="h4 fw-semibold mb-1 text-dark">
+                                Gestion des colis
+                            </h1>
+                            <p class="mb-0 text-muted small">
+                                Suivi et gestion de tous vos colis en temps réel
+                            </p>
+                        </div>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-file-export me-2"></i>
+                                Exporter
+                            </button>
+                            <button type="button" class="btn btn-orange text-white">
+                                <i class="fas fa-plus me-2"></i>
+                                Nouveau colis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search and filters -->
+            <div class="bg-white border-bottom py-3">
+                <div class="container-fluid">
+                    <div class="row g-3">
+                        <!-- Search -->
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" id="search" class="form-control border-start-0" placeholder="Rechercher un colis...">
+                            </div>
+                        </div>
+                        
+                        <!-- Status filter -->
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <select id="status-filter" class="form-select">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending">En attente</option>
+                                <option value="in-transit">En transit</option>
+                                <option value="delivered">Livré</option>
+                                <option value="failed">Échoué</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date filter -->
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <select id="date-filter" class="form-select">
+                                <option value="">Toutes les dates</option>
+                                <option value="today">Aujourd'hui</option>
+                                <option value="week">Cette semaine</option>
+                                <option value="month">Ce mois</option>
+                                <option value="custom">Personnalisé</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Carrier filter -->
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <select id="carrier-filter" class="form-select">
+                                <option value="">Tous transporteurs</option>
+                                <option value="chronopost">Chronopost</option>
+                                <option value="ups">UPS</option>
+                                <option value="dhl">DHL</option>
+                                <option value="fedex">FedEx</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="container-fluid py-4">
+                <div class="row g-3">
+                    <!-- Total packages -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="stat-card bg-white p-3 rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-orange me-3">
+                                    <i class="fas fa-box text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small text-muted">Total colis</div>
+                                    <div class="fw-semibold fs-5">1,248</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- In transit -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="stat-card bg-white p-3 rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-primary me-3">
+                                    <i class="fas fa-truck text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small text-muted">En transit</div>
+                                    <div class="fw-semibold fs-5">324</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivered -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="stat-card bg-white p-3 rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-success me-3">
+                                    <i class="fas fa-check-circle text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small text-muted">Livrés</div>
+                                    <div class="fw-semibold fs-5">876</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Failed -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="stat-card bg-white p-3 rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-danger me-3">
+                                    <i class="fas fa-exclamation-triangle text-white"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small text-muted">Échoués</div>
+                                    <div class="fw-semibold fs-5">48</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Packages table -->
+            <div class="container-fluid pb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-4">Référence</th>
+                                <th scope="col">Destinataire</th>
+                                <th scope="col">Statut</th>
+                                <th scope="col">Poids</th>
+                                <th scope="col">Transporteur</th>
+                                <th scope="col">Dernière mise à jour</th>
+                                <th scope="col" class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Package 1 -->
+                            <tr>
+                                <td class="ps-4 fw-medium">COL-2023-001</td>
+                                <td>Jean Dupont</td>
+                                <td>
+                                    <span class="badge-status status-delivered">Livré</span>
+                                </td>
+                                <td>2.5 kg</td>
+                                <td>Chronopost</td>
+                                <td>15/06/2023 10:30</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm text-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-secondary">
+                                            <i class="fas fa-tag"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Package 2 -->
+                            <tr>
+                                <td class="ps-4 fw-medium">COL-2023-002</td>
+                                <td>Marie Martin</td>
+                                <td>
+                                    <span class="badge-status status-in-transit">En transit</span>
+                                </td>
+                                <td>1.2 kg</td>
+                                <td>DHL</td>
+                                <td>16/06/2023 14:15</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm text-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-secondary">
+                                            <i class="fas fa-tag"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Package 3 -->
+                            <tr>
+                                <td class="ps-4 fw-medium">COL-2023-003</td>
+                                <td>Pierre Durand</td>
+                                <td>
+                                    <span class="badge-status status-pending">En attente</span>
+                                </td>
+                                <td>3.7 kg</td>
+                                <td>UPS</td>
+                                <td>16/06/2023 09:45</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm text-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-secondary">
+                                            <i class="fas fa-tag"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Package 4 -->
+                            <tr>
+                                <td class="ps-4 fw-medium">COL-2023-004</td>
+                                <td>Sophie Lambert</td>
+                                <td>
+                                    <span class="badge-status status-failed">Échoué</span>
+                                </td>
+                                <td>0.8 kg</td>
+                                <td>FedEx</td>
+                                <td>15/06/2023 16:20</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm text-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-secondary">
+                                            <i class="fas fa-tag"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Package 5 -->
+                            <tr>
+                                <td class="ps-4 fw-medium">COL-2023-005</td>
+                                <td>Thomas Leroy</td>
+                                <td>
+                                    <span class="badge-status status-in-transit">En transit</span>
+                                </td>
+                                <td>5.2 kg</td>
+                                <td>Chronopost</td>
+                                <td>16/06/2023 11:10</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm text-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm text-secondary">
+                                            <i class="fas fa-tag"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                        <div class="d-none d-md-block">
+                            <p class="mb-0 small text-muted">
+                                Affichage de <span class="fw-medium">1</span> à <span class="fw-medium">5</span> sur <span class="fw-medium">1248</span> résultats
+                            </p>
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                                <li class="page-item"><a class="page-link" href="#">25</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Next">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Toggle sidebar on desktop
+            $('#toggleSidebar').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                if ($('.sidebar').hasClass('collapsed')) {
+                    $('.main-content').css('margin-left', '70px');
+                } else {
+                    $('.main-content').css('margin-left', '16rem');
+                }
+            });
+            
+            // Toggle mobile menu
+            $('#mobileMenuButton').click(function() {
+                $('.sidebar').toggleClass('show');
+            });
+            
+            // Filter functionality
+            $('#search, #status-filter, #date-filter, #carrier-filter').on('change keyup', function() {
+                // In a real app, this would make an API call to filter the data
+                console.log('Filtering packages...');
+            });
+            
+            // Responsive adjustments
+            function handleResize() {
+                if ($(window).width() < 768) {
+                    $('.sidebar').removeClass('collapsed');
+                    $('.main-content').css('margin-left', '0');
+                } else {
+                    $('.sidebar').removeClass('show');
+                }
+            }
+            
+            // Run on load and resize
+            handleResize();
+            $(window).resize(handleResize);
+        });
+    </script>
+</body>
+</html>
