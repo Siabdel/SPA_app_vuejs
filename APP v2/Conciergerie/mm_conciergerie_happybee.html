@@ -1,0 +1,1071 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Conciergerie HappyBee</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E53935',
+                        secondary: '#1565C0',
+                        accent: '#FFC107',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/vue3@5.11.2/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-link i {
+            margin-right: 0.5rem;
+        }
+        .card {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+        }
+        .btn-primary {
+            background-color: #E53935;
+            border-color: #E53935;
+        }
+        .btn-primary:hover {
+            background-color: #C62828;
+            border-color: #C62828;
+        }
+        .btn-secondary {
+            background-color: #1565C0;
+            border-color: #1565C0;
+        }
+        .badge-primary {
+            background-color: #E53935;
+        }
+        .badge-secondary {
+            background-color: #1565C0;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .fc-event-primary {
+            background-color: #E53935;
+            border-color: #E53935;
+        }
+        .fc-event-secondary {
+            background-color: #1565C0;
+            border-color: #1565C0;
+        }
+        .fc-event-accent {
+            background-color: #FFC107;
+            border-color: #FFC107;
+            color: #212529;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 col-lg-2 d-md-block sidebar collapse bg-primary">
+                    <div class="position-sticky pt-3">
+                        <div class="text-center mb-4">
+                            <img src="http://static.photos/white/200x200/1" alt="Logo" class="rounded-circle mb-2" width="80">
+                            <h4 class="text-white">MM Conciergerie</h4>
+                            <h5 class="text-white-50">HappyBee</h5>
+                        </div>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: currentView === 'dashboard'}" href="#" @click="changeView('dashboard')">
+                                    <i data-feather="home"></i> Tableau de bord
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: currentView === 'today'}" href="#" @click="changeView('today')">
+                                    <i data-feather="calendar"></i> Réservations du jour
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: currentView === 'week'}" href="#" @click="changeView('week')">
+                                    <i data-feather="list"></i> Réservations semaine
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: currentView === 'calendar'}" href="#" @click="changeView('calendar')">
+                                    <i data-feather="calendar"></i> Calendrier
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: currentView === 'add'}" href="#" @click="changeView('add')">
+                                    <i data-feather="plus-circle"></i> Ajouter réservation
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: currentView === 'services'}" href="#" @click="changeView('services')">
+                                    <i data-feather="tool"></i> Services
+                                </a>
+                            </li>
+                            <li class="nav-item mt-4">
+                                <a class="nav-link" href="#" @click="logout">
+                                    <i data-feather="log-out"></i> Déconnexion
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                    <!-- Dashboard View -->
+                    <div v-if="currentView === 'dashboard'" class="dashboard-view">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Tableau de bord</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <div class="btn-group me-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">Aujourd'hui</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">Semaine</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">Mois</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card text-white bg-primary mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="card-title">Réservations aujourd'hui</h5>
+                                                <h2 class="mb-0">{{ todayReservations.length }}</h2>
+                                            </div>
+                                            <i data-feather="calendar" width="48" height="48"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-white bg-secondary mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="card-title">Services en cours</h5>
+                                                <h2 class="mb-0">{{ ongoingServices.length }}</h2>
+                                            </div>
+                                            <i data-feather="tool" width="48" height="48"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-dark bg-accent mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="card-title">À valider</h5>
+                                                <h2 class="mb-0">{{ pendingReservations.length }}</h2>
+                                            </div>
+                                            <i data-feather="alert-circle" width="48" height="48"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0">Réservations récentes</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Client</th>
+                                                        <th>Date</th>
+                                                        <th>Service</th>
+                                                        <th>Statut</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="reservation in recentReservations" :key="reservation.id" @click="showReservationDetails(reservation)" style="cursor: pointer;">
+                                                        <td>{{ reservation.client }}</td>
+                                                        <td>{{ formatDate(reservation.start) }}</td>
+                                                        <td>{{ reservation.service }}</td>
+                                                        <td><span :class="'badge bg-' + getStatusClass(reservation.status)">{{ reservation.status }}</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0">Services en cours</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group">
+                                            <a href="#" class="list-group-item list-group-item-action" v-for="service in ongoingServices" :key="service.id">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">{{ service.name }}</h6>
+                                                    <small>{{ service.duration }} min</small>
+                                                </div>
+                                                <p class="mb-1">{{ service.location }}</p>
+                                                <small>{{ service.technician }}</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Reservations View -->
+                    <div v-if="currentView === 'today'" class="today-view">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Réservations du jour</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <button type="button" class="btn btn-sm btn-primary" @click="changeView('add')">
+                                    <i data-feather="plus"></i> Ajouter
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Heure</th>
+                                                <th>Client</th>
+                                                <th>Service</th>
+                                                <th>Localisation</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="reservation in todayReservations" :key="reservation.id">
+                                                <td>{{ formatTime(reservation.start) }}</td>
+                                                <td>{{ reservation.client }}</td>
+                                                <td>{{ reservation.service }}</td>
+                                                <td>{{ reservation.location }}</td>
+                                                <td><span :class="'badge bg-' + getStatusClass(reservation.status)">{{ reservation.status }}</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1" @click="showReservationDetails(reservation)">
+                                                        <i data-feather="eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary me-1" @click="editReservation(reservation)">
+                                                        <i data-feather="edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" @click="confirmCancel(reservation)">
+                                                        <i data-feather="x"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week Reservations View -->
+                    <div v-if="currentView === 'week'" class="week-view">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Réservations de la semaine</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <button type="button" class="btn btn-sm btn-primary" @click="changeView('add')">
+                                    <i data-feather="plus"></i> Ajouter
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Heure</th>
+                                                <th>Client</th>
+                                                <th>Service</th>
+                                                <th>Localisation</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="reservation in weekReservations" :key="reservation.id">
+                                                <td>{{ formatDate(reservation.start) }}</td>
+                                                <td>{{ formatTime(reservation.start) }}</td>
+                                                <td>{{ reservation.client }}</td>
+                                                <td>{{ reservation.service }}</td>
+                                                <td>{{ reservation.location }}</td>
+                                                <td><span :class="'badge bg-' + getStatusClass(reservation.status)">{{ reservation.status }}</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1" @click="showReservationDetails(reservation)">
+                                                        <i data-feather="eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary me-1" @click="editReservation(reservation)">
+                                                        <i data-feather="edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" @click="confirmCancel(reservation)">
+                                                        <i data-feather="x"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar View -->
+                    <div v-if="currentView === 'calendar'" class="calendar-view">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Calendrier des réservations</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <button type="button" class="btn btn-sm btn-primary" @click="changeView('add')">
+                                    <i data-feather="plus"></i> Ajouter
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <FullCalendar :options="calendarOptions" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Reservation View -->
+                    <div v-if="currentView === 'add'" class="add-reservation-view">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Ajouter une réservation</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" @click="changeView('dashboard')">
+                                    <i data-feather="arrow-left"></i> Retour
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <form @submit.prevent="submitReservation">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="client" class="form-label">Client</label>
+                                            <select class="form-select" id="client" v-model="newReservation.client" required>
+                                                <option value="" disabled selected>Sélectionnez un client</option>
+                                                <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="property" class="form-label">Bien</label>
+                                            <select class="form-select" id="property" v-model="newReservation.property" required>
+                                                <option value="" disabled selected>Sélectionnez un bien</option>
+                                                <option v-for="property in properties" :value="property.id">{{ property.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="service" class="form-label">Service</label>
+                                            <select class="form-select" id="service" v-model="newReservation.service" required>
+                                                <option value="" disabled selected>Sélectionnez un service</option>
+                                                <option v-for="service in services" :value="service.id">{{ service.name }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="technician" class="form-label">Technicien</label>
+                                            <select class="form-select" id="technician" v-model="newReservation.technician">
+                                                <option value="" disabled selected>Sélectionnez un technicien</option>
+                                                <option v-for="technician in technicians" :value="technician.id">{{ technician.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="startDate" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="startDate" v-model="newReservation.startDate" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="startTime" class="form-label">Heure de début</label>
+                                            <input type="time" class="form-control" id="startTime" v-model="newReservation.startTime" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="duration" class="form-label">Durée (min)</label>
+                                            <input type="number" class="form-control" id="duration" v-model="newReservation.duration" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="notes" class="form-label">Notes</label>
+                                        <textarea class="form-control" id="notes" rows="3" v-model="newReservation.notes"></textarea>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="button" class="btn btn-outline-secondary me-md-2" @click="resetForm">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services View -->
+                    <div v-if="currentView === 'services'" class="services-view">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Gestion des services</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <button type="button" class="btn btn-sm btn-primary" @click="showAddServiceModal">
+                                    <i data-feather="plus"></i> Ajouter
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Description</th>
+                                                <th>Durée</th>
+                                                <th>Prix</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="service in allServices" :key="service.id">
+                                                <td>{{ service.name }}</td>
+                                                <td>{{ service.description }}</td>
+                                                <td>{{ service.duration }} min</td>
+                                                <td>{{ service.price }} €</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1" @click="editService(service)">
+                                                        <i data-feather="edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" @click="confirmDeleteService(service)">
+                                                        <i data-feather="trash-2"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservation Details Modal -->
+                    <div class="modal fade" id="reservationDetailsModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Détails de la réservation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div v-if="selectedReservation" class="row">
+                                        <div class="col-md-6">
+                                            <h6>Informations client</h6>
+                                            <p><strong>Nom:</strong> {{ selectedReservation.client }}</p>
+                                            <p><strong>Téléphone:</strong> {{ selectedReservation.clientPhone }}</p>
+                                            <p><strong>Email:</strong> {{ selectedReservation.clientEmail }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Détails de la réservation</h6>
+                                            <p><strong>Service:</strong> {{ selectedReservation.service }}</p>
+                                            <p><strong>Date:</strong> {{ formatDateTime(selectedReservation.start) }}</p>
+                                            <p><strong>Durée:</strong> {{ selectedReservation.duration }} minutes</p>
+                                            <p><strong>Statut:</strong> <span :class="'badge bg-' + getStatusClass(selectedReservation.status)">{{ selectedReservation.status }}</span></p>
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <h6>Localisation</h6>
+                                            <p>{{ selectedReservation.location }}</p>
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <h6>Notes</h6>
+                                            <p>{{ selectedReservation.notes || 'Aucune note' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    <button type="button" class="btn btn-primary" @click="editReservation(selectedReservation)" data-bs-dismiss="modal">
+                                        <i data-feather="edit"></i> Modifier
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add/Edit Service Modal -->
+                    <div class="modal fade" id="serviceModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">{{ isEditingService ? 'Modifier' : 'Ajouter' }} un service</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form @submit.prevent="submitService">
+                                        <div class="mb-3">
+                                            <label for="serviceName" class="form-label">Nom du service</label>
+                                            <input type="text" class="form-control" id="serviceName" v-model="serviceForm.name" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="serviceDescription" class="form-label">Description</label>
+                                            <textarea class="form-control" id="serviceDescription" rows="3" v-model="serviceForm.description"></textarea>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="serviceDuration" class="form-label">Durée (minutes)</label>
+                                                <input type="number" class="form-control" id="serviceDuration" v-model="serviceForm.duration" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="servicePrice" class="form-label">Prix (€)</label>
+                                                <input type="number" step="0.01" class="form-control" id="servicePrice" v-model="serviceForm.price" required>
+                                            </div>
+                                        </div>
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <button type="button" class="btn btn-outline-secondary me-md-2" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">{{ isEditingService ? 'Modifier' : 'Enregistrer' }}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Modal -->
+                    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirmation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>{{ confirmationMessage }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="button" class="btn btn-primary" @click="confirmAction">Confirmer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                // Current view state
+                const currentView = ref('dashboard');
+                
+                // Sample data
+                const clients = ref([
+                    { id: 1, name: 'Jean Dupont', email: 'jean.dupont@example.com', phone: '0612345678' },
+                    { id: 2, name: 'Marie Martin', email: 'marie.martin@example.com', phone: '0623456789' },
+                    { id: 3, name: 'Pierre Durand', email: 'pierre.durand@example.com', phone: '0634567890' },
+                    { id: 4, name: 'Sophie Lambert', email: 'sophie.lambert@example.com', phone: '0645678901' },
+                    { id: 5, name: 'Thomas Moreau', email: 'thomas.moreau@example.com', phone: '0656789012' }
+                ]);
+                
+                const properties = ref([
+                    { id: 1, name: 'Appartement T1 - Paris 15ème', address: '12 Rue de la Convention, 75015 Paris' },
+                    { id: 2, name: 'Maison - Neuilly-sur-Seine', address: '25 Avenue Charles de Gaulle, 92200 Neuilly-sur-Seine' },
+                    { id: 3, name: 'Studio - Boulogne-Billancourt', address: '8 Rue du Château, 92100 Boulogne-Billancourt' },
+                    { id: 4, name: 'Appartement T2 - Levallois-Perret', address: '15 Rue Rivay, 92300 Levallois-Perret' },
+                    { id: 5, name: 'Pavillon - Saint-Cloud', address: '7 Avenue du Général Leclerc, 92210 Saint-Cloud' }
+                ]);
+                
+                const technicians = ref([
+                    { id: 1, name: 'Marc Lefebvre', specialty: 'Ménage' },
+                    { id: 2, name: 'Élodie Petit', specialty: 'Ménage' },
+                    { id: 3, name: 'Nicolas Bernard', specialty: 'Technique' },
+                    { id: 4, name: 'Laura Morel', specialty: 'Ménage' },
+                    { id: 5, name: 'David Leroy', specialty: 'Technique' }
+                ]);
+                
+                const allServices = ref([
+                    { id: 1, name: 'Ménage complet', description: 'Nettoyage complet de l\'appartement', duration: 120, price: 80 },
+                    { id: 2, name: 'Ménage léger', description: 'Nettoyage rapide des surfaces', duration: 60, price: 50 },
+                    { id: 3, name: 'Réparation plomberie', description: 'Dépannage plomberie de base', duration: 90, price: 120 },
+                    { id: 4, name: 'Réparation électrique', description: 'Dépannage électrique de base', duration: 90, price: 120 },
+                    { id: 5, name: 'Gardiennage', description: 'Surveillance du bien', duration: 1440, price: 100 }
+                ]);
+                
+                const services = ref(allServices.value.map(s => ({ id: s.id, name: s.name })));
+                
+                // Sample reservations data
+                const reservations = ref([
+                    { 
+                        id: 1, 
+                        client: 'Jean Dupont', 
+                        clientEmail: 'jean.dupont@example.com', 
+                        clientPhone: '0612345678',
+                        property: 1, 
+                        service: 'Ménage complet', 
+                        start: new Date(new Date().setHours(9, 0, 0, 0)), 
+                        end: new Date(new Date().setHours(11, 0, 0, 0)), 
+                        duration: 120, 
+                        location: 'Appartement T1 - Paris 15ème', 
+                        technician: 'Marc Lefebvre', 
+                        notes: 'Prévoir produits spécifiques pour sol en marbre', 
+                        status: 'confirmé' 
+                    },
+                    { 
+                        id: 2, 
+                        client: 'Marie Martin', 
+                        clientEmail: 'marie.martin@example.com', 
+                        clientPhone: '0623456789',
+                        property: 2, 
+                        service: 'Réparation plomberie', 
+                        start: new Date(new Date().setHours(14, 0, 0, 0)), 
+                        end: new Date(new Date().setHours(15, 30, 0, 0)), 
+                        duration: 90, 
+                        location: 'Maison - Neuilly-sur-Seine', 
+                        technician: 'Nicolas Bernard', 
+                        notes: 'Fuite sous l\'évier de la cuisine', 
+                        status: 'confirmé' 
+                    },
+                    { 
+                        id: 3, 
+                        client: 'Pierre Durand', 
+                        clientEmail: 'pierre.durand@example.com', 
+                        clientPhone: '0634567890',
+                        property: 3, 
+                        service: 'Ménage léger', 
+                        start: new Date(new Date().setDate(new Date().getDate() + 1)), 
+                        end: new Date(new Date().setDate(new Date().getDate() + 1)), 
+                        duration: 60, 
+                        location: 'Studio - Boulogne-Billancourt', 
+                        technician: 'Élodie Petit', 
+                        notes: 'Préparation pour visite', 
+                        status: 'en attente' 
+                    },
+                    { 
+                        id: 4, 
+                        client: 'Sophie Lambert', 
+                        clientEmail: 'sophie.lambert@example.com', 
+                        clientPhone: '0645678901',
+                        property: 4, 
+                        service: 'Gardiennage', 
+                        start: new Date(new Date().setDate(new Date().getDate() + 2)), 
+                        end: new Date(new Date().setDate(new Date().getDate() + 3)), 
+                        duration: 1440, 
+                        location: 'Appartement T2 - Levallois-Perret', 
+                        technician: '', 
+                        notes: 'Propriétaire en vacances', 
+                        status: 'confirmé' 
+                    },
+                    { 
+                        id: 5, 
+                        client: 'Thomas Moreau', 
+                        clientEmail: 'thomas.moreau@example.com', 
+                        clientPhone: '0656789012',
+                        property: 5, 
+                        service: 'Réparation électrique', 
+                        start: new Date(new Date().setDate(new Date().getDate() + 1)), 
+                        end: new Date(new Date().setDate(new Date().getDate() + 1)), 
+                        duration: 90, 
+                        location: 'Pavillon - Saint-Cloud', 
+                        technician: 'David Leroy', 
+                        notes: 'Problème prise cuisine', 
+                        status: 'annulé' 
+                    }
+                ]);
+                
+                // Filtered reservations
+                const todayReservations = ref([]);
+                const weekReservations = ref([]);
+                const recentReservations = ref([]);
+                const pendingReservations = ref([]);
+                const ongoingServices = ref([]);
+                
+                // Calendar options
+                const calendarOptions = ref({
+                    plugins: [],
+                    initialView: 'dayGridMonth',
+                    locale: 'fr',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    events: [],
+                    eventClick: function(info) {
+                        const event = info.event;
+                        const reservation = reservations.value.find(r => r.id === parseInt(event.id));
+                        if (reservation) {
+                            selectedReservation.value = reservation;
+                            const modal = new bootstrap.Modal(document.getElementById('reservationDetailsModal'));
+                            modal.show();
+                        }
+                    }
+                });
+                
+                // New reservation form
+                const newReservation = ref({
+                    client: '',
+                    property: '',
+                    service: '',
+                    technician: '',
+                    startDate: '',
+                    startTime: '',
+                    duration: 60,
+                    notes: ''
+                });
+                
+                // Service form
+                const serviceForm = ref({
+                    id: null,
+                    name: '',
+                    description: '',
+                    duration: 60,
+                    price: 50
+                });
+                
+                const isEditingService = ref(false);
+                
+                // Selected reservation for details
+                const selectedReservation = ref(null);
+                
+                // Confirmation modal
+                const confirmationMessage = ref('');
+                const actionToConfirm = ref(null);
+                const actionData = ref(null);
+                
+                // Methods
+                const changeView = (view) => {
+                    currentView.value = view;
+                    if (view === 'calendar') {
+                        updateCalendarEvents();
+                    }
+                };
+                
+                const formatDate = (date) => {
+                    return new Date(date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                };
+                
+                const formatTime = (date) => {
+                    return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                };
+                
+                const formatDateTime = (date) => {
+                    return new Date(date).toLocaleString('fr-FR', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                };
+                
+                const getStatusClass = (status) => {
+                    switch(status.toLowerCase()) {
+                        case 'confirmé': return 'primary';
+                        case 'en attente': return 'accent';
+                        case 'annulé': return 'secondary';
+                        case 'terminé': return 'success';
+                        default: return 'light';
+                    }
+                };
+                
+                const updateCalendarEvents = () => {
+                    calendarOptions.value.events = reservations.value.map(reservation => ({
+                        id: reservation.id.toString(),
+                        title: `${reservation.client} - ${reservation.service}`,
+                        start: reservation.start,
+                        end: reservation.end,
+                        className: `fc-event-${getStatusClass(reservation.status)}`,
+                        extendedProps: {
+                            location: reservation.location,
+                            technician: reservation.technician,
+                            notes: reservation.notes
+                        }
+                    }));
+                };
+                
+                const filterReservations = () => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    const endOfDay = new Date();
+                    endOfDay.setHours(23, 59, 59, 999);
+                    
+                    const endOfWeek = new Date();
+                    endOfWeek.setDate(today.getDate() + 7);
+                    endOfWeek.setHours(23, 59, 59, 999);
+                    
+                    todayReservations.value = reservations.value.filter(r => 
+                        new Date(r.start) >= today && new Date(r.start) <= endOfDay && r.status !== 'annulé'
+                    );
+                    
+                    weekReservations.value = reservations.value.filter(r => 
+                        new Date(r.start) >= today && new Date(r.start) <= endOfWeek && r.status !== 'annulé'
+                    );
+                    
+                    recentReservations.value = [...reservations.value]
+                        .sort((a, b) => new Date(b.start) - new Date(a.start))
+                        .slice(0, 5);
+                    
+                    pendingReservations.value = reservations.value.filter(r => 
+                        r.status.toLowerCase() === 'en attente'
+                    );
+                    
+                    ongoingServices.value = [
+                        { id: 1, name: 'Ménage complet', duration: 120, location: 'Appartement T1 - Paris 15ème', technician: 'Marc Lefebvre' },
+                        { id: 2, name: 'Réparation plomberie', duration: 90, location: 'Maison - Neuilly-sur-Seine', technician: 'Nicolas Bernard' }
+                    ];
+                };
+                
+                const showReservationDetails = (reservation) => {
+                    selectedReservation.value = reservation;
+                    const modal = new bootstrap.Modal(document.getElementById('reservationDetailsModal'));
+                    modal.show();
+                };
+                
+                const editReservation = (reservation) => {
+                    selectedReservation.value = reservation;
+                    newReservation.value = {
+                        client: reservation.client,
+                        property: reservation.property,
+                        service: reservation.service,
+                        technician: reservation.technician,
+                        startDate: reservation.start.toISOString().split('T')[0],
+                        startTime: reservation.start.toTimeString().substring(0, 5),
+                        duration: reservation.duration,
+                        notes: reservation.notes
+                    };
+                    changeView('add');
+                };
+                
+                const confirmCancel = (reservation) => {
+                    selectedReservation.value = reservation;
+                    confirmationMessage.value = `Êtes-vous sûr de vouloir annuler la réservation de ${reservation.client} pour le ${formatDate(reservation.start)} ?`;
+                    actionToConfirm.value = 'cancelReservation';
+                    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                    modal.show();
+                };
+                
+                const confirmDeleteService = (service) => {
+                    selectedReservation.value = service;
+                    confirmationMessage.value = `Êtes-vous sûr de vouloir supprimer le service "${service.name}" ?`;
+                    actionToConfirm.value = 'deleteService';
+                    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                    modal.show();
+                };
+                
+                const confirmAction = () => {
+                    if (actionToConfirm.value === 'cancelReservation' && selectedReservation.value) {
+                        const index = reservations.value.findIndex(r => r.id === selectedReservation.value.id);
+                        if (index !== -1) {
+                            reservations.value[index].status = 'annulé';
+                            filterReservations();
+                            updateCalendarEvents();
+                        }
+                    } else if (actionToConfirm.value === 'deleteService' && selectedReservation.value) {
+                        const index = allServices.value.findIndex(s => s.id === selectedReservation.value.id);
+                        if (index !== -1) {
+                            allServices.value.splice(index, 1);
+                            services.value = allServices.value.map(s => ({ id: s.id, name: s.name }));
+                        }
+                    }
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+                    modal.hide();
+                };
+                
+                const submitReservation = () => {
+                    const startDateTime = new Date(`${newReservation.value.startDate}T${newReservation.value.startTime}`);
+                    const endDateTime = new Date(startDateTime.getTime() + newReservation.value.duration * 60000);
+                    
+                    const client = clients.value.find(c => c.id === newReservation.value.client);
+                    const property = properties.value.find(p => p.id === newReservation.value.property);
+                    const service = allServices.value.find(s => s.id === newReservation.value.service);
+                    const technician = technicians.value.find(t => t.id === newReservation.value.technician);
+                    
+                    const newReservationObj = {
+                        id: reservations.value.length + 1,
+                        client: client.name,
+                        clientEmail: client.email,
+                        clientPhone: client.phone,
+                        property: property.id,
+                        service: service.name,
+                        start: startDateTime,
+                        end: endDateTime,
+                        duration: newReservation.value.duration,
+                        location: property.name,
+                        technician: technician ? technician.name : '',
+                        notes: newReservation.value.notes,
+                        status: 'en attente'
+                    };
+                    
+                    reservations.value.push(newReservationObj);
+                    filterReservations();
+                    updateCalendarEvents();
+                    resetForm();
+                    changeView('dashboard');
+                };
+                
+                const resetForm = () => {
+                    newReservation.value = {
+                        client: '',
+                        property: '',
+                        service: '',
+                        technician: '',
+                        startDate: '',
+                        startTime: '',
+                        duration: 60,
+                        notes: ''
+                    };
+                };
+                
+                const showAddServiceModal = () => {
+                    isEditingService.value = false;
+                    serviceForm.value = {
+                        id: null,
+                        name: '',
+                        description: '',
+                        duration: 60,
+                        price: 50
+                    };
+                    const modal = new bootstrap.Modal(document.getElementById('serviceModal'));
+                    modal.show();
+                };
+                
+                const editService = (service) => {
+                    isEditingService.value = true;
+                    serviceForm.value = { ...service };
+                    const modal = new bootstrap.Modal(document.getElementById('serviceModal'));
+                    modal.show();
+                };
+                
+                const submitService = () => {
+                    if (isEditingService.value) {
+                        const index = allServices.value.findIndex(s => s.id === serviceForm.value.id);
+                        if (index !== -1) {
+                            allServices.value[index] = { ...serviceForm.value };
+                        }
+                    } else {
+                        const newId = Math.max(...allServices.value.map(s => s.id)) + 1;
+                        allServices.value.push({
+                            id: newId,
+                            ...serviceForm.value
+                        });
+                    }
+                    
+                    services.value = allServices.value.map(s => ({ id: s.id, name: s.name }));
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('serviceModal'));
+                    modal.hide();
+                };
+                
+                const logout = () => {
+                    // In a real app, this would clear the authentication token
+                    alert('Déconnexion effectuée');
+                };
+                
+                // Initialize data
+                onMounted(() => {
+                    feather.replace();
+                    filterReservations();
+                    updateCalendarEvents();
+                    
+                    // Set default date/time for new reservation
+                    const now = new Date();
+                    newReservation.value.startDate = now.toISOString().split('T')[0];
+                    newReservation.value.startTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                });
+                
+                return {
+                    currentView,
+                    clients,
+                    properties,
+                    services,
+                    technicians,
+                    allServices,
+                    todayReservations,
+                    weekReservations,
+                    recentReservations,
+                    pendingReservations,
+                    ongoingServices,
+                    calendarOptions,
+                    newReservation,
+                    serviceForm,
+                    isEditingService,
+                    selectedReservation,
+                    confirmationMessage,
+                    changeView,
+                    formatDate,
+                    formatTime,
+                    formatDateTime,
+                    getStatusClass,
+                    showReservationDetails,
+                    editReservation,
+                    confirmCancel,
+                    confirmDeleteService,
+                    confirmAction,
+                    submitReservation,
+                    resetForm,
+                    showAddServiceModal,
+                    editService,
+                    submitService,
+                    logout
+                };
+            }
+        }).mount('#app');
+    </script>
+    <script>feather.replace();</script>
+</body>
+</html>
+
