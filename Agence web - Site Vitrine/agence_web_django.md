@@ -1,0 +1,706 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DjangoWave | Développement Web sur Mesure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #2b5876 0%, #4e4376 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(43,88,118,0.9) 0%, rgba(78,67,118,0.9) 100%);
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 3s infinite;
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(-5px); }
+            50% { transform: translateY(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="#" class="flex items-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2306/2306030.png" alt="Logo DjangoWave" class="h-8 w-auto">
+                            <span class="ml-2 text-xl font-bold gradient-text">DjangoWave</span>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="#services" class="text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium">Services</a>
+                        <a href="#expertise" class="text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium">Expertise</a>
+                        <a href="#projets" class="text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium">Projets</a>
+                        <a href="#about" class="text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium">À propos</a>
+                        <a href="#contact" class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-2 rounded-md font-medium hover:opacity-90 transition duration-300">Contactez-nous</a>
+                    </div>
+                    <div class="md:hidden flex items-center">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 focus:outline-none">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="mobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile menu -->
+            <div class="md:hidden" v-show="mobileMenuOpen">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg">
+                    <a href="#services" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Services</a>
+                    <a href="#expertise" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Expertise</a>
+                    <a href="#projets" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Projets</a>
+                    <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">À propos</a>
+                    <a href="#contact" class="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-700 text-white">Contactez-nous</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-gradient text-white pb-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-2 gap-10 items-center pt-20 pb-10">
+                    <div class="space-y-6">
+                        <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+                            Solutions <span class="gradient-text">Django</span> sur mesure pour booster votre business
+                        </h1>
+                        <p class="text-xl text-gray-200">
+                            Nous transformons vos idées en applications web performantes avec Django. Spécialisés dans les solutions e-commerce, gestion de stock et CRM.
+                        </p>
+                        <div class="flex flex-wrap gap-4 pt-4">
+                            <a href="#contact" class="bg-white text-blue-700 px-8 py-3 rounded-md font-bold hover:bg-gray-100 transition duration-300">Demander un devis</a>
+                            <a href="#projets" class="border-2 border-white text-white px-8 py-3 rounded-md font-bold hover:bg-white hover:text-blue-700 transition duration-300">Voir nos projets</a>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <img src="https://img.freepik.com/free-vector/web-development-programmer-engineering-coding-website-augmented-reality-interface-screens-developer-project-engineer-programming-software-application-design-cartoon-illustration_107791-3863.jpg" alt="Développement web" class="rounded-lg shadow-2xl animate-bounce-slow">
+                        <div class="absolute -bottom-10 -left-10 bg-white p-6 rounded-lg shadow-lg hidden md:block">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-trophy text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-900">Top 10 France</p>
+                                    <p class="text-gray-600 text-sm">Agence Django</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients Logo -->
+        <section class="py-12 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-gray-500 mb-8">Ils nous font confiance</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+                    <img src="https://via.placeholder.com/160x80?text=Client+1" alt="Client" class="h-10 md:h-12 mx-auto grayscale hover:grayscale-0 transition duration-300">
+                    <img src="https://via.placeholder.com/160x80?text=Client+2" alt="Client" class="h-10 md:h-12 mx-auto grayscale hover:grayscale-0 transition duration-300">
+                    <img src="https://via.placeholder.com/160x80?text=Client+3" alt="Client" class="h-10 md:h-12 mx-auto grayscale hover:grayscale-0 transition duration-300">
+                    <img src="https://via.placeholder.com/160x80?text=Client+4" alt="Client" class="h-10 md:h-12 mx-auto grayscale hover:grayscale-0 transition duration-300">
+                    <img src="https://via.placeholder.com/160x80?text=Client+5" alt="Client" class="h-10 md:h-12 mx-auto grayscale hover:grayscale-0 transition duration-300">
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Nos <span class="gradient-text">Services</span></h2>
+                    <p class="max-w-2xl mx-auto text-gray-600">Nous offrons des solutions digitales complètes adaptées à vos besoins métiers</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Service 1 -->
+                    <div class="service-card bg-white p-8 rounded-xl border border-gray-100 transition duration-300">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-shopping-cart text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">E-commerce</h3>
+                        <p class="text-gray-600 mb-6">Solutions e-commerce performantes avec paiement sécurisé, gestion des stocks et expérience client optimale.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="ml-2 fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <!-- Service 2 -->
+                    <div class="service-card bg-white p-8 rounded-xl border border-gray-100 transition duration-300">
+                        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-boxes text-indigo-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">Gestion de stock</h3>
+                        <p class="text-gray-600 mb-6">Systèmes de gestion d'inventaire en temps réel avec alertes et prévisions pour optimiser vos stocks.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="ml-2 fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <!-- Service 3 -->
+                    <div class="service-card bg-white p-8 rounded-xl border border-gray-100 transition duration-300">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-users text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">CRM sur mesure</h3>
+                        <p class="text-gray-600 mb-6">Outils de gestion de la relation client adaptés à votre secteur d'activité avec automatisation des processus.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="ml-2 fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <!-- Service 4 -->
+                    <div class="service-card bg-white p-8 rounded-xl border border-gray-100 transition duration-300">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">ERP</h3>
+                        <p class="text-gray-600 mb-6">Systèmes de gestion intégrés pour optimiser l'ensemble de vos processus métiers.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="ml-2 fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <!-- Service 5 -->
+                    <div class="service-card bg-white p-8 rounded-xl border border-gray-100 transition duration-300">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-home text-red-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">Solutions immobilières</h3>
+                        <p class="text-gray-600 mb-6">Plateformes spécialisées pour agences immobilières avec gestion des biens, rendez-vous et visites virtuelles.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="ml-2 fas fa-arrow-right"></i></a>
+                    </div>
+                    
+                    <!-- Service 6 -->
+                    <div class="service-card bg-white p-8 rounded-xl border border-gray-100 transition duration-300">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-file-alt text-yellow-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">CMS personnalisé</h3>
+                        <p class="text-gray-600 mb-6">Systèmes de gestion de contenu adaptés à vos besoins avec éditeur intuitif pour vos équipes.</p>
+                        <a href="#" class="text-blue-600 font-medium flex items-center">En savoir plus <i class="ml-2 fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expertise Section -->
+        <section id="expertise" class="py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Notre <span class="gradient-text">Expertise Django</span></h2>
+                    <p class="max-w-2xl mx-auto text-gray-600">Pourquoi choisir Django pour vos projets web ?</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <img src="https://img.freepik.com/free-vector/hand-drawn-flat-design-api-illustration_23-2149380541.jpg" alt="Expertise Django" class="rounded-lg shadow-lg w-full">
+                    </div>
+                    <div class="space-y-8">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-bold text-gray-900">Sécurité renforcée</h3>
+                                <p class="text-gray-600">
+                                    Django intègre des protections natives contre les vulnérabilités web les plus courantes (XSS, CSRF, SQL injection).
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-bold text-gray-900">Performance optimale</h3>
+                                <p class="text-gray-600">
+                                    Architecture MVT et cache intelligent pour des applications ultra rapides, même avec des charges importantes.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-500 text-white">
+                                    <i class="fas fa-expand"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-bold text-gray-900">Évolutivité garantie</h3>
+                                <p class="text-gray-600">
+                                    Nos solutions s'adaptent à votre croissance, avec possibilité d'ajouter des fonctionnalités sans refonte complète.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-4 gap-8 text-center">
+                    <div>
+                        <p class="text-4xl font-bold" v-text="projectsCount" ref="projectsCounter"></p>
+                        <p class="text-gray-200 mt-2">Projets réalisés</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold" v-text="clientsCount" ref="clientsCounter"></p>
+                        <p class="text-gray-200 mt-2">Clients satisfaits</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold" v-text="yearsExperience" ref="yearsCounter"></p>
+                        <p class="text-gray-200 mt-2">Ans d'expérience</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold" v-text="cupsCoffee" ref="coffeeCounter"></p>
+                        <p class="text-gray-200 mt-2">Tasses de café</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projets" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Nos <span class="gradient-text">Réalisations</span></h2>
+                    <p class="max-w-2xl mx-auto text-gray-600">Découvrez une sélection de nos projets récents réalisés avec Django</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div v-for="project in projects" :key="project.id" class="group relative rounded-lg overflow-hidden shadow-lg">
+                        <img :src="project.image" :alt="project.title" class="w-full h-64 object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 group-hover:bg-opacity-70 transition duration-300 flex items-end p-6">
+                            <div>
+                                <h3 class="text-white text-xl font-bold mb-2">{{ project.title }}</h3>
+                                <p class="text-gray-200 mb-4">{{ project.description }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span v-for="tag in project.tags" :key="tag" class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs">
+                                        {{ tag }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <a href="#contact" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:opacity-90 transition duration-300">
+                        Discutons de votre projet
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Ils parlent <span class="gradient-text">de nous</span></h2>
+                    <p class="max-w-2xl mx-auto text-gray-600">Découvrez ce que nos clients pensent de notre collaboration.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div v-for="(testimonial, index) in testimonials" :key="index" class="bg-white p-8 rounded-lg shadow-md">
+                        <div class="flex items-center mb-6">
+                            <img :src="testimonial.avatar" :alt="testimonial.name" class="w-12 h-12 rounded-full object-cover">
+                            <div class="ml-4">
+                                <h4 class="font-bold">{{ testimonial.name }}</h4>
+                                <p class="text-gray-600 text-sm">{{ testimonial.position }}</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 mb-4 italic">"{{ testimonial.quote }}"</p>
+                        <div class="flex text-yellow-400">
+                            <i v-for="star in 5" :key="star" :class="['fas', star <= testimonial.rating ? 'fa-star' : 'fa-star-half-alt']"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section id="about" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Notre <span class="gradient-text">Processus</span></h2>
+                    <p class="max-w-2xl mx-auto text-gray-600">Une méthodologie éprouvée pour atteindre vos objectifs</p>
+                </div>
+                
+                <div class="relative">
+                    <!-- Line -->
+                    <div class="hidden md:block absolute top-0 left-1/2 w-1 h-full bg-gradient-to-b from-blue-500 to-indigo-600 transform -translate-x-1/2"></div>
+                    
+                    <!-- Process Steps -->
+                    <div class="space-y-12 md:space-y-0">
+                        <div v-for="(step, index) in processSteps" :key="index" class="relative flex flex-col md:flex-row items-center md:items-start md:odd:flex-row-reverse">
+                            <!-- Step Dot -->
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold z-10">
+                                {{ index + 1 }}
+                            </div>
+                            
+                            <div class="hidden md:block flex-shrink-0 md:w-24"></div>
+                            
+                            <!-- Step Content -->
+                            <div class="mt-4 md:mt-0 md:w-full">
+                                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                                    <h3 class="text-xl font-bold mb-2">{{ step.title }}</h3>
+                                    <p class="text-gray-600">{{ step.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-20 bg-gray-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">Prêt à concrétiser votre projet digital ?</h2>
+                <p class="max-w-2xl mx-auto text-gray-300 mb-10">Contactez-nous pour une consultation gratuite et obtenez un devis personnalisé en 48h.</p>
+                <a href="#contact" class="inline-flex items-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-gray-100 transition duration-300">
+                    Demander un devis <i class="fas fa-paper-plane ml-2"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold mb-6"><span class="gradient-text">Contactez-nous</span></h2>
+                        <p class="text-gray-600 mb-8">Vous avez un projet en tête ? Discutons-en pour trouver la meilleure solution technique et fonctionnelle.</p>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-600">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-bold text-gray-900">Notre agence</h3>
+                                    <p class="text-gray-600">15 Rue de la Paix, 75002 Paris</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-100 text-indigo-600">
+                                        <i class="fas fa-phone-alt"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-bold text-gray-900">Téléphone</h3>
+                                    <p class="text-gray-600">01 23 45 67 89</p>
+                                    <p class="text-gray-600">09 87 65 43 21 (mobile)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100 text-purple-600">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-bold text-gray-900">Email</h3>
+                                    <p class="text-gray-600">contact@djangowave.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Form -->
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                        <form @submit.prevent="submitForm" class="space-y-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700">Nom complet</label>
+                                <input type="text" id="name" v-model="form.name" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" id="email" v-model="form.email" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone</label>
+                                <input type="tel" id="phone" v-model="form.phone" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="service" class="block text-sm font-medium text-gray-700">Service recherché</label>
+                                <select id="service" v-model="form.service" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" disabled selected>Sélectionnez un service</option>
+                                    <option value="ecommerce">E-commerce</option>
+                                    <option value="gestion-stock">Gestion de stock</option>
+                                    <option value="crm">CRM sur mesure</option>
+                                    <option value="erp">ERP</option>
+                                    <option value="immobilier">Solutions immobilières</option>
+                                    <option value="cms">CMS personnalisé</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                                <textarea id="message" v-model="form.message" rows="4" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:opacity-90 focus:outline-none transition duration-300">
+                                    Envoyer mon message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+                    <div class="col-span-2">
+                        <a href="#" class="flex items-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2306/2306030.png" alt="Logo DjangoWave" class="h-8 w-auto">
+                            <span class="ml-2 text-xl font-bold gradient-text">DjangoWave</span>
+                        </a>
+                        <p class="mt-4 text-gray-400">
+                            Spécialistes du développement Django pour solutions métiers sur mesure. Nous transformons vos idées en applications performantes.
+                        </p>
+                        <div class="flex space-x-4 mt-6">
+                            <a href="#" class="text-gray-400 hover:text-white">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-white">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-6">Services</h3>
+                        <ul class="space-y-3 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition duration-300">Développement E-commerce</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Solutions ERP/CRM</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Gestion de stock</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Plateformes immobilières</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">CMS personnalisés</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-bold mb-6">Liens utiles</h3>
+                        <ul class="space-y-3 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition duration-300">À propos</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Notre équipe</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Blog</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Mentions légales</a></li>
+                            <li><a href="#" class="hover:text-white transition duration-300">Politique de confidentialité</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400">© 2023 DjangoWave. Tous droits réservés.</p>
+                    <div class="mt-4 md:mt-0">
+                        <a href="#top" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                            Retour en haut <i class="fas fa-arrow-up ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                const mobileMenuOpen = ref(false);
+                const projectsCount = ref(0);
+                const clientsCount = ref(0);
+                const yearsExperience = ref(0);
+                const cupsCoffee = ref(0);
+                
+                const projects = ref([
+                    {
+                        id: 1,
+                        title: "E-commerce Mode Luxe",
+                        description: "Plateforme e-commerce haut de gamme avec système de recommandation IA",
+                        image: "https://images.unsplash.com/photo-1607082352122-fa4437c95f25?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        tags: ["Django", "React", "Paiement sécurisé"]
+                    },
+                    {
+                        id: 2,
+                        title: "Gestion de stock B2B",
+                        description: "Solution complète de gestion d'inventaire pour distributeur",
+                        image: "https://images.unsplash.com/photo-1486401899868-0e435ed85128?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        tags: ["Django", "Stock temps réel", "Reporting"]
+                    },
+                    {
+                        id: 3,
+                        title: "Solution CRM Immobilier",
+                        description: "Outil de gestion clientèle pour réseau d'agences immobilières",
+                        image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        tags: ["Django", "Calendrier", "Visites 3D"]
+                    },
+                    {
+                        id: 4,
+                        title: "ERP Pharmacie",
+                        description: "Système intégré gestion stocks, ventes et RH pour chaîne de pharmacie",
+                        image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        tags: ["Django", "ERP", "Gestion des flux"]
+                    },
+                    {
+                        id: 5,
+                        title: "Marketplace Pro",
+                        description: "Place de marché verticale pour professionnels du bâtiment",
+                        image: "https://images.unsplash.com/photo-1575566379038-8ce2cdf46a4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        tags: ["Django", "Marketplace", "Espace pro"]
+                    },
+                    {
+                        id: 6,
+                        title: "CMS Édition",
+                        description: "Système de gestion de contenu pour éditeur de presse",
+                        image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+                        tags: ["Django", "CMS", "Workflow"]
+                    }
+                ]);
+                
+                const testimonials = ref([
+                    {
+                        name: "Jean Dupont",
+                        position: "Directeur Technique, FashionClick",
+                        avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+                        quote: "DjangoWave a transformé notre boutique en ligne avec une solution sur mesure qui a boosté nos ventes de 40% en 6 mois.",
+                        rating: 5
+                    },
+                    {
+                        name: "Sophie Martin",
+                        position: "CEO, PharmaStock",
+                        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+                        quote: "Leur ERP pour notre chaîne de pharmacies a simplifié toutes nos opérations quotidiennes avec une intégration parfaite avec nos systèmes existants.",
+                        rating: 5
+                    },
+                    {
+                        name: "Pierre Leroy",
+                        position: "Directeur, ImmoPro",
+                        avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+                        quote: "Notre CRM spécialisé développé par DjangoWave a changé la façon dont nos agents collaborent et suivent leurs prospects et clients.",
+                        rating: 4
+                    }
+                ]);
+                
+                const processSteps = ref([
+                    {
+                        title: "Analyse des besoins",
+                        description: "Nous étudions votre projet en détail pour comprendre vos objectifs métiers et vos contraintes techniques."
+                    },
+                    {
+                        title: "Proposition sur-mesure",
+                        description: "Nous concevons une solution technique adaptée à vos besoins avec un plan de projet clair et un devis transparent."
+                    },
+                    {
+                        title: "Développement agile",
+                        description: "Nos équipes développent votre solution en cycles courts avec des livraisons régulières pour valider chaque étape."
+                    },
+                    {
+                        title: "Tests et optimisation",
+                        description: "Nous testons rigoureusement votre application pour garantir qualité, performance et sécurité avant déploiement."
+                    },
+                    {
+                        title: "Formation & support",
+                        description: "Nous vous accompagnons dans la prise en main et assurons un support technique réactif après la mise en production."
+                    }
+                ]);
+                
+                const form = ref({
+                    name: "",
+                    email: "",
+                    phone: "",
+                    service: "",
+                    message: ""
+                });
+                
+                const submitForm = () => {
+                    // Here you would typically send the form data to your backend
+                    alert(`Merci ${form.value.name} pour votre message! Nous vous contacterons bientôt à propos de votre demande pour ${form.value.service}.`);
+                    // Reset form
+                    form.value = {
+                        name: "",
+                        email: "",
+                        phone: "",
+                        service: "",
+                        message: ""
+                    };
+                };
+                
+                const animateCounter = (element, target, duration = 2000) => {
+                    const start = 0;
+                    const increment = target / (duration / 16);
+                    const step = (timestamp) => {
+                        const elapsed = timestamp - startTime;
+                        if (elapsed < duration) {
+                            const value = Math.min(Math.ceil(increment * (elapsed / 16)), target);
+                            element.textContent = value;
+                            requestAnimationFrame(step);
+                        } else {
+                            element.textContent = target;
+                        }
+                    };
+                    const startTime = performance.now();
+                    requestAnimationFrame(step);
+                };
+                
+                onMounted(() => {
+                    animateCounter(document.querySelector('[ref="projectsCounter"]'), 150);
+                    animateCounter(document.querySelector('[ref="clientsCounter"]'), 89);
+                    animateCounter(document.querySelector('[ref="yearsCounter"]'), 8);
+                    animateCounter(document.querySelector('[ref="coffeeCounter"]'), 12450);
+                });
+                
+                return {
+                    mobileMenuOpen,
+                    projectsCount,
+                    clientsCount,
+                    yearsExperience,
+                    cupsCoffee,
+                    projects,
+                    testimonials,
+                    processSteps,
+                    form,
+                    submitForm
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

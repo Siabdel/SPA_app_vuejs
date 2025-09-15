@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM Conciergerie HappyBee</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/vue3@5.11.2/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@5.11.3/main.min.js"></script>
+    <style>
+        :root {
+            --primary-red: #E53935;
+            --primary-blue: #1565C0;
+            --white: #FFFFFF;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-blue) !important;
+        }
+        .navbar {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-link {
+            color: var(--primary-blue) !important;
+            font-weight: 500;
+        }
+        .nav-link.active {
+            color: var(--primary-red) !important;
+            border-bottom: 2px solid var(--primary-red);
+        }
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        .btn-danger {
+            background-color: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .section {
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+        .fc-event {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        .fc-event:hover {
+            background-color: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+        .bee-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="https://static.photos/yellow/200x200/1" alt="HappyBee Logo" class="bee-icon rounded-circle">
+                    MM Conciergerie HappyBee
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav" v-if="isAuthenticated">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" :class="{active: activeSection === 'dashboard'}" @click="navigateTo('dashboard')">Tableau de bord</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" :class="{active: activeSection === 'calendar'}" @click="navigateTo('calendar')">Calendrier</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" :class="{active: activeSection === 'add-booking'}" @click="navigateTo('add-booking')">Nouvelle réservation</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" @click="logout">Déconnexion</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Login Section (shown when not authenticated) -->
+            <section class="section d-flex align-items-center" v-if="!isAuthenticated">
+                <div class="container">
+                    <div class="login-container">
+                        <h2 class="text-center mb-4" style="color: var(--primary-blue)">Connexion</h2>
+                        <form @submit.prevent="login">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" v-model="loginForm.email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mot de passe</label>
+                                <input type="password" class="form-control" id="password" v-model="loginForm.password" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Se connecter</button>
+                            </div>
+                            <div v-if="loginError" class="alert alert-danger mt-3">
+                                {{ loginError }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section class="section" v-if="isAuthenticated && activeSection === 'dashboard'" id="dashboard">
+                <div class="container">
+                    <h2 class="mb-4" style="color: var(--primary-blue)">Tableau de bord</h2>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    Réservations du jour
+                                </div>
+                                <div class="card-body">
+                                    <div v-if="todayBookings.length > 0">
+                                        <div class="list-group">
+                                            <div v-for="booking in todayBookings" :key="booking.id" class="list-group-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <h5>{{ booking.service }}</h5>
+                                                        <p class="mb-1">{{ booking.client }}</p>
+                                                        <small>{{ booking.time }}</small>
+                                                    </div>
+                                                    <div>
+                                                        <button class="btn btn-sm btn-primary me-1">Modifier</button>
+                                                        <button class="btn btn-sm btn-danger">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-else>
+                                        <p>Aucune réservation aujourd'hui</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    Statistiques
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <h3>{{ weeklyBookings.length }}</h3>
+                                            <p>Cette semaine</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h3>{{ pendingBookings }}</h3>
+                                            <p>En attente</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <h3>{{ confirmedBookings }}</h3>
+                                            <p>Confirmées</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            Réservations de la semaine
+                        </div>
+                        <div class="card-body">
+                            <div v-if="weeklyBookings.length > 0">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Heure</th>
+                                            <th>Service</th>
+                                            <th>Client</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="booking in weeklyBookings" :key="booking.id">
+                                            <td>{{ booking.date }}</td>
+                                            <td>{{ booking.time }}</td>
+                                            <td>{{ booking.service }}</td>
+                                            <td>{{ booking.client }}</td>
+                                            <td>
+                                                <span class="badge" :class="{
+                                                    'bg-warning': booking.status === 'pending',
+                                                    'bg-success': booking.status === 'confirmed',
+                                                    'bg-danger': booking.status === 'cancelled'
+                                                }">
+                                                    {{ booking.status === 'pending' ? 'En attente' : 
+                                                       booking.status === 'confirmed' ? 'Confirmée' : 'Annulée' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary me-1">Modifier</button>
+                                                <button class="btn btn-sm btn-danger">Annuler</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div v-else>
+                                <p>Aucune réservation cette semaine</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section class="section" v-if="isAuthenticated && activeSection === 'calendar'" id="calendar">
+                <div class="container">
+                    <h2 class="mb-4" style="color: var(--primary-blue)">Calendrier</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <FullCalendar :options="calendarOptions" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Booking Section -->
+            <section class="section" v-if="isAuthenticated && activeSection === 'add-booking'" id="add-booking">
+                <div class="container">
+                    <h2 class="mb-4" style="color: var(--primary-blue)">Nouvelle réservation</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <form @submit.prevent="submitBooking">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="client" class="form-label">Client</label>
+                                        <input type="text" class="form-control" id="client" v-model="bookingForm.client" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="service" class="form-label">Service</label>
+                                        <select class="form-select" id="service" v-model="bookingForm.service" required>
+                                            <option value="">Sélectionner un service</option>
+                                            <option value="Nettoyage">Nettoyage</option>
+                                            <option value="Garde d'enfants">Garde d'enfants</option>
+                                            <option value="Courses">Courses</option>
+                                            <option value="Réparation">Réparation</option>
+                                            <option value="Autre">Autre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="date" class="form-label">Date</label>
+                                        <input type="date" class="form-control" id="date" v-model="bookingForm.date" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="time" class="form-label">Heure</label>
+                                        <input type="time" class="form-control" id="time" v-model="bookingForm.time" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label">Remarques</label>
+                                    <textarea class="form-control" id="notes" v-model="bookingForm.notes" rows="3"></textarea>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">Enregistrer la réservation</button>
+                                </div>
+                                <div v-if="bookingSuccess" class="alert alert-success mt-3">
+                                    Réservation enregistrée avec succès!
+                                </div>
+                                <div v-if="bookingError" class="alert alert-danger mt-3">
+                                    {{ bookingError }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                const isAuthenticated = ref(false);
+                const activeSection = ref('dashboard');
+                const loginError = ref('');
+                const bookingSuccess = ref(false);
+                const bookingError = ref('');
+                
+                const loginForm = ref({
+                    email: '',
+                    password: ''
+                });
+                
+                const bookingForm = ref({
+                    client: '',
+                    service: '',
+                    date: '',
+                    time: '',
+                    notes: ''
+                });
+                
+                // Mock data for bookings
+                const todayBookings = ref([
+                    { id: 1, service: 'Nettoyage', client: 'Marie Dupont', time: '10:00', status: 'confirmed' },
+                    { id: 2, service: 'Garde d\'enfants', client: 'Jean Martin', time: '15:30', status: 'pending' }
+                ]);
+                
+                const weeklyBookings = ref([
+                    { id: 1, date: '2023-06-12', time: '10:00', service: 'Nettoyage', client: 'Marie Dupont', status: 'confirmed' },
+                    { id: 2, date: '2023-06-12', time: '15:30', service: 'Garde d\'enfants', client: 'Jean Martin', status: 'pending' },
+                    { id: 3, date: '2023-06-14', time: '09:00', service: 'Courses', client: 'Sophie Leroy', status: 'confirmed' },
+                    { id: 4, date: '2023-06-15', time: '14:00', service: 'Réparation', client: 'Thomas Bernard', status: 'pending' }
+                ]);
+                
+                const pendingBookings = ref(2);
+                const confirmedBookings = ref(2);
+                
+                // Calendar options
+                const calendarOptions = ref({
+                    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    events: [
+                        { title: 'Nettoyage - Marie Dupont', start: '2023-06-12T10:00:00', end: '2023-06-12T12:00:00' },
+                        { title: 'Garde d\'enfants - Jean Martin', start: '2023-06-12T15:30:00', end: '2023-06-12T18:30:00' },
+                        { title: 'Courses - Sophie Leroy', start: '2023-06-14T09:00:00', end: '2023-06-14T11:00:00' },
+                        { title: 'Réparation - Thomas Bernard', start: '2023-06-15T14:00:00', end: '2023-06-15T16:00:00' }
+                    ],
+                    eventClick: function(info) {
+                        alert('Réservation: ' + info.event.title);
+                    },
+                    locale: 'fr'
+                });
+                
+                const login = () => {
+                    // Mock authentication
+                    if (loginForm.value.email === 'admin@happybee.com' && loginForm.value.password === 'password') {
+                        isAuthenticated.value = true;
+                        loginError.value = '';
+                    } else {
+                        loginError.value = 'Email ou mot de passe incorrect';
+                    }
+                };
+                
+                const logout = () => {
+                    isAuthenticated.value = false;
+                    activeSection.value = 'dashboard';
+                };
+                
+                const navigateTo = (section) => {
+                    activeSection.value = section;
+                };
+                
+                const submitBooking = () => {
+                    // Mock booking submission
+                    if (bookingForm.value.client && bookingForm.value.service && bookingForm.value.date && bookingForm.value.time) {
+                        const newBooking = {
+                            id: weeklyBookings.value.length + 1,
+                            date: bookingForm.value.date,
+                            time: bookingForm.value.time,
+                            service: bookingForm.value.service,
+                            client: bookingForm.value.client,
+                            status: 'pending'
+                        };
+                        
+                        weeklyBookings.value.push(newBooking);
+                        pendingBookings.value += 1;
+                        
+                        // Add to calendar
+                        calendarOptions.value.events.push({
+                            title: `${bookingForm.value.service} - ${bookingForm.value.client}`,
+                            start: `${bookingForm.value.date}T${bookingForm.value.time}:00`,
+                            end: `${bookingForm.value.date}T${parseInt(bookingForm.value.time.split(':')[0]) + 2}:${bookingForm.value.time.split(':')[1]}:00`
+                        });
+                        
+                        // Reset form
+                        bookingForm.value = {
+                            client: '',
+                            service: '',
+                            date: '',
+                            time: '',
+                            notes: ''
+                        };
+                        
+                        bookingSuccess.value = true;
+                        bookingError.value = '';
+                        
+                        setTimeout(() => {
+                            bookingSuccess.value = false;
+                        }, 3000);
+                    } else {
+                        bookingError.value = 'Veuillez remplir tous les champs obligatoires';
+                    }
+                };
+                
+                // Format today's date for the date input
+                onMounted(() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    bookingForm.value.date = today;
+                });
+                
+                return {
+                    isAuthenticated,
+                    activeSection,
+                    loginForm,
+                    bookingForm,
+                    loginError,
+                    bookingSuccess,
+                    bookingError,
+                    todayBookings,
+                    weeklyBookings,
+                    pendingBookings,
+                    confirmedBookings,
+                    calendarOptions,
+                    login,
+                    logout,
+                    navigateTo,
+                    submitBooking
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
